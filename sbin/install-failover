@@ -95,7 +95,7 @@ done
 function create_failover {
     SERVICEDIR=/opt/zp-services
     SERVICENAME="failover-${TYPE}"
-    svc_create_service $USERNAME $GROUPNAME ${SERVICEDIR} "" ${SERVICENAME} "
+    svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
 exec nginx-update-config \\
     --adminHostname=$ADMIN_IP \\
     --adminPort=$ADMIN_PORT \\
