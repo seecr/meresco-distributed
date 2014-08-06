@@ -30,6 +30,7 @@
 source /usr/share/seecr-tools/functions.d/default
 source /usr/share/seecr-tools/functions.d/svc
 source /usr/share/seecr-tools/functions.d/nginx
+source /usr/share/seecr-tools/functions.d/iptables
 
 function show_usage {
     message "Usage $0 \\
@@ -105,6 +106,8 @@ exec nginx-update-config \\
 "
     svc_prepare_service ${SERVICEDIR} ${SERVICENAME}
     nginx_restart
+
+    iptables_open_port zp tcp 80
 }
 
 function create_admin_iptables_redirect {

@@ -8,4 +8,6 @@ python-seecr-utils (>= 1.0.5)
 python-seecr-utils (<< 1.1)
 python-simplejson (<< 2.6)
 python-simplejson (>= 2.0.9)
+seecr-firewall (>= 0.2.12)
+seecr-firewall (<< 0.3)
 nginx
