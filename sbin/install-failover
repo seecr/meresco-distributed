@@ -55,19 +55,19 @@ while true ; do
             TYPE=$2; shift 2
             ;;
         --ip)
-            IPADDR=$2 shift 2
+            IPADDR=$2; shift 2
             ;;
         --adminIp)
-            ADMIN_IP=$2 shift 2
+            ADMIN_IP=$2; shift 2
             ;;
         --adminPort)
-            ADMIN_PORT=$2 shift 2
+            ADMIN_PORT=$2; shift 2
             ;;
         --minVersion)
-            MIN_VERSION=$2 shift 2
+            MIN_VERSION=$2; shift 2
             ;;
         --untilVersion)
-            UNTIL_VERSION=$2 shift 2
+            UNTIL_VERSION=$2; shift 2
             ;;
         --)
             shift
