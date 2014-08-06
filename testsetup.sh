@@ -1,3 +1,4 @@
+#!/bin/bash
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
@@ -5,8 +6,8 @@
 #  for all public libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2014 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2012-2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -26,7 +27,30 @@
 #
 ## end license ##
 
-usrSharePath = '/usr/share/zp-loadbalancer'
-from os.path import abspath, dirname, join                     #DO_NOT_DISTRIBUTE
-_mydir = dirname(abspath(__file__))                            #DO_NOT_DISTRIBUTE
-usrSharePath = join(dirname(dirname(_mydir)), 'usr-share')     #DO_NOT_DISTRIBUTE
+set -e
+mydir=$(cd $(dirname $0);pwd)
+
+source /usr/share/seecr-test/functions
+
+rm -rf tmp build
+
+definePythonVars
+
+$PYTHON setup.py install --root tmp
+cp -r test tmp/test
+
+removeDoNotDistribute tmp
+find tmp -type f -exec sed -e \
+    "s,usrSharePath = .*,usrSharePath = '$mydir/tmp/usr/share/zp-loadbalancer',;
+    s,binDir = '/usr/bin',binDir = '$mydir/tmp/usr/local/bin',;
+    " -i {} \;
+
+export ZP_SKIP_TESTRESULT_LOGGING="TRUE"
+export SEECRTEST_USR_BIN="${mydir}/tmp/usr/local/bin"
+if [ -z "$@" ]; then
+    runtests "alltests.sh integrationtest.sh"
+else
+    runtests "$@"
+fi
+
+rm -rf tmp build
