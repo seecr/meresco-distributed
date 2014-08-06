@@ -8,7 +8,7 @@ function show_usage {
 
 TEMP=$(getopt \
     --options "" \
-    --long ip:: \
+    --long ip::,name:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -26,6 +26,10 @@ while true ; do
                     shift 2
                     ;;
             esac
+            ;;
+        --name)
+            NAME=$2
+            shift 2
             ;;
         --)
             shift
@@ -45,8 +49,12 @@ if [ -z "$IPADDR" ]; then
     exit 1
 fi
 
+if [ -z "$NAME" ]; then
+    NAME=${IPADDR}
+fi
+
 SERVICEDIR=/opt/zp-services
-SERVICENAME="virtual-ip-${IPADDR}"
+SERVICENAME="virtual-ip-${NAME}"
 svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
 ucarp-for-virt-ip --ip=${IPADDR}
 "
