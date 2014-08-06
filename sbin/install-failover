@@ -29,7 +29,7 @@
 
 source /usr/share/seecr-tools/functions.d/default
 source /usr/share/seecr-tools/functions.d/svc
-source /usr/share/seecr-tools/functions.d/user
+source /usr/share/seecr-tools/functions.d/nginx
 
 function show_usage {
     message "Usage $0 \\
@@ -48,6 +48,7 @@ TEMP=$(getopt \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
+ADMIN_PORT=10000
 
 while true ; do
     case "$1" in
@@ -88,20 +89,14 @@ for name in TYPE IPADDR ADMIN_IP MIN_VERSION UNTIL_VERSION; do
         exit 1
     fi
 done
-if [ -z "$ADMIN_PORT" ]; then
-    ADMIN_PORT=10000
-fi
 
 
 
 function create_failover {
-    USERNAME=zp
-    user_create_systemuser ${USERNAME}
-    GROUPNAME=$(user_groupname ${USERNAME})
     SERVICEDIR=/opt/zp-services
     SERVICENAME="failover-${TYPE}"
     svc_create_service $USERNAME $GROUPNAME ${SERVICEDIR} "" ${SERVICENAME} "
-setuidgid $USERNAME $GROUPNAME nginx-update-config \\
+exec nginx-update-config \\
     --adminHostname=$ADMIN_IP \\
     --adminPort=$ADMIN_PORT \\
     --type=${TYPE} \\
@@ -109,6 +104,7 @@ setuidgid $USERNAME $GROUPNAME nginx-update-config \\
     --untilVersion=${UNTIL_VERSION}
 "
     svc_prepare_service ${SERVICEDIR} ${SERVICENAME}
+    nginx_restart
 }
 
 case $TYPE in
