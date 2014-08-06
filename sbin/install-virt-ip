@@ -56,6 +56,10 @@ fi
 SERVICEDIR=/opt/zp-services
 SERVICENAME="virtual-ip-${NAME}"
 svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
+sleepTimeSec=\$(( ( \$RANDOM % 5 )  + 1 ))
+sleepTimeMinor=\$(( ( \$RANDOM % 100 )  + 1 ))
+echo \"Sleeping \${sleepTimeSec}.\${sleepTimeMinor}s before starting\"
+sleep \${sleepTimeSec}.\${sleepTimeMinor}s
 exec ucarp-for-virt-ip --ip=${IPADDR}
 "
 svc_start_service ${SERVICEDIR} ${SERVICENAME}
