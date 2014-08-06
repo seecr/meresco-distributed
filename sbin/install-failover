@@ -32,7 +32,13 @@ source /usr/share/seecr-tools/functions.d/svc
 source /usr/share/seecr-tools/functions.d/user
 
 function show_usage {
-    message "Usage $0 --type <service type> --ip <virtual ipaddress> --adminHostname <adminaddress> [--adminPort 10000]
+    message "Usage $0 \\
+        --type <service type> \\
+        --ip <virtual ipaddress> \\
+        --adminHostname <adminaddress> \\
+        --minVersion <minimalVersion> \\
+        --untilVersion <majorVersion of next release> \\
+        [--adminPort 10000]
     Allowed service types: api, gateway, admin"
 }
 
@@ -46,22 +52,22 @@ eval set -- "$TEMP"
 while true ; do
     case "$1" in
         --type)
-            TYPE=$2
+            TYPE=$2; shift 2
             ;;
         --ip)
-            IPADDR=$2
+            IPADDR=$2 shift 2
             ;;
         --adminIp)
-            ADMIN_IP=$2
+            ADMIN_IP=$2 shift 2
             ;;
         --adminPort)
-            ADMIN_PORT=$2
+            ADMIN_PORT=$2 shift 2
             ;;
         --minVersion)
-            MIN_VERSION=$2
+            MIN_VERSION=$2 shift 2
             ;;
         --untilVersion)
-            UNTIL_VERSION=$2
+            UNTIL_VERSION=$2 shift 2
             ;;
         --)
             shift
