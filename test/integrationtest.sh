@@ -27,7 +27,7 @@
 #
 ## end license ##
 
-source ../_testoptions.sh
+source _testoptions.sh
 export PYTHONPATH=.:$PYTHONPATH
 
 python _integrationtest.py "$@"

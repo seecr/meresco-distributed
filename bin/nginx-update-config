@@ -38,32 +38,33 @@ for path in glob(parentdir+'/deps.d/*'):            #DO_NOT_DISTRIBUTE
 systemPath.insert(0, parentdir)                     #DO_NOT_DISTRIBUTE
 
 from os import system
-from zp import VERSION
-from zp.failover import NginxConfig
-from seecr.utils import isRootUser, Version
+from zploadbalancer.failover import NginxConfig
+from seecr.utils import isRootUser
 from time import sleep
+from meresco.components import ParseArguments
+from simplejson import load
+from urllib2 import urlopen
 
-from zp.utils import ParseArguments, ConfigDownloadProcessor
 
 if __name__ == '__main__':
-    parser = ParseArguments(mandatoryKeys=['adminHostname', 'adminPort', 'verbose'])
+    parser = ParseArguments()
+    parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
+    parser.addOption('', '--adminPort', help='Admin port', mandatory=True)
+    parser.addOption('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
     parser.addOption('-c', '--nginxConfigDir', type='str', help='Configuration directory with files included by default nginx configuration (defaults to /etc/nginx/conf.d)', default='/etc/nginx/conf.d')
     parser.addOption('-t', '--type', type='str', help='Service type to write nginx configuration for (default: api)', default='api')
     defaultNginxReloadCmd = 'svc -h /etc/service/nginx'
     parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{0}")'.format(defaultNginxReloadCmd), default=defaultNginxReloadCmd)
-    defaultMinVersion = str(Version(VERSION).majorVersion())
-    defaultUntilVersion = str(Version(VERSION).nextMajorVersion())
-    parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version (default {0})'.format(defaultMinVersion), default=defaultMinVersion)
-    parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version (default {0})'.format(defaultUntilVersion), default=defaultUntilVersion)
+    parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
+    parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
         print 'Run as rootuser for default nginx restart script.'
         exit(2)
 
-    configDownloadProcessor = ConfigDownloadProcessor.forDownload(statePath=None)
-    configAndServices = configDownloadProcessor.download(options.adminHostname, options.adminPort)
-    nginxConfig = NginxConfig(options.type, options.nginxConfigDir, verbose=options.verbose, minVersion=options.minVersion, untilVersion=options.untilVersion)
+    configAndServices = load(urlopen('http://{0}:{1}/api/service/list'.format(options.adminHostname, options.adminPort)))
+    nginxConfig = NginxConfig(type=options.type, nginxConfigDir=options.nginxConfigDir, verbose=options.verbose, minVersion=options.minVersion, untilVersion=options.untilVersion)
 
     mustUpdate, sleeptime = nginxConfig.updateConfig(configAndServices)
     if mustUpdate:

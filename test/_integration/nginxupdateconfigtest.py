@@ -45,7 +45,7 @@ class NginxUpdateConfigTest(IntegrationTestCase):
     def testRunNormal(self):
         self.adminServer.response = JsonDict({
             'services': {
-                newId(): {'type': 'api', 'active': True, 'ipAddress': '10.0.0.10', 'infoport': 1234},
+                newId(): {'type': 'api', 'active': True, 'ipAddress': '10.0.0.10', 'infoport': 1234, 'data':{'VERSION': '0.42'}},
             },
             'config': {
                 'api.frontend': {
@@ -55,7 +55,7 @@ class NginxUpdateConfigTest(IntegrationTestCase):
                 }
             },
         }).pretty_print()
-        self.runNginxUpdateConfig(processName='testRunNormal', type='api')
+        self.runNginxUpdateConfig(processName='testRunNormal', type='api', minVersion='0.40', untilVersion='1.0')
         self.assertEquals(1, len(self.adminServer.requests))
         header, body = self.adminServer.requests[0].split('\r\n\r\n')
         self.assertTrue('GET /api/service/list' in header, header)

@@ -27,24 +27,19 @@
 #
 ## end license ##
 
-from os.path import isdir, isfile, join, abspath, dirname, basename
+from os.path import isdir, join, abspath, dirname
 from os import chmod, makedirs
-from subprocess import Popen
-from time import time, sleep
 from uuid import uuid4
-from random import choice
 
-from meresco.components import readConfig
 
 from seecr.test.integrationtestcase import IntegrationState
 from seecr.test.portnumbergenerator import PortNumberGenerator
-from seecr.test.utils import getRequest, postRequest, postMultipartForm
 from seecr.test.mockserver import MockServer
 
 newId = lambda: str(uuid4())
 
 mydir = dirname(abspath(__file__))
-projectDir = dirname(dirname(dirname(mydir)))
+projectDir = dirname(dirname(mydir))
 documentationDir = join(projectDir, "doc")
 
 class ZpIntegrationState(IntegrationState):

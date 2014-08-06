@@ -34,8 +34,6 @@ from sys import stdout
 
 from zploadbalancer.failover.utils import usrSharePath
 from seecr.utils import Version
-# from zp.utils.constants import READABLE
-# from zp.utils.servicemanagement import ConfigAndServices
 
 
 class NginxConfig(object):
