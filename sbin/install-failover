@@ -107,11 +107,22 @@ exec nginx-update-config \\
     nginx_restart
 }
 
+function create_admin_iptables_redirect {
+    cat > /etc/seecr/firewall/rules.d/1-admin-zp <<EOF
+#!/bin/bash
+source /etc/seecr/firewall/config
+\$IPTABLES -t nat -I PREROUTING -d $IPADDR -p tcp -j DNAT --to-destination $ADMIN_IP
+EOF
+    chmod +x /etc/seecr/firewall/rules.d/1-admin-zp
+    invoke-rc.d seecr-firewall reload
+}
+
 case $TYPE in
     api|gateway)
         create_failover
         ;;
     admin)
+        create_admin_iptables_redirect
         ;;
     *)
         echo "Unknown type $TYPE"
