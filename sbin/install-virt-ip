@@ -1,0 +1,53 @@
+#!/bin/bash
+source /usr/share/seecr-tools/functions.d/default
+source /usr/share/seecr-tools/functions.d/svc
+
+function show_usage {
+    message "Usage $0 --ip <virtual ipaddress>"
+}
+
+TEMP=$(getopt \
+    --options "" \
+    --long ip:: \
+    -n "$0" -- "$@")
+
+eval set -- "$TEMP"
+
+while true ; do
+    case "$1" in
+        --ip)
+            case "$2" in
+                "")
+                    show_usage
+                    exit 1
+                    ;;
+                *)
+                    IPADDR=$2
+                    shift 2
+                    ;;
+            esac
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Unknown option specified."
+            exit 1
+            ;;
+    esac
+done
+
+set -o errexit
+
+if [ -z "$IPADDR" ]; then
+    show_usage
+    exit 1
+fi
+
+SERVICEDIR=/opt/zp-services
+SERVICENAME="virtual-ip-${IPADDR}"
+svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
+ucarp-for-virt-ip --ip=${IPADDR}
+"
+svc_start_service ${SERVICEDIR} ${SERVICENAME}
