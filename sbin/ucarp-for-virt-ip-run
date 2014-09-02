@@ -27,74 +27,63 @@
 #
 ## end license ##
 
+export LANG=en_US.UTF-8
+exec 2>&1
+
 source /usr/share/seecr-tools/functions.d/network
+
+currentDir=$(cd $(dirname $0); pwd)
+if [ -f "${currentDir}/config" ]; then
+    echo "Config file not found."
+    exit 1
+fi
+source ${currentDir}/config
+
+if [ -z "${IPADDR}" -o -z "${RANGE}" -o -z "${SHAREDSECRET}" ]; then
+    echo "Required configuration items not found. Check the config!"
+    exit 1
+fi
+
+sleepTimeSec=$(( ( $RANDOM % 5 )  + 1 ))
+sleepTimeMinor=$(( ( $RANDOM % 100 )  + 1 ))
+echo "Sleeping ${sleepTimeSec}.${sleepTimeMinor}s before starting"
 
 if ! lsmod | grep "^dummy" >/dev/null; then
     modprobe dummy numdummies=8
 fi
 
-TEMP=$(getopt \
-    --options "" \
-    --long device::,ip::,range:: \
-    -n "$0" -- "$@")
-
-eval set -- "$TEMP"
-
-RANGE=
 DEVICE=$(network_get_nic)
-while true ; do
-    case "$1" in
-        --device)
-            case "$2" in
-                "") show_usage ; exit 1 ;;
-                *) DEVICE=$2 ; shift 2 ;;
-            esac ;;
-        --ip)
-            case "$2" in
-                "") show_usage ; exit 1 ;;
-                *) IPADDR=$2 ; shift 2;;
-            esac ;;
-        --range)
-            case "$2" in
-                "") show_usage ; exit 1 ;;
-                *) RANGE=$2 ; shift 2;;
-            esac ;;
-        --) shift ; break ;;
-        *) echo "Unknown option specified." ; exit 1 ;;
-    esac
-done
-
-if [ -z "${RANGE}" -o -z "${IPADDR}" ]; then
-    show_usage
-    exit 1
-fi
-
 SRCIP=$(ip addr show ${DEVICE}| head -n 3 | tail -n 1 | awk '{print $2}' | awk -F/ '{print $1}')
 VHID=$(echo "${IPADDR}" | awk -F'.' '{print $NF}')
 FREE_DUMMY=$(ip link | grep dummy | grep DOWN | head -n 1 | awk '{print $2}' | tr -d :)
+export FREE_DUMMY
 if [ -z "${FREE_DUMMY}" ]; then
     echo "No free dummy device found!"
     exit 1
 fi
-SHAREDPASSWORD="3f09e646d"
 
-export FREE_DUMMY
-function cleanup_dummy {
-    echo "releasing ${FREE_DUMMY}"
-    ifconfig ${FREE_DUMMY} down
+function cleanup {
+    (ip link show ${FREE_DUMMY} | grep DOWN >/dev/null) || ifconfig ${FREE_DUMMY} down
+    (ps --no-headers --pid ${PID} >/dev/null) && kill ${PID}
+    echo "Cleanup done"
 }
 
-trap cleanup_dummy SIGTERM SIGINT
+trap cleanup SIGTERM SIGINT
 ifconfig ${FREE_DUMMY} -arp ${IPADDR} \
     netmask 255.255.255.255 \
     broadcast $(network_broadcast_range ${RANGE})
 
-exec ucarp \
+ucarp \
     --interface=${DEVICE} \
     --vhid=${VHID} \
     --srcip=${SRCIP} \
     --addr=${IPADDR} \
-    --pass=${SHAREDPASSWORD} &
+    --pass=${SHAREDSECRET} &
 
 PID=$!
-wait ${PID}
+export PID
+while ps --no-headers --pid ${PID} >/dev/null
+do
+    wait ${PID}
+done
+cleanup

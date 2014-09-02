@@ -27,16 +27,24 @@
 #
 ## end license ##
 
+IPADDR=""
+RANGE=""
+SHAREDSECRET="3f09e646d"
+SCRIPT=/sbin/ucarp-for-virt-ip-run
+
 source /usr/share/seecr-tools/functions.d/default
 source /usr/share/seecr-tools/functions.d/svc
 
+mydir=$(cd $(dirname $0); pwd)              #DO_NOT_DISTRIBUTE
+SCRIPT=${mydir}/ucarp-for-virt-ip-run       #DO_NOT_DISTRIBUTE
+
 function show_usage {
-    message "Usage $0 --ip <virtual ipaddress> [--name <service name>]"
+    message "Usage $0 --ip <virtual ipaddress> --range <network range> [--shared-secret <secret> --name <service name>]"
 }
 
 TEMP=$(getopt \
     --options "" \
-    --long ip::,name:: \
+    --long ip::,name::,range::,shared-secret:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -46,18 +54,42 @@ while true ; do
         --ip)
             case "$2" in
                 "")
-                    show_usage
-                    exit 1
+                    show_usage; exit 1
                     ;;
                 *)
-                    IPADDR=$2
-                    shift 2
+                    IPADDR=$2; shift 2
+                    ;;
+            esac
+            ;;
+        --range)
+            case "$2" in
+                "")
+                    show_usage; exit 1
+                    ;;
+                *)
+                    RANGE=$2; shift 2
+                    ;;
+            esac
+            ;;
+        --shared-secret)
+            case "$2" in
+                "")
+                    show_usage; exit 1;
+                    ;;
+                *)
+                    SHAREDSECRET=$2; shift 2;
                     ;;
             esac
             ;;
         --name)
-            NAME=$2
-            shift 2
+            case "$2" in
+                "")
+                    show_usage; exit 1;
+                    ;;
+                *)
+                    NAME=$2; shift 2
+                    ;;
+            esac
             ;;
         --)
             shift
@@ -72,22 +104,27 @@ done
 
 set -o errexit
 
-if [ -z "$IPADDR" ]; then
+if [ -z "${IPADDR}" -o -z "${RANGE}" ]; then
     show_usage
     exit 1
 fi
 
-if [ -z "$NAME" ]; then
+if [ -z "${NAME}" ]; then
     NAME=${IPADDR}
 fi
 
-SERVICEDIR=/opt/zp-services
-SERVICENAME="virtual-ip-${NAME}"
-svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
-sleepTimeSec=\$(( ( \$RANDOM % 5 )  + 1 ))
-sleepTimeMinor=\$(( ( \$RANDOM % 100 )  + 1 ))
-echo \"Sleeping \${sleepTimeSec}.\${sleepTimeMinor}s before starting\"
-sleep \${sleepTimeSec}.\${sleepTimeMinor}s
-exec ucarp-for-virt-ip --ip=${IPADDR}
-"
-svc_start_service ${SERVICEDIR} ${SERVICENAME}
+SERVICE_DIR=/opt/zp-services
+SERVICE_NAME="virtual-ip-${NAME}"
+
+
+_svc_setup_dir_and_log root root ${SERVICE_DIR} ${SERVICE_NAME}
+cp ${SCRIPT} ${SERVICE_DIR}/${SERVICE_NAME}/run
+chmod +x ${SERVICE_DIR}/${SERVICE_NAME}/run
+touch ${SERVICE_DIR}/${SERVICE_NAME}/down
+
+cat << EOF > ${SERVICE_DIR}/${SERVICE_NAME}/config
+IPADDR="${IPADDR}"
+RANGE="${RANGE}"
+SHAREDSECRET="${SHAREDSECRET}"
+EOF
+svc_start_service ${SERVICE_DIR} ${SERVICE_NAME}
