@@ -33,7 +33,7 @@ exec 2>&1
 source /usr/share/seecr-tools/functions.d/network
 
 currentDir=$(cd $(dirname $0); pwd)
-if [ -f "${currentDir}/config" ]; then
+if [ ! -f "${currentDir}/config" ]; then
     echo "Config file not found."
     exit 1
 fi
