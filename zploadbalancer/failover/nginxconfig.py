@@ -43,7 +43,7 @@ class NginxConfig(object):
         self._type = type
         self._name = self._type if name is None else name
         namecheck(self._name)
-        self._nginxConfigFile = join(nginxConfigDir, '%s.frontend.conf' % name)
+        self._nginxConfigFile = join(nginxConfigDir, '%s.frontend.conf' % self._name)
         self._verbose = verbose
         self._minVersion = Version(minVersion)
         self._untilVersion = Version(untilVersion)
