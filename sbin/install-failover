@@ -35,10 +35,10 @@ source /usr/share/seecr-tools/functions.d/iptables
 function show_usage {
     message "Usage $0 \\
         --type <service type> \\
-        --ip <virtual ipaddress> \\
-        --adminHostname <adminaddress> \\
+        --adminIp <adminaddress> \\
         --minVersion <minimalVersion> \\
         --untilVersion <majorVersion of next release> \\
+        [--ip <virtual ipaddress> 'Only mandatory for type=admin'] \\
         [--name <name for service, defaults to service type>] \\
         [--adminPort 10000]
     Allowed service types: api, gateway, admin"
@@ -46,7 +46,7 @@ function show_usage {
 
 TEMP=$(getopt \
     --options "" \
-    --long type::,ip::,adminIp::,adminPort::,minVersion::,untilVersion:: \
+    --long type::,name::,ip::,adminIp::,adminPort::,minVersion::,untilVersion:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -88,12 +88,19 @@ done
 
 set -o errexit
 
-for name in TYPE IPADDR ADMIN_IP MIN_VERSION UNTIL_VERSION; do
+for name in TYPE ADMIN_IP MIN_VERSION UNTIL_VERSION; do
     if [ -z "${!name}" ]; then
         show_usage
         exit 1
     fi
 done
+
+if [ "$TYPE" == "admin" ]; then
+    if [ -z "$IPADDR" ]; then
+        show_usage
+        exit 1
+    fi
+fi
 
 if [ -z "$NAME" ]; then
     NAME="$TYPE"
