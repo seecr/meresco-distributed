@@ -37,10 +37,11 @@ from seecr.utils import Version
 
 
 class NginxConfig(object):
-    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False):
+    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, name=None, **kwargs):
         assert type.strip() != '', "Expected a type name."
         self._type = type
-        self._nginxConfigFile = join(nginxConfigDir, '%s.frontend.conf' % self._type)
+        name = self._type if name is None else name
+        self._nginxConfigFile = join(nginxConfigDir, '%s.frontend.conf' % name)
         self._verbose = verbose
         self._minVersion = Version(minVersion)
         self._untilVersion = Version(untilVersion)

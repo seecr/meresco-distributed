@@ -39,6 +39,7 @@ function show_usage {
         --adminHostname <adminaddress> \\
         --minVersion <minimalVersion> \\
         --untilVersion <majorVersion of next release> \\
+        [--name <name for service, defaults to service type>] \\
         [--adminPort 10000]
     Allowed service types: api, gateway, admin"
 }
@@ -55,6 +56,9 @@ while true ; do
     case "$1" in
         --type)
             TYPE=$2; shift 2
+            ;;
+        --name)
+            NAME=$2; shift 2
             ;;
         --ip)
             IPADDR=$2; shift 2
@@ -91,16 +95,19 @@ for name in TYPE IPADDR ADMIN_IP MIN_VERSION UNTIL_VERSION; do
     fi
 done
 
-
+if [ -z "$NAME" ]; then
+    NAME="$TYPE"
+fi
 
 function create_failover {
     SERVICEDIR=/opt/zp-services
-    SERVICENAME="failover-${TYPE}"
+    SERVICENAME="failover-${NAME}"
     svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
 exec nginx-update-config \\
     --adminHostname=$ADMIN_IP \\
     --adminPort=$ADMIN_PORT \\
     --type=${TYPE} \\
+    --name=${NAME} \\
     --minVersion=${MIN_VERSION} \\
     --untilVersion=${UNTIL_VERSION}
 "

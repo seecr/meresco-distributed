@@ -66,6 +66,26 @@ class NginxConfigTest(SeecrTestCase):
         self.assertFalse(mustUpdate)
         self.assertEquals(stats, stat(join(self.tempdir, 'api.frontend.conf')))
 
+    def testShouldUseNameIfGiven(self):
+        config = {
+            'services': {
+                newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': VERSION}},
+            },
+            'config': {
+                'api.frontend': {
+                    'ipAddress': '10.2.3.4',
+                    'fqdn': 'api.front.example.org',
+                    'reconfiguration.interval': 20,
+                }
+            }
+        }
+
+        n1 = NginxConfig(type='api', name='api_1.4', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
+        mustUpdate, sleeptime = n1.updateConfig(config)
+        self.assertTrue(mustUpdate)
+        self.assertEquals(20, sleeptime)
+        self.assertTrue(isfile(join(self.tempdir, 'api_1.4.frontend.conf')))
+
     def testShouldConfigureApiServers(self):
         n = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
         mustUpdate, sleeptime = n.updateConfig({
