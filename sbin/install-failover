@@ -32,15 +32,21 @@ source /usr/share/seecr-tools/functions.d/svc
 source /usr/share/seecr-tools/functions.d/nginx
 source /usr/share/seecr-tools/functions.d/iptables
 
+mydir=$(cd $(dirname $0); pwd)
+CD_BIN=""
+CD_BIN="cd $(dirname $mydir)/bin" #DO_NOT_DISTRIBUTE
+DOTSLASH=""
+DOTSLASH="./" #DO_NOT_DISTRIBUTE
+
 function show_usage {
     message "Usage $0 \\
-        --type <service type> \\
-        --adminIp <adminaddress> \\
-        --minVersion <minimalVersion> \\
-        --untilVersion <majorVersion of next release> \\
-        [--ip <virtual ipaddress> 'Only mandatory for type=admin'] \\
-        [--name <name for service, defaults to service type>] \\
-        [--adminPort 10000]
+        --type=<service type> \\
+        --adminIp=<adminaddress> \\
+        --minVersion=<minimalVersion> \\
+        --untilVersion=<majorVersion of next release> \\
+        [--ip=<virtual ipaddress> 'Only mandatory for type=admin'] \\
+        [--name=<name for service, defaults to service type>] \\
+        [--adminPort=10000]
     Allowed service types: api, gateway, admin"
 }
 
@@ -110,7 +116,8 @@ function create_failover {
     SERVICEDIR=/opt/zp-services
     SERVICENAME="failover-${NAME}"
     svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
-exec nginx-update-config \\
+${CD_BIN}
+exec ${DOTSLASH}nginx-update-config \\
     --adminHostname=$ADMIN_IP \\
     --adminPort=$ADMIN_PORT \\
     --type=${TYPE} \\
