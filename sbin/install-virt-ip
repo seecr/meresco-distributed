@@ -39,7 +39,7 @@ mydir=$(cd $(dirname $0); pwd)              #DO_NOT_DISTRIBUTE
 UCARP_RUN_SCRIPT=${mydir}/ucarp-for-virt-ip-run       #DO_NOT_DISTRIBUTE
 
 function show_usage {
-    message "Usage $0 --ip <virtual ipaddress> [--name <service name>]"
+    message "Usage $0 --ip=<virtual ipaddress> [--name=<service name>]"
 }
 
 TEMP=$(getopt \
