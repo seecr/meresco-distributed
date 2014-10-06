@@ -45,6 +45,8 @@ RANGE="5.153.228.64/27"
 SHAREDSECRET="3f09e646d"
 
 function ucarp_start {
+    source /usr/share/seecr-tools/functions.d/network
+
     local config_file=$1
     local dummycount=$2
     IPADDR=
