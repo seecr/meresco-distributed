@@ -29,8 +29,8 @@
 
 ### BEGIN INIT INFO
 # Provides:        zoekplatform-loadbalancer
-# Required-Start:  $network
-# Required-Stop:   $network
+# Required-Start:  $network $local_fs
+# Required-Stop:   $network $local_fs
 # Default-Start:   2 3 4 5
 # Default-Stop:    0 1 6
 # Short-Description: Zoekplatform Loadbalancer Virtual IPs with ucarp
