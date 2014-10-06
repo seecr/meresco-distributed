@@ -83,7 +83,7 @@ function do_start() {
 
     # Skip old dpkg-old files etc.
     config_files=$(ls -1 ${UCARP_D_DIR} | grep -Ev '.*\.dpkg(-\w*)?$' | grep -E '.*\.config')
-    nr_of_config_files=$(echo "$config_files" | wc -l)
+    nr_of_config_files=$(echo -n "$config_files" | wc -l)
     if [ $nr_of_config_files -eq 0 ]; then
         echo "No config files, not starting ucarp"
         exit 0
@@ -121,7 +121,7 @@ case "$1" in
         do_stop
     ;;
     *)
-        echo "Usage: \$0 start|stop|reload" >&2
+        echo "Usage: $0 start|stop|reload" >&2
         exit 3
     ;;
 esac
