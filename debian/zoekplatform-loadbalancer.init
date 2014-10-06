@@ -71,10 +71,6 @@ function ucarp_start {
         --addr=${IPADDR} \
         --pass=${SHAREDSECRET} \
         --daemonize
-
-    PID=$!
-    echo $PID > /var/run/ucarp_${DUMMY}.pid
-
 }
 
 function do_start() {
@@ -99,12 +95,9 @@ function do_start() {
 }
 
 function do_stop() {
-    for pidfile in $(ls /var/run/ucarp_*.pid); do
-        DUMMY=$(basename $pidfile | sed 's,ucarp_,,;s,\.pid,,')
-        PID=$(cat ${pidfile})
-        (ip link show ${DUMMY} | grep DOWN >/dev/null) || ifconfig ${DUMMY} down
-        (ps --no-headers --pid ${PID} >/dev/null) && kill ${PID}
-        rm $pidfile
+    killall ucarp
+    ifconfig | grep dummy | awk '{print $1}' | while read dummy; do
+        (ip link show ${dummy} | grep DOWN >/dev/null) || ifconfig ${dummy} down
     done
 }
 
