@@ -30,21 +30,21 @@
 IPADDR=""
 RANGE=""
 SHAREDSECRET="3f09e646d"
-SCRIPT=/sbin/ucarp-for-virt-ip-run
+UCARP_RUN_SCRIPT=/sbin/ucarp-for-virt-ip-run
 
 source /usr/share/seecr-tools/functions.d/default
 source /usr/share/seecr-tools/functions.d/svc
 
 mydir=$(cd $(dirname $0); pwd)              #DO_NOT_DISTRIBUTE
-SCRIPT=${mydir}/ucarp-for-virt-ip-run       #DO_NOT_DISTRIBUTE
+UCARP_RUN_SCRIPT=${mydir}/ucarp-for-virt-ip-run       #DO_NOT_DISTRIBUTE
 
 function show_usage {
-    message "Usage $0 --ip <virtual ipaddress> --range <network range> [--shared-secret <secret> --name <service name>]"
+    message "Usage $0 --ip <virtual ipaddress> [--name <service name>]"
 }
 
 TEMP=$(getopt \
     --options "" \
-    --long ip::,name::,range::,shared-secret:: \
+    --long ip::,name:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -58,26 +58,6 @@ while true ; do
                     ;;
                 *)
                     IPADDR=$2; shift 2
-                    ;;
-            esac
-            ;;
-        --range)
-            case "$2" in
-                "")
-                    show_usage; exit 1
-                    ;;
-                *)
-                    RANGE=$2; shift 2
-                    ;;
-            esac
-            ;;
-        --shared-secret)
-            case "$2" in
-                "")
-                    show_usage; exit 1;
-                    ;;
-                *)
-                    SHAREDSECRET=$2; shift 2;
                     ;;
             esac
             ;;
@@ -104,7 +84,7 @@ done
 
 set -o errexit
 
-if [ -z "${IPADDR}" -o -z "${RANGE}" ]; then
+if [ -z "${IPADDR}" ]; then
     show_usage
     exit 1
 fi
@@ -113,18 +93,10 @@ if [ -z "${NAME}" ]; then
     NAME=${IPADDR}
 fi
 
-SERVICE_DIR=/opt/zp-services
-SERVICE_NAME="virtual-ip-${NAME}"
 
-
-_svc_setup_dir_and_log root root ${SERVICE_DIR} ${SERVICE_NAME}
-cp ${SCRIPT} ${SERVICE_DIR}/${SERVICE_NAME}/run
-chmod +x ${SERVICE_DIR}/${SERVICE_NAME}/run
-touch ${SERVICE_DIR}/${SERVICE_NAME}/down
-
-cat << EOF > ${SERVICE_DIR}/${SERVICE_NAME}/config
+cat << EOF > /etc/zp/ucarp.d/ucarp_${NAME}.config
+# Config file for ${NAME}
 IPADDR="${IPADDR}"
-RANGE="${RANGE}"
-SHAREDSECRET="${SHAREDSECRET}"
 EOF
-svc_start_service ${SERVICE_DIR} ${SERVICE_NAME}
+message_with_enter "Please restart zoekplatform-loadbalancer
+$ /etc/init.d/zoekplatform-loadbalancer restart"

@@ -1,0 +1,7 @@
+This directory can contain ucarp config files.
+
+These config files have the following requirements:
+name: <name>.config
+
+Contents:
+IPADDR=<virtual ip you want>
