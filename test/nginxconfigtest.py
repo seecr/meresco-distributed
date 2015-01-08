@@ -1,12 +1,14 @@
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
-#  initiated by Stichting Bibliotheek.nl to provide a new search service
-#  for all public libraries in the Netherlands.
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2012-2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -41,47 +43,43 @@ class NginxConfigTest(SeecrTestCase):
         SeecrTestCase.setUp(self)
 
     def testShouldNotWriteNginxConfigFileIfNothingChanged(self):
-        config = {
-            'services': {
-                newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': VERSION}},
-            },
-            'config': {
-                'api.frontend': {
-                    'ipAddress': '10.2.3.4',
-                    'fqdn': 'api.front.example.org',
-                    'reconfiguration.interval': 20,
-                }
+        services={
+            newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': VERSION}},
+        }
+        config={
+            'api.frontend': {
+                'ipAddress': '10.2.3.4',
+                'fqdn': 'api.front.example.org',
+                'reconfiguration.interval': 20,
             }
         }
 
         n1 = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n1.updateConfig(config)
+        mustUpdate, sleeptime = n1.updateConfig(services=services, config=config)
         self.assertTrue(mustUpdate)
         self.assertEquals(20, sleeptime)
         self.assertTrue(isfile(join(self.tempdir, 'api.frontend.conf')))
         stats = stat(join(self.tempdir, 'api.frontend.conf'))
 
         n2 = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n2.updateConfig(config)
+        mustUpdate, sleeptime = n2.updateConfig(config=config, services=services)
         self.assertFalse(mustUpdate)
         self.assertEquals(stats, stat(join(self.tempdir, 'api.frontend.conf')))
 
     def testShouldUseNameIfGiven(self):
-        config = {
-            'services': {
-                newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': VERSION}},
-            },
-            'config': {
-                'api.frontend': {
-                    'ipAddress': '10.2.3.4',
-                    'fqdn': 'api.front.example.org',
-                    'reconfiguration.interval': 20,
-                }
+        services={
+            newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': VERSION}},
+        }
+        config={
+            'api.frontend': {
+                'ipAddress': '10.2.3.4',
+                'fqdn': 'api.front.example.org',
+                'reconfiguration.interval': 20,
             }
         }
 
         n1 = NginxConfig(type='api', name='api_14', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n1.updateConfig(config)
+        mustUpdate, sleeptime = n1.updateConfig(config=config, services=services)
         self.assertTrue(mustUpdate)
         self.assertEquals(20, sleeptime)
         self.assertTrue(isfile(join(self.tempdir, 'api_14.frontend.conf')))
@@ -97,19 +95,19 @@ class NginxConfigTest(SeecrTestCase):
 
     def testShouldConfigureApiServers(self):
         n = NginxConfig(type='api', name='name', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'api', 'ipAddress':'10.0.0.3', 'infoport':2345, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'plein', 'ipAddress':'10.0.0.4', 'infoport':2346, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
             },
-            'config': {
+            config={
                 'api.frontend': {
                     'ipAddress': '10.2.3.4',
                     'fqdn': 'api.front.example.org',
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'name.frontend.conf')))
         self.assertEquals("""## Generated by zploadbalancer.failover.NginxConfig
@@ -137,21 +135,21 @@ server {
 
     def testShouldConfigureAnyGivenTypeOfServiceWithPort(self):
         n = NginxConfig(type='other', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'other', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'other', 'ipAddress':'10.0.0.4', 'infoport':1235, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'other', 'ipAddress':'10.0.0.5', 'infoport':1236, 'active':True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'api', 'ipAddress':'10.0.0.3', 'infoport':2345, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
             },
-            'config': {
+            config={
                 'other.frontend': {
                     'ipAddress': '10.3.4.5',
                     'port': 8080,
                     'fqdn': 'other.front.example.org',
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'other.frontend.conf')))
         self.assertEquals("""## Generated by zploadbalancer.failover.NginxConfig
@@ -179,12 +177,12 @@ server {
 
     def testShouldConfigureGivenAliases(self):
         n = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'other', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
                 newId(): {'type':'api', 'ipAddress':'10.0.0.3', 'infoport':2345, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
             },
-            'config': {
+            config={
                 'api.frontend': {
                     'ipAddress': '10.3.4.5',
                     'port': 80,
@@ -195,7 +193,7 @@ server {
                     ],
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'api.frontend.conf')))
         self.assertEquals("""## Generated by zploadbalancer.failover.NginxConfig
@@ -222,18 +220,18 @@ server {
 
     def testShouldConfigureErrorPageIfServiceNotAvailable(self):
         n = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'other', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
             },
-            'config': {
+            config={
                 'api.frontend': {
                     'ipAddress': '10.3.4.5',
                     'port': 80,
                     'fqdn': 'api.front.example.org',
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'api.frontend.conf')))
         self.assertEqualsWS("""## Generated by zploadbalancer.failover.NginxConfig
@@ -252,18 +250,18 @@ server {
 
     def testShouldConfigureErrorPageIfServicesNotReadable(self):
         n = NginxConfig(type='api', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'api', 'ipAddress':'10.0.0.3', 'infoport':1235, 'active':True, 'readable': False, 'data':{'VERSION': VERSION}},
             },
-            'config': {
+            config={
                 'api.frontend': {
                     'ipAddress': '10.3.4.5',
                     'port': 80,
                     'fqdn': 'api.front.example.org',
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'api.frontend.conf')))
         self.assertEqualsWS("""## Generated by zploadbalancer.failover.NginxConfig
@@ -282,21 +280,21 @@ server {
 
     def testShouldConfigureServicesWithCorrectVersion(self):
         n = NginxConfig(type='other', nginxConfigDir=self.tempdir, minVersion='0.42', untilVersion='0.43')
-        mustUpdate, sleeptime = n.updateConfig({
-            'services': {
+        mustUpdate, sleeptime = n.updateConfig(
+            services={
                 newId(): {'type':'other', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': '0.41.1'}},
                 newId(): {'type':'other', 'ipAddress':'10.0.0.4', 'infoport':1235, 'active':True, 'readable': True, 'data':{'VERSION': '0.42'}},
                 newId(): {'type':'other', 'ipAddress':'10.0.0.8', 'infoport':1236, 'active':True, 'readable': True, 'data':{'VERSION': '0.42.3'}},
                 newId(): {'type':'other', 'ipAddress':'10.0.0.16', 'infoport':1237, 'active':True, 'readable': True, 'data':{'VERSION': '0.43'}},
             },
-            'config': {
+            config={
                 'other.frontend': {
                     'ipAddress': '10.3.4.5',
                     'port': 8080,
                     'fqdn': 'other.front.example.org',
                 }
             }
-        })
+        )
         self.assertEquals(True, mustUpdate)
         self.assertTrue(isfile(join(self.tempdir, 'other.frontend.conf')))
         self.assertEquals("""## Generated by zploadbalancer.failover.NginxConfig

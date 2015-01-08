@@ -1,12 +1,14 @@
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
-#  initiated by Stichting Bibliotheek.nl to provide a new search service
-#  for all public libraries in the Netherlands.
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2012-2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -48,15 +50,15 @@ class NginxConfig(object):
         self._minVersion = Version(minVersion)
         self._untilVersion = Version(untilVersion)
 
-    def updateConfig(self, configAndServices):
-        typeConfig = configAndServices['config']['%s.frontend' % self._type]
+    def updateConfig(self, config, services, **ignored):
+        typeConfig = config['%s.frontend' % self._type]
         sleeptime = typeConfig.get('reconfiguration.interval', 30)
-        mustUpdate = self._updateConfig(configAndServices, typeConfig)
+        mustUpdate = self._updateConfig(services, typeConfig)
         self._log("Sleeping: %ss\n" % sleeptime)
         return mustUpdate, sleeptime
 
-    def _updateConfig(self, configAndServices, typeConfig):
-        matchingServices = self._selectHostAndPort(configAndServices['services'])
+    def _updateConfig(self, services, typeConfig):
+        matchingServices = self._selectHostAndPort(services)
         listenIp = typeConfig['ipAddress']
         serverName = typeConfig['fqdn']
         aliases = ' '.join(typeConfig.get('aliases', []))

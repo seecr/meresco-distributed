@@ -1,12 +1,14 @@
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
-#  initiated by Stichting Bibliotheek.nl to provide a new search service
-#  for all public libraries in the Netherlands.
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2012-2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -58,5 +60,5 @@ class NginxUpdateConfigTest(IntegrationTestCase):
         self.runNginxUpdateConfig(processName='testRunNormal', type='api', minVersion='0.40', untilVersion='1.0')
         self.assertEquals(1, len(self.adminServer.requests))
         header, body = self.adminServer.requests[0].split('\r\n\r\n')
-        self.assertTrue('GET /api/service/list' in header, header)
+        self.assertTrue('GET /api/service/v2/list' in header, header)
 
