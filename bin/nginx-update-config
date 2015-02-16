@@ -29,16 +29,16 @@
 #
 ## end license ##
 
-from seecr.deps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
-includeParentAndDeps(__file__)                    #DO_NOT_DISTRIBUTE
+from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
+includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
 from os import system
-from zploadbalancer.failover import NginxConfig
+from zploadbalancer.failover import NginxConfig, VERSION
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
 from simplejson import load
-from urllib2 import urlopen
+from urllib2 import urlopen, Request
 
 
 if __name__ == '__main__':
@@ -59,7 +59,9 @@ if __name__ == '__main__':
         print 'Run as rootuser for default nginx restart script.'
         exit(2)
 
-    configuration = load(urlopen('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort)))
+    request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
+    request.add_header('User-Agent', 'ZP-Loadbalancer v%s' % VERSION)
+    configuration = load(urlopen(request))
     nginxConfig = NginxConfig(**vars(options))
 
     mustUpdate, sleeptime = nginxConfig.updateConfig(**configuration)
