@@ -59,7 +59,6 @@ class NginxConfig(object):
 
     def _updateConfig(self, services, typeConfig):
         matchingServices = self._selectHostAndPort(services)
-        listenIp = typeConfig['ipAddress']
         serverName = typeConfig['fqdn']
         aliases = ' '.join(typeConfig.get('aliases', []))
         if aliases:
@@ -75,7 +74,7 @@ class NginxConfig(object):
             conf.write("""}
 
 server {
-    listen %(listenIp)s:%(listenPort)s;
+    listen 0.0.0.0:%(listenPort)s;
     server_name %(serverName)s;
     location / {
         proxy_pass http://__var_%%s;
@@ -92,7 +91,7 @@ server {
         else:
             conf.write("""
 server {
-    listen %(listenIp)s:%(listenPort)s;
+    listen 0.0.0.0:%(listenPort)s;
     server_name %(serverName)s;
     root %%s;  # Note that nginx won't read in a directory for which the root user doesn't have read permissions.
     location / {
