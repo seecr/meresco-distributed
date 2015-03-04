@@ -53,7 +53,7 @@ if __name__ == '__main__':
     parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{0}")'.format(defaultNginxReloadCmd), default=defaultNginxReloadCmd)
     parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
     parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
-    parser.addOption('', '--unused', type='store_true', default=False, dest='unused', help='Show unused page')
+    parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
