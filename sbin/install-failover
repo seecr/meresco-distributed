@@ -47,7 +47,7 @@ function show_usage {
         [--ip=<virtual ipaddress> 'Only mandatory for type=admin'] \\
         [--name=<name for service, defaults to service type>] \\
         [--adminPort=10000]
-    Allowed service types: api, gateway, admin"
+    Allowed service types: api, apikey, gateway, admin"
 }
 
 TEMP=$(getopt \
@@ -142,7 +142,7 @@ EOF
 }
 
 case $TYPE in
-    api|gateway)
+    api|gateway|apikey)
         create_failover
         ;;
     admin)
