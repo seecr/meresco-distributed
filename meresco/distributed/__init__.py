@@ -28,5 +28,6 @@ from .configuration import Configuration
 from .utils import serviceUpdateHash
 from .servicehandler import ServiceHandler
 from .serviceregistry import ServiceRegistry
+from .selectservice import SelectService
 from .service import Service
 

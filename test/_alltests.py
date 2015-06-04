@@ -36,6 +36,7 @@ from warnings import simplefilter
 simplefilter('default')
 
 from configurationtest import ConfigurationTest
+from selectservicetest import SelectServiceTest
 from serviceregistrytest import ServiceRegistryTest
 from servicehandlertest import ServiceHandlerTest
 
