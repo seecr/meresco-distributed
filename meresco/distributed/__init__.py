@@ -24,7 +24,9 @@
 #
 ## end license ##
 
-from configuration import Configuration
-from utils import serviceUpdateHash
-from serviceregistry import ServiceRegistry
-from service import Service
+from .configuration import Configuration
+from .utils import serviceUpdateHash
+from .servicehandler import ServiceHandler
+from .serviceregistry import ServiceRegistry
+from .service import Service
+

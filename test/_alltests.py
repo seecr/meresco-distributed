@@ -37,6 +37,7 @@ simplefilter('default')
 
 from configurationtest import ConfigurationTest
 from serviceregistrytest import ServiceRegistryTest
+from servicehandlertest import ServiceHandlerTest
 
 if __name__ == '__main__':
     unittest.main()
