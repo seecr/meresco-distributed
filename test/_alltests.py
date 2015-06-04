@@ -36,6 +36,7 @@ from warnings import simplefilter
 simplefilter('default')
 
 from configurationtest import ConfigurationTest
+from serviceregistrytest import ServiceRegistryTest
 
 if __name__ == '__main__':
     unittest.main()

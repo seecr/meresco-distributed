@@ -26,4 +26,5 @@
 
 from configuration import Configuration
 from utils import serviceUpdateHash
+from serviceregistry import ServiceRegistry
 from service import Service
