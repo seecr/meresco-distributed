@@ -25,6 +25,7 @@
 ## end license ##
 
 from .configuration import Configuration
+from .confighandler import ConfigHandler
 from .utils import serviceUpdateHash
 from .servicehandler import ServiceHandler
 from .serviceregistry import ServiceRegistry
