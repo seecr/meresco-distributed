@@ -24,6 +24,7 @@
 #
 ## end license ##
 
+from .configdownloadprocessor import ConfigDownloadProcessor
 from .configuration import Configuration
 from .confighandler import ConfigHandler
 from .utils import serviceUpdateHash
