@@ -24,5 +24,10 @@
 #
 ## end license ##
 
-from configuration import Configuration
-from utils import serviceUpdateHash
+SERVICE_TIMEOUT = 60
+ULTIMATE_TIMEOUT = 24*60*60
+RETAIN_AFTER_STARTUP_TIMEOUT = 60 + 30
+
+SERVICE_POLL_INTERVAL = SERVICE_TIMEOUT / 2
+
+from _serviceflags import READABLE, WRITABLE, SERVICE_FLAGS

@@ -2,8 +2,9 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -24,5 +25,23 @@
 #
 ## end license ##
 
-from configuration import Configuration
-from utils import serviceUpdateHash
+SERVICE_FLAGS = {}
+class _Flag(object):
+    def __init__(self, name, default):
+        self.name = name
+        self.default = default
+        SERVICE_FLAGS[name] = self
+
+    def isSet(self, d):
+        return d.get(self.name, self.default)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, repr(self.name))
+
+
+READABLE = _Flag('readable', default=False)
+WRITABLE = _Flag('writable', default=False)
+_Flag.__init__ = None
