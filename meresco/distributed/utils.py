@@ -29,3 +29,6 @@ from hashlib import sha1
 def serviceUpdateHash(secret, **kwargs):
     hashString = secret + ''.join(str(value) for key, value in sorted(kwargs.items()))
     return sha1(hashString).hexdigest()
+
+from socket import gethostname, gethostbyname
+IP_ADDRESS = gethostbyname(gethostname())
