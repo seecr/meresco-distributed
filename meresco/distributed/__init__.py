@@ -26,3 +26,4 @@
 
 from configuration import Configuration
 from utils import serviceUpdateHash
+from service import Service
