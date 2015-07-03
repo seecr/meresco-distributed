@@ -38,9 +38,12 @@ simplefilter('default')
 from configurationtest import ConfigurationTest
 from confighandlertest import ConfigHandlerTest
 from configdownloadprocessortest import ConfigDownloadProcessorTest
+from utilstest import UtilsTest
 from selectservicetest import SelectServiceTest
 from serviceregistrytest import ServiceRegistryTest
 from servicehandlertest import ServiceHandlerTest
+from servicelogtest import ServiceLogTest
+
 
 if __name__ == '__main__':
     unittest.main()

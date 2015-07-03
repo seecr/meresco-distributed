@@ -2,8 +2,9 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -24,14 +25,26 @@
 #
 ## end license ##
 
-from .configdownloadprocessor import ConfigDownloadProcessor
-from .configuration import Configuration
-from .confighandler import ConfigHandler
-from .utils import serviceUpdateHash
-from .servicehandler import ServiceHandler
-from .serviceregistry import ServiceRegistry
-from .selectservice import SelectService
-from .servicelog import ServiceLog
-from .service import Service
-from .servicemanagement import ServiceManagement
+from seecr.test import SeecrTestCase
+
+from meresco.distributed import serviceUpdateHash
+
+class UtilsTest(SeecrTestCase):
+    def testServiceUpdateHash(self):
+        hash1 = serviceUpdateHash(secret='1234', identifier='x', type='y', ipAddress='1.2.3.4', port=99)
+        hash2 = serviceUpdateHash(secret='3411', identifier='xx', type='yy', ipAddress='2.2.3.4', port=98)
+        self.assertNotEqual(hash1, hash2)
+        self.assertEquals(40, len(hash1))
+        self.assertEquals(40, len(hash2))
+
+    def testArgumentsNotAllowed(self):
+        self.assertRaises(TypeError, serviceUpdateHash, '1234', 'x', 'y', '1.2.3.4', 99)
+
+    def testHashBasedOnKwargs(self):
+        hash = serviceUpdateHash(secret='1234', a='a', b='b', c=3)
+        hash2 = serviceUpdateHash(secret='1234', b='b', c=3, a='a')
+        self.assertEquals(hash, hash2)
+        self.assertEquals(40, len(hash))
+
+
 
