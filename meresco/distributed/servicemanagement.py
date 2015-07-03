@@ -56,6 +56,10 @@ class ServiceManagement(object):
     def getServiceSelector(self):
         return self._selectService
 
+    @property
+    def gustosIdentifier(self):
+        return "%s-%s" % (self._serviceType, self.identifier)
+
     def createConfigUpdateTree(self, configObservers=None):
         configObservers = configObservers or []
         if not getattr(self, '_configPeriodicDownload', None):
