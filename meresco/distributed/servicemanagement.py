@@ -78,6 +78,9 @@ class ServiceManagement(object):
             self.addConfigObserver(configObserver)
         return self._periodicConfigDownloadTree
 
+    def addConfigObserver(self, configObserver):
+        self._configDownloadProcessor.addObserver(configObserver)
+
 
 class DummySelectService(object):
     def updateConfig(self, **kwargs):
