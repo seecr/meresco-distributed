@@ -43,7 +43,7 @@ from selectservicetest import SelectServiceTest
 from serviceregistrytest import ServiceRegistryTest
 from servicehandlertest import ServiceHandlerTest
 from servicelogtest import ServiceLogTest
-
+from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
 
 if __name__ == '__main__':
     unittest.main()

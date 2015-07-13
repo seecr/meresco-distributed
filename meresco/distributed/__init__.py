@@ -34,4 +34,4 @@ from .selectservice import SelectService
 from .servicelog import ServiceLog
 from .service import Service
 from .servicemanagement import ServiceManagement
-
+from .updateperiodicdownload import UpdatePeriodicDownload

@@ -26,9 +26,10 @@
 
 from .selectservice import SelectService
 from .servicelog import ServiceLog
+from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
+from .updateperiodicdownload import UpdatePeriodicDownload
 from meresco.components import Schedule, PeriodicDownload
 from meresco.components.json import JsonDict
-from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from weightless.core import be
 
 class ServiceManagement(object):
@@ -84,6 +85,20 @@ class ServiceManagement(object):
 
     def addConfigObserver(self, configObserver):
         self._configDownloadProcessor.addObserver(configObserver)
+
+    def makeUpdatePeriodicDownload(self, sourceServiceType, periodicDownload, pollIntervalConfigSelector=None, **kwargs):
+        return be(
+            (UpdatePeriodicDownload(
+                    serviceIdentifier=self.identifier,
+                    periodicDownloadName=periodicDownload.observable_name(),
+                    pollIntervalConfigSelector=pollIntervalConfigSelector,
+                    sourceServiceType=sourceServiceType,
+                    **kwargs
+                ),
+                (self.getServiceSelector(),),
+                (periodicDownload,),
+            )
+        )
 
 
 class DummySelectService(object):
