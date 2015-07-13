@@ -57,7 +57,7 @@ class ServiceManagement(object):
         return self._selectService
 
     @property
-    def gustosIdentifier(self):
+    def serviceIdentifier(self):
         return "%s-%s" % (self._serviceType, self.identifier)
 
     def createConfigUpdateTree(self, configObservers=None):
