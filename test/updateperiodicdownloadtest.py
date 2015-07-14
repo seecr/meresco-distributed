@@ -278,7 +278,7 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
         self.assertEqual({
                 'flag': READABLE,
                 'identifier': 'sourceServiceIdentifier',
-                'remember': True,
+                'remember': False,
                 'type': 'sourceServiceType'
             }, self.serviceManagementMock.calledMethods[0].kwargs)
 
