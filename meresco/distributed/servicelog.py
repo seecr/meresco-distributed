@@ -33,26 +33,23 @@ from time import strftime, localtime
 
 class ServiceLog(Observable):
 
-    def __init__(self, identifier, **kwargs):
+    def __init__(self, identifier, serviceDir='/etc/service', **kwargs):
         super(ServiceLog, self).__init__(**kwargs)
         self._identifier = identifier
-        self._logDir = None
-
-    def updateConfig(self, config, **kwargs):
-        self._logDir = config.get(LOGDIR)
-        return
-        yield
+        self._serviceDir = serviceDir
 
     def getLogFiles(self):
-        logdirs =[join(self._logDir, d) for d in listdir(self._logDir) if self._identifier in d]
+        servicedirs =[join(self._serviceDir, d) for d in listdir(self._serviceDir) if self._identifier in d]
         result = []
-        for d in sorted(logdirs):
-            files = [(basename(d), f, formatStamp(stat(join(d, f)).st_mtime)) for f in listdir(d) if f.endswith('.s') or f.endswith('.u') or f == 'current']
+        for d in sorted(servicedirs):
+            serviceName = basename(d)
+            logDir = join(d, 'log', 'main')
+            files = [(serviceName, f, formatStamp(stat(join(logDir, f)).st_mtime)) for f in listdir(logDir) if f.endswith('.s') or f.endswith('.u') or f == 'current']
             result.extend(reversed(sorted(files)))
         return result
 
     def getLogLines(self, dirname, filename, filterValue=None, filterStamp=None):
-        filepath = join(self._logDir, dirname, filename)
+        filepath = join(self._serviceDir, dirname, 'log', 'main', filename)
         if not isfile(filepath):
             yield 'Log not found'
             return
@@ -77,5 +74,4 @@ def tai64ToTime(stamp):
     return "%s.%03d" % (strftime("%Y-%m-%d %H:%M:%S", localtime(int(secs - EPOCH))), nsec/10**6)
 
 EPOCH = 4611686018427387914L
-LOGDIR = 'logDir'
 
