@@ -30,7 +30,7 @@ from seecr.test import SeecrTestCase, CallTrace
 from weightless.core import compose
 from meresco.components import Schedule
 
-from meresco.distributed.constants import OAI_DOWNLOAD_PERIOD_CONFIG_KEY
+from meresco.distributed.constants import OAI_DOWNLOAD_PERIOD_CONFIG_KEY, READABLE
 from meresco.distributed import UpdatePeriodicDownload
 
 
@@ -248,6 +248,39 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
             }
         )))
         self.assertEquals(['getState', 'setDownloadAddress', 'resume'], self.periodicDownloadMock.calledMethodNames())
+
+    def testCreateUpdatePeriodicDownloadForSpecificService(self):
+        self.updatePeriodicDownload = UpdatePeriodicDownload(
+                serviceIdentifier='identifier',
+                periodicDownloadName='sourceService',
+                sourceServiceType='sourceServiceType',
+                sourceServiceIdentifier='sourceServiceIdentifier',
+                name='sourceService')
+        self.updatePeriodicDownload.addObserver(self.periodicDownloadMock)
+        self.updatePeriodicDownload.addObserver(self.serviceManagementMock)
+
+        list(compose(self.updatePeriodicDownload.updateConfig(
+            config={},
+            services={
+                'sourceServiceIdentifier': {
+                    'type': 'sourceServiceType',
+                    'host': 'hostname',
+                    'port': 1234,
+                    'readable': True,
+                },
+                'identifier': {
+                    'writable': True,
+                }
+            }
+        )))
+
+        self.assertEqual(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
+        self.assertEqual({
+                'flag': READABLE,
+                'identifier': 'sourceServiceIdentifier',
+                'remember': True,
+                'type': 'sourceServiceType'
+            }, self.serviceManagementMock.calledMethods[0].kwargs)
 
 class Bucket(object):
     def __init__(self, **kwargs):

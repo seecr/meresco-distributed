@@ -270,4 +270,18 @@ class SelectServiceTest(SeecrTestCase):
         self.assertEquals([2], [port for h, port in hostsAndPorts])
         self.assertFalse(hasattr(selectService, 'updateConfig'))
 
+    def testSelectHostPortForGivenIdentifier(self):
+        serviceIdentifier = str(uuid4())
+        consume(self.selectService.updateConfig(
+            config={},
+            services={
+                serviceIdentifier: {'identifier': serviceIdentifier, 'type': 'plein', 'ipAddress': '1.2.3.5', 'infoport': 2000, 'readable': True, 'data':{'VERSION': VERSION}},
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport': 2001, 'readable': True, 'data':{'VERSION': VERSION}},
+            },
+        ))
+        selectedHostPort = set()
+        for i in xrange(10):
+            result = self.selectService.selectHostPortForService(identifier=serviceIdentifier, type='plein', flag=READABLE, remember=True)
+            selectedHostPort.add(result)
+        self.assertEquals(set([('1.2.3.5', 2000)]), selectedHostPort)
 

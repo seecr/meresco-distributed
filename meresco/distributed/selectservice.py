@@ -45,12 +45,11 @@ class SelectService(object):
     def selectHostPortForService(self, type, flag, remember=False, endpoint=None, **kwargs):
         return self.selectService(type=type, flag=flag, remember=remember, **kwargs).selectHostAndPort(endpoint)
 
-    def selectService(self, type, flag, remember=False, **kwargs):
-        identifier = None
-        if remember:
+    def selectService(self, type, flag, remember=False, identifier=None, **kwargs):
+        if remember and not identifier:
             identifier = self._getChosenService(type)
 
-        matchingServices = self._findServices(type=type, flag=flag, **kwargs)
+        matchingServices = self.findServices(type=type, flag=flag, **kwargs)
         if len(matchingServices) == 0:
             raise ValueError("No '%s' service found" % type)
         if not identifier is None:
@@ -65,10 +64,10 @@ class SelectService(object):
         return service
 
     def hostsAndPortsForService(self, type, flag, endpoint=None, **kwargs):
-        for service in self._findServices(type=type, flag=flag, **kwargs):
+        for service in self.findServices(type=type, flag=flag, **kwargs):
             yield service.selectHostAndPort(endpoint)
 
-    def _findServices(self, type, flag, minVersion=None, untilVersion=None, **ignored):
+    def findServices(self, type, flag, minVersion=None, untilVersion=None, **ignored):
         matchingServices = []
         minVersion = self._currentVersion.majorVersion() if minVersion is None else Version(minVersion)
         untilVersion = minVersion.nextMajorVersion() if untilVersion is None else Version(untilVersion)

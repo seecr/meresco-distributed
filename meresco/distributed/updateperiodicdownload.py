@@ -34,12 +34,13 @@ from .constants import OAI_DOWNLOAD_INTERVAL, OAI_DOWNLOAD_PERIOD_CONFIG_KEY
 
 
 class UpdatePeriodicDownload(Observable):
-    def __init__(self, serviceIdentifier, periodicDownloadName, sourceServiceType, pollIntervalConfigSelector=None, name=None, **kwargs):
+    def __init__(self, serviceIdentifier, periodicDownloadName, sourceServiceType, sourceServiceIdentifier=None, pollIntervalConfigSelector=None, name=None, **kwargs):
         Observable.__init__(self, name)
         self._serviceIdentifier = serviceIdentifier
         self._periodicDownloadName = periodicDownloadName
         self._pollIntervalConfigSelector = pollIntervalConfigSelector or oaiDownloadConfigSelector
         self._sourceServiceType = sourceServiceType
+        self._sourceServiceIdentifier = sourceServiceIdentifier
         self._extraKwargs = kwargs
 
     def updateConfig(self, config, services, **kwargs):
@@ -48,7 +49,7 @@ class UpdatePeriodicDownload(Observable):
         if state.schedule.period != pollInterval:
             self.call.setSchedule(schedule=Schedule(period=pollInterval))
         try:
-            host, port = self.call.selectHostPortForService(type=self._sourceServiceType, flag=READABLE, remember=True, **self._extraKwargs)
+            host, port = self.call.selectHostPortForService(type=self._sourceServiceType, flag=READABLE, remember=True, identifier=self._sourceServiceIdentifier, **self._extraKwargs)
         except ValueError:
             host, port = None, None
         if state.host != host or state.port != port:
