@@ -49,7 +49,7 @@ class UpdatePeriodicDownload(Observable):
         if state.schedule.period != pollInterval:
             self.call.setSchedule(schedule=Schedule(period=pollInterval))
         try:
-            host, port = self.call.selectHostPortForService(type=self._sourceServiceType, flag=READABLE, remember=True, identifier=self._sourceServiceIdentifier, **self._extraKwargs)
+            host, port = self.call.selectHostPortForService(type=self._sourceServiceType, flag=READABLE, remember=self._sourceServiceIdentifier is None, identifier=self._sourceServiceIdentifier, **self._extraKwargs)
         except ValueError:
             host, port = None, None
         if state.host != host or state.port != port:
