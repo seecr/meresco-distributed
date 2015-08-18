@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 ## begin license ##
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -25,26 +25,14 @@
 #
 ## end license ##
 
-from os import getuid
-assert getuid() != 0, "Do not run tests as 'root'"
+class ServiceState(object):
+    def __init__(self, states):
+        self._states = states
 
-from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
-includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
-
-import unittest
-from warnings import simplefilter
-simplefilter('default')
-
-from configurationtest import ConfigurationTest
-from confighandlertest import ConfigHandlerTest
-from configdownloadprocessortest import ConfigDownloadProcessorTest
-from utilstest import UtilsTest
-from selectservicetest import SelectServiceTest
-from serviceregistrytest import ServiceRegistryTest
-from servicehandlertest import ServiceHandlerTest
-from servicelogtest import ServiceLogTest
-from servicestatetest import ServiceStateTest
-from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
-
-if __name__ == '__main__':
-    unittest.main()
+    def serviceData(self, dataDict):
+        errors = 0
+        for state in self._states:
+            if state.errorState:
+                errors += 1
+        if errors:
+            dataDict['errors'] = errors
