@@ -25,8 +25,11 @@
 #
 ## end license ##
 
+WARNING = 'warnings'
+ERROR = 'errors'
+
 class ServiceState(object):
-    def __init__(self, states, type='errors'):
+    def __init__(self, states, type=ERROR):
         self._states = states
         self._type = type
 
@@ -37,3 +40,7 @@ class ServiceState(object):
                 errors += 1
         if errors:
             dataDict[self._type] = errors
+
+    @classmethod
+    def asWarning(cls, states):
+        return cls(states, type=WARNING)

@@ -48,7 +48,7 @@ class ServiceStateTest(SeecrTestCase):
         self.assertEquals({'errors': 2}, dataDict)
 
     def testWarnings(self):
-        state = ServiceState([downloadState(True)], type='warnings')
+        state = ServiceState.asWarning([downloadState(True)])
         dataDict = {}
         state.serviceData(dataDict)
         self.assertEqual({'warnings': 1}, dataDict)
