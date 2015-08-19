@@ -26,8 +26,9 @@
 ## end license ##
 
 class ServiceState(object):
-    def __init__(self, states):
+    def __init__(self, states, type='errors'):
         self._states = states
+        self._type = type
 
     def serviceData(self, dataDict):
         errors = 0
@@ -35,4 +36,4 @@ class ServiceState(object):
             if state.errorState:
                 errors += 1
         if errors:
-            dataDict['errors'] = errors
+            dataDict[self._type] = errors

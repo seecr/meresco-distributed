@@ -47,6 +47,12 @@ class ServiceStateTest(SeecrTestCase):
         state.serviceData(dataDict)
         self.assertEquals({'errors': 2}, dataDict)
 
+    def testWarnings(self):
+        state = ServiceState([downloadState(True)], type='warnings')
+        dataDict = {}
+        state.serviceData(dataDict)
+        self.assertEqual({'warnings': 1}, dataDict)
+
 def downloadState(error=True):
     downloadProcessorState = CallTrace('downloadProcessorState')
     downloadProcessorState.errorState = error
