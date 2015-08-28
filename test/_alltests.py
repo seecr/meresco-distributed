@@ -38,6 +38,7 @@ simplefilter('default')
 from configurationtest import ConfigurationTest
 from confighandlertest import ConfigHandlerTest
 from configdownloadprocessortest import ConfigDownloadProcessorTest
+from flagchecktest import FlagCheckTest
 from utilstest import UtilsTest
 from selectservicetest import SelectServiceTest
 from serviceregistrytest import ServiceRegistryTest
