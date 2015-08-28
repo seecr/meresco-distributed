@@ -30,7 +30,9 @@ from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from .updateperiodicdownload import UpdatePeriodicDownload
 from meresco.components import Schedule, PeriodicDownload
 from meresco.components.json import JsonDict
+from meresco.distributed.flagcheck import FlagCheck
 from weightless.core import be
+from _serviceflags import WRITABLE, READABLE
 
 class ServiceManagement(object):
     def __init__(self, reactor, admin, configDownloadProcessor, identifier, serviceType, statePath, version=None, documentationPath=None, enableSelectService=True):
@@ -99,6 +101,17 @@ class ServiceManagement(object):
                 (periodicDownload,),
             )
         )
+
+    def writableCheck(self):
+        return self._flagCheck(flag=WRITABLE)
+
+    def readableCheck(self):
+        return self._flagCheck(flag=READABLE)
+
+    def _flagCheck(self, flag):
+        check = FlagCheck(serviceIdentifier=self.identifier, flag=flag)
+        self.addConfigObserver(check)
+        return check
 
 
 class DummySelectService(object):
