@@ -38,7 +38,10 @@ class Service(dict):
 
     def __init__(self, domainname=None, timeout=None, ultimateTimeout=None, _time=None, *args, **kwargs):
         super(Service, self).__init__(*args, **kwargs)
-        self._domainname = domainname
+        if domainname is not None:
+            self._domainname = domainname
+        elif 'fqdn' in kwargs:
+            self._domainname = kwargs['fqdn'].split('.', 1)[1]
         self._timeout = timeout
         self._ultimateTimeout = ultimateTimeout
         self._state = {}
