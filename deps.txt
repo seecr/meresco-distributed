@@ -1,13 +1,14 @@
 ucarp (>= 1.5.2)
 ucarp (<< 1.6)
 seecr-daemontools-run
-seecr-tools (>= 0.8.9.1)
+seecr-tools (>= 0.8.17)
+seecr-tools (<< 0.9)
 python-meresco-components (>= 4.10.19)
-python-meresco-components (<< 4.12)
-python-seecr-utils (>= 1.0.6)
+python-meresco-components (<< 4.13)
+python-seecr-utils (>= 1.0.7)
 python-seecr-utils (<< 1.1)
 python-simplejson (>= 2.5.2)
 python-simplejson (<< 2.6)
-seecr-firewall (>= 0.2.13.1)
+seecr-firewall (>= 0.2.15.1)
 seecr-firewall (<< 0.3)
 nginx
