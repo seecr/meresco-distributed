@@ -3,6 +3,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -45,6 +46,7 @@ from serviceregistrytest import ServiceRegistryTest
 from servicehandlertest import ServiceHandlerTest
 from servicelogtest import ServiceLogTest
 from servicestatetest import ServiceStateTest
+from updateipstest import UpdateIpsTest
 from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
 
 if __name__ == '__main__':

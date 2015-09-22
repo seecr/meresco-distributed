@@ -2,6 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -32,3 +33,21 @@ def serviceUpdateHash(secret, **kwargs):
 
 from socket import gethostname, gethostbyname
 IP_ADDRESS = gethostbyname(gethostname())
+
+def ipsAndRanges(ipSpecs, includeLocalhost=True, knownIps=None):
+    '''parses (json) dictionary config format into something IpFilter / Deproxy's updateIps-method understands.'''
+    knownIps = {} if knownIps is None else knownIps
+    ips = set()
+    for ipItem in ipSpecs:
+        if 'known' in ipItem:
+            ips.update(knownIps.get(ipItem['known'], set()))
+    ips.update(ipItem['ip'] for ipItem in ipSpecs if 'ip' in ipItem)
+    ips.update(ipItem['ipAddress'] for ipItem in ipSpecs if 'ipAddress' in ipItem)  # *.frontend ip's
+    if includeLocalhost:
+        ips.add('127.0.0.1')
+    ipRanges = set(
+        (ipItem['start'], ipItem['end'])
+        for ipItem in ipSpecs
+        if 'start' in ipItem and 'end' in ipItem
+    )
+    return ips, ipRanges
