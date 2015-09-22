@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
@@ -33,6 +34,7 @@ from meresco.components.json import JsonDict
 from meresco.distributed import serviceUpdateHash
 from simplejson import loads
 from urlparse import parse_qs
+from weightless.core import NoneOfTheObserversRespond
 
 
 class ServiceHandler(Observable):
@@ -105,12 +107,15 @@ class ServiceHandler(Observable):
         additionalConfigDict = result
         fullServiceInfo = arguments.get('allServiceInfo', ['False'])[0] == 'True'
         for key in requestedKeys:
-            if key == 'services':
-                additionalConfigDict[key] = self.call.listServices(activeOnly=not fullServiceInfo, includeState=fullServiceInfo)
-            elif key == 'config':
-                additionalConfigDict[key] = self.call.getConfig()
-            else:
-                additionalConfigDict[key] = self.call[key].getConfiguration()
+            try:
+                if key == 'services':
+                    additionalConfigDict[key] = self.call.listServices(activeOnly=not fullServiceInfo, includeState=fullServiceInfo)
+                elif key == 'config':
+                    additionalConfigDict[key] = self.call.getConfig()
+                else:
+                    additionalConfigDict[key] = self.call[key].getConfiguration()
+            except NoneOfTheObserversRespond:
+                result.setdefault('errors', []).append("Key '%s' not found." % key)
         if serviceIdentifier:
             this_service = self.call.getService(identifier=serviceIdentifier)
             if this_service is not None:
@@ -127,7 +132,7 @@ def requestedKeys(arguments):
         if not key:
             continue
         if key.startswith('-'):
-            requested.remove(key[1:])
+            requested.discard(key[1:])
         else:
             requested.add(key)
     return requested

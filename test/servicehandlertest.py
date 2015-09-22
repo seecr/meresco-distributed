@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
@@ -431,6 +432,27 @@ class ServiceHandlerTest(SeecrTestCase):
         self.assertEquals(['other'], dictBodyV2['other'])
         self.assertEquals({'host': 'localhost', 'port': 8000}, dictBodyV2['config'])
         self.assertEquals({}, dictBodyV2['services'])
+
+    def testNonexistingKeys(self):
+        result = asString(self.dna.all.handleRequest(
+            path='/service/v2/list',
+            Method='GET',
+            arguments={'keys':['no']}
+        ))
+        header, body = httpSplit(result)
+        dictBodyV2 = JsonDict.loads(body)
+        self.assertEquals(['api_version', 'config', 'errors', 'services'], sorted(dictBodyV2.keys()))
+        self.assertEquals(["Key 'no' not found."], dictBodyV2['errors'])
+
+    def testRemovingNotListedKeys(self):
+        result = asString(self.dna.all.handleRequest(
+            path='/service/v2/list',
+            Method='GET',
+            arguments={'keys':['-no']}
+        ))
+        header, body = httpSplit(result)
+        dictBodyV2 = JsonDict.loads(body)
+        self.assertEquals(['api_version', 'config', 'services'], sorted(dictBodyV2.keys()))
 
     def testAllKeysMultipleArguments(self):
         result = asString(self.dna.all.handleRequest(
