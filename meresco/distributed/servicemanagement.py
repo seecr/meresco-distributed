@@ -31,16 +31,28 @@ from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from .updateperiodicdownload import UpdatePeriodicDownload
 from .updateips import UpdateIps
 from meresco.components import Schedule, PeriodicDownload
+from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
+from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.json import JsonDict
 from meresco.distributed.utils import ipsAndRanges
 from meresco.distributed.flagcheck import FlagCheck
+from meresco.oai import stamp2zulutime
+from meresco.oai.resumptiontoken import ResumptionToken
 from weightless.core import be
+from weightless.http import httpget
 from _serviceflags import WRITABLE, READABLE
+from simplejson import loads
+from meresco.html import DynamicHtml
+from seecr.weblib import seecrWebLibPath
+from seecr.zulutime import ZuluTime
+import re
 
 class ServiceManagement(object):
-    def __init__(self, reactor, admin, configDownloadProcessor, identifier, serviceType, statePath, version=None, documentationPath=None, enableSelectService=True):
+    def __init__(self, reactor, admin, configDownloadProcessor, identifier, serviceType, statePath, version=None, documentationPath=None, enableSelectService=True, name=None):
         self._reactor = reactor
         self._adminHostname, self._adminPort = admin
+        self._name = name
+        self._versionPrefix = '' if not self._name else ('%s-' % self._name)
         self.identifier = identifier
         self._serviceType = serviceType
         self._version = version
@@ -50,6 +62,26 @@ class ServiceManagement(object):
         self._documentationPath = documentationPath
         self._serviceLog = ServiceLog(identifier=identifier)
         self.ipsAndRanges = ipsAndRanges
+        self.allAdditionalGlobals={
+            'VERSION': self._version,
+            'SERVICE_TYPE': self._serviceType,
+            'processingStates': [],
+            'ResumptionToken': ResumptionToken,
+            'stamp2zulutime': stamp2zulutime,
+            'ValueError': ValueError,
+            'getattr': getattr,
+            'hasattr': hasattr,
+            'JsonDict': JsonDict,
+            'httpget': httpget,
+            'loads': loads,
+            'identifier': self.identifier,
+            'ZuluTime': ZuluTime,
+            're': re,
+            'datastreamStates': [],
+            'processingStates': [],
+        }
+        self.commonDynamicPaths = []
+        self.commonStaticPaths = [seecrWebLibPath]
         self.createConfigUpdateTree()
 
     def updateConfig(self, config, **kwargs):
@@ -119,10 +151,73 @@ class ServiceManagement(object):
     def readableCheck(self):
         return self._flagCheck(flag=READABLE)
 
+    def createInfoHelix(self, dynamicPath, additionalGlobals=None):
+        allAdditionalGlobals = dict(self.allAdditionalGlobals)
+        if additionalGlobals:
+            allAdditionalGlobals.update(additionalGlobals)
+        return \
+            (PathFilter('/info'),
+                (PathRename(lambda path: path[len('/info'):] or '/'),
+                    (PathFilter('/version'),
+                        (StringServer("%s%s (%s)" % (self._versionPrefix, self._serviceType, self._version), ContentTypePlainText),)
+                    ),
+                    (PathFilter('/identifier'),
+                        (StringServer(self.identifier, ContentTypePlainText),)
+                    ),
+                    (PathFilter('/', excluding=[
+                            '/version',
+                            '/identifier',
+                        ]),
+                        (DynamicHtml(
+                                [dynamicPath] + self.commonDynamicPaths,
+                                reactor=self._reactor,
+                                indexPage='/info/index',
+                                additionalGlobals=allAdditionalGlobals,
+                            ),
+                            (self.configReadObject(),),
+                            (self._serviceLog,),
+                        )
+                    )
+                ),
+            )
+
+    @staticmethod
+    def createInfoRedirectHelix(excluding=None):
+        excluding = [] if excluding is None else excluding
+        excluding.extend(['/info', '/static'])
+        return  \
+            (PathFilter('/', excluding=excluding),
+                (SimpleServer("HTTP/1.0 302 Found\r\nLocation: /info\r\n\r\n"), )
+            )
+
+    def createStaticHelix(self, staticPath=None):
+        paths = [] if staticPath is None else [staticPath]
+        paths.extend(self.commonStaticPaths)
+        return \
+            (PathFilter('/static'),
+                (PathRename(lambda path: path[len('/static'):]),
+                    (FileServer(paths),)
+                )
+            )
+
+    def configReadObject(self):
+        class ConfigReadObject(object):
+            def getConfiguration(inner):
+                return self._latestConfiguration
+        return ConfigReadObject()
+
     def _flagCheck(self, flag):
         check = FlagCheck(serviceIdentifier=self.identifier, flag=flag)
         self.addConfigObserver(check)
         return check
+
+class SimpleServer(object):
+    def __init__(self, completeHttpResponse):
+        self._response = completeHttpResponse
+
+    def handleRequest(self, *args, **kwargs):
+        yield self._response
+
 
 
 class DummySelectService(object):
