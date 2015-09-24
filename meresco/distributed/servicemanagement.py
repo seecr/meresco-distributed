@@ -2,6 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
+# Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -28,8 +29,10 @@ from .selectservice import SelectService
 from .servicelog import ServiceLog
 from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from .updateperiodicdownload import UpdatePeriodicDownload
+from .updateips import UpdateIps
 from meresco.components import Schedule, PeriodicDownload
 from meresco.components.json import JsonDict
+from meresco.distributed.utils import ipsAndRanges
 from meresco.distributed.flagcheck import FlagCheck
 from weightless.core import be
 from _serviceflags import WRITABLE, READABLE
@@ -46,6 +49,7 @@ class ServiceManagement(object):
         self._configDownloadProcessor = configDownloadProcessor
         self._documentationPath = documentationPath
         self._serviceLog = ServiceLog(identifier=identifier)
+        self.ipsAndRanges = ipsAndRanges
         self.createConfigUpdateTree()
 
     def updateConfig(self, config, **kwargs):
@@ -99,6 +103,13 @@ class ServiceManagement(object):
                 ),
                 (self.getServiceSelector(),),
                 (periodicDownload,),
+            )
+        )
+
+    def makeUpdateIps(self, configSelector, component, staticIpAddresses=None):
+        return be(
+            (UpdateIps(configSelector=configSelector, staticIpAddresses=staticIpAddresses, ipsAndRanges=self.ipsAndRanges),
+                (component,)
             )
         )
 

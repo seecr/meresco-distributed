@@ -45,6 +45,7 @@ from selectservicetest import SelectServiceTest
 from serviceregistrytest import ServiceRegistryTest
 from servicehandlertest import ServiceHandlerTest
 from servicelogtest import ServiceLogTest
+from servicemanagementtest import ServiceManagementTest
 from servicestatetest import ServiceStateTest
 from updateipstest import UpdateIpsTest
 from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
