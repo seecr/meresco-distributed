@@ -49,6 +49,7 @@ from servicemanagementtest import ServiceManagementTest
 from servicestatetest import ServiceStateTest
 from updateipstest import UpdateIpsTest
 from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
+from updateperiodiccalltest import UpdatePeriodicCallTest
 
 if __name__ == '__main__':
     unittest.main()
