@@ -36,6 +36,7 @@ import unittest
 from warnings import simplefilter
 simplefilter('default')
 
+from compositestatetest import CompositeStateTest
 from configurationtest import ConfigurationTest
 from confighandlertest import ConfigHandlerTest
 from configdownloadprocessortest import ConfigDownloadProcessorTest

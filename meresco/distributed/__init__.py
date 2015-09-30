@@ -25,6 +25,7 @@
 #
 ## end license ##
 
+from .compositestate import CompositeState
 from .configdownloadprocessor import ConfigDownloadProcessor
 from .configuration import Configuration
 from .confighandler import ConfigHandler
