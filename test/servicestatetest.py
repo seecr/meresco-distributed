@@ -30,7 +30,7 @@ from meresco.distributed.servicestate import ServiceState
 
 class ServiceStateTest(SeecrTestCase):
     def testZeroErrors(self):
-        state = ServiceState([downloadState(error=False)])
+        state = ServiceState(lambda: [downloadState(error=False)])
         dataDict = {}
         state.serviceData(dataDict)
         self.assertEquals({}, dataDict)

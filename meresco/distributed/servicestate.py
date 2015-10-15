@@ -30,12 +30,12 @@ ERROR = 'errors'
 
 class ServiceState(object):
     def __init__(self, states, type=ERROR):
-        self._states = states
+        self._states = states if hasattr(states, '__call__') else (lambda: states)
         self._type = type
 
     def serviceData(self, dataDict):
         errors = 0
-        for state in self._states:
+        for state in self._states():
             if state.errorState:
                 errors += 1
         if errors:
