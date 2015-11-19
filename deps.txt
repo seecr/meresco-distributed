@@ -7,8 +7,7 @@ python-meresco-components (>= 4.10.19)
 python-meresco-components (<< 4.13)
 python-seecr-utils (>= 1.0.7)
 python-seecr-utils (<< 1.1)
-python-simplejson (>= 2.5.2)
-python-simplejson (<< 2.6)
+python-simplejson
 seecr-firewall (>= 0.2.15.1)
 seecr-firewall (<< 0.3)
 nginx
