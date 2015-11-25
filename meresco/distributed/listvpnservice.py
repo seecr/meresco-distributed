@@ -53,4 +53,4 @@ class ListVpnService(Transparent):
                 vpnUrl = url.replace(origIp, vpnIp)
                 if url != vpnUrl:
                     service['data']['endpoints'][endpoint] = vpnUrl
-                    service['data']['endpoints'][endpoint + "Original"] = url
+                    service['data'].setdefault('originalEndpoints', {})[endpoint] = url
