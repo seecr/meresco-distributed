@@ -81,7 +81,7 @@ class ServiceRegistry(Observable):
     def getDomain(self):
         return self._domainname
 
-    def listServices(self, activeOnly=True, includeState=False):
+    def listServices(self, activeOnly=True, includeState=False, **kwargs):
         self._disableLongGoneService()
         servicesDict = {}
         for identifier, service in self._services.items():

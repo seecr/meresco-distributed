@@ -47,7 +47,7 @@ from uuid import uuid4
 class ServiceHandlerTest(SeecrTestCase):
     def setUp(self):
         SeecrTestCase.setUp(self)
-        serviceHandler = ServiceHandler(secret='guessme!')
+        self.serviceHandler = ServiceHandler(secret='guessme!')
         self.serviceRegistry = ServiceRegistry(stateDir=self.tempdir, domainname='seecr.nl', reactor=CallTrace())
         self.config = {"host": "localhost", "port": 8000}
         self.configuration = CallTrace('configuration', methods={'getConfig': lambda: JsonDict(self.config)}, ignoredAttributes=['getConfiguration', 'updateZone', 'deleteFromZone', 'call_unknown'])
@@ -59,7 +59,7 @@ class ServiceHandlerTest(SeecrTestCase):
 
         self.dna = be(
             (Observable(),
-                (serviceHandler,
+                (self.serviceHandler,
                     (self.serviceRegistry,
                         (self.dns,),
                     ),
@@ -532,6 +532,20 @@ class ServiceHandlerTest(SeecrTestCase):
         self.assertEquals('HTTP/1.0 400 Bad Request', header)
         self.assertEquals("Missing parameter: 'type'", body)
 
+    def testUseVpn(self):
+        observer = CallTrace()
+        self.dna = be(
+            (Observable(),
+                (ServiceHandler(secret='guessme!'),
+                    (observer,),
+                )
+            ))
+
+        result = asString(self.dna.all.handleRequest(path='/service/v2/list', arguments={'useVpn': ['True']}, Method='GET'))
+        header, body = httpSplit(result)
+        self.assertTrue("200 OK" in header, header)
+        self.assertEqual(["listServices", "getConfig"], observer.calledMethodNames())
+        self.assertEqual({'activeOnly': True, 'convertIpsToVpn': True, 'includeState': False}, observer.calledMethods[0].kwargs)
 
 newId = lambda: str(uuid4())
 

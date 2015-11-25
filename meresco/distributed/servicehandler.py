@@ -106,10 +106,11 @@ class ServiceHandler(Observable):
         result = {}
         additionalConfigDict = result
         fullServiceInfo = arguments.get('allServiceInfo', ['False'])[0] == 'True'
+        useVpn = arguments.get('useVpn', ['False'])[0] == 'True'
         for key in requestedKeys:
             try:
                 if key == 'services':
-                    additionalConfigDict[key] = self.call.listServices(activeOnly=not fullServiceInfo, includeState=fullServiceInfo)
+                    additionalConfigDict[key] = self.call.listServices(activeOnly=not fullServiceInfo, includeState=fullServiceInfo, convertIpsToVpn=useVpn)
                 elif key == 'config':
                     additionalConfigDict[key] = self.call.getConfig()
                 else:
