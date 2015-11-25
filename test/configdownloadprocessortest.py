@@ -298,3 +298,9 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         with stderr_replaced():
             with httpResponder(hangupConnectionTimeout=1.2) as (ms, serverPort):
                 self.assertRaises(Exception, lambda: cdp.download('localhost', serverPort))
+
+    def testUseVpn(self):
+        parameters = dict(identifier='id1', type='api', ipAddress='127.0.0.1', infoport=12345)
+        downloadProcessor = ConfigDownloadProcessor.forUpdate(statePath=self.tempdir, useVpn=True, sharedSecret=SHARED_SECRET, version=VERSION, **parameters)
+        header, request = downloadProcessor.buildRequest().split(CRLF*2)
+        self.assertEquals('POST /api/service/v2/update?keys=&useVpn=True HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
