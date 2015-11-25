@@ -39,9 +39,18 @@ class ListVpnService(Transparent):
         services = self.call.listServices(*args, **kwargs)
         if convertIps:
             for service in services.values():
-                ipAddress = service['ipAddress']
-                vpnAddress = self._convertDict.get(ipAddress, ipAddress)
-                if vpnAddress != ipAddress:
-                    service['ipAddress'] = vpnAddress
-                    service['data']['originalIpAddress'] = ipAddress
+                self._convertService(service)
         return services
+
+    def _convertService(self, service):
+        ipAddress = service['ipAddress']
+        vpnAddress = self._convertDict.get(ipAddress, ipAddress)
+        if vpnAddress != ipAddress:
+            service['ipAddress'] = vpnAddress
+            service['data']['originalIpAddress'] = ipAddress
+        for endpoint, url in service['data'].get("endpoints", {}).items():
+            for origIp, vpnIp in self._convertDict.items():
+                vpnUrl = url.replace(origIp, vpnIp)
+                if url != vpnUrl:
+                    service['data']['endpoints'][endpoint] = vpnUrl
+                    service['data']['endpoints'][endpoint + "Original"] = url

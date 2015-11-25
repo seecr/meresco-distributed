@@ -30,8 +30,8 @@ class ListVpnServiceTest(SeecrTestCase):
     def testChangeIp(self):
         def services(*args, **kwargs):
             return {
-                "id0": Service(identifier="id0", ipAddress="1.2.3.4", data={}),
-                "id1": Service(identifier="id1", ipAddress="1.2.3.5", data={}),
+                "id0": Service(identifier="id0", ipAddress="1.2.3.4", data={'endpoints': {"triplestore": "http://1.2.3.4:8975/sparql"}}),
+                "id1": Service(identifier="id1", ipAddress="1.2.3.5", data={'endpoints': {"triplestore": "http://1.2.3.5:8975/sparql"}}),
             }
         observer = CallTrace(methods=dict(listServices=services))
         lvs = ListVpnService()
@@ -48,7 +48,11 @@ class ListVpnServiceTest(SeecrTestCase):
         self.assertEquals('1.2.3.4', lvs.listServices()['id0']['ipAddress'])
         self.assertEquals('10.20.30.40', lvs.listServices(convertIpsToVpn=True)['id0']['ipAddress'])
         self.assertEquals('1.2.3.4', lvs.listServices(convertIpsToVpn=True)['id0']['data']['originalIpAddress'])
+        self.assertEquals('http://10.20.30.40:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['endpoints']['triplestore'])
+        self.assertEquals('http://1.2.3.4:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['endpoints']['triplestoreOriginal'])
         self.assertEquals('1.2.3.5', lvs.listServices(convertIpsToVpn=True)['id1']['ipAddress'])
+        self.assertEquals('http://1.2.3.5:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id1']['data']['endpoints']['triplestore'])
+
 
 
 
