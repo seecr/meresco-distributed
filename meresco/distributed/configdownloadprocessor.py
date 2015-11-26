@@ -48,7 +48,7 @@ class ConfigDownloadProcessor(Observable):
     def __init__(self, statePath, version, keys=None, _bodyArgs=None, syncDownloadTimeout=15, forUpdate=True, name=None, identifier=None, type=None, useVpn=False, **data):
         Observable.__init__(self, name=name)
         self._version = version
-        self._originalArguments = dict(statePath=statePath, keys=keys, _bodyArgs=_bodyArgs, syncDownloadTimeout=syncDownloadTimeout, forUpdate=forUpdate, name=name, identifier=identifier, type=type, version=version, **data)
+        self._originalArguments = dict(statePath=statePath, keys=keys, _bodyArgs=_bodyArgs, syncDownloadTimeout=syncDownloadTimeout, forUpdate=forUpdate, name=name, identifier=identifier, type=type, version=version, useVpn=useVpn, **data)
         self._starttime = time()
         self._syncDownloadTimeout = syncDownloadTimeout
         self._bodyArgs = _bodyArgs
