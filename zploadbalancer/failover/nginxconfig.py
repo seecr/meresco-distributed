@@ -72,23 +72,47 @@ class NginxConfig(object):
             for host, port in sorted(matchingServices):
                 conf.write("    server {host}:{port};\n".format(host=host, port=port))
                 self._log("Service {type} at {host}:{port}\n".format(host=host, port=port, type=self._type))
+            name = self._name
+            throttling = typeConfig.get('throttling', {})
+            if '/' not in throttling:
+                throttling['/'] = {}
+            locations = []
+            zones = []
+            for location, data in throttling.items():
+                zone_name = location.replace("/", "")
+                byIp, total = "", ""
+                locationData = StringIO()
+                locationData.write("""    location {location} {{
+        proxy_pass http://__var_{name};\n""".format(name=name, location=location))
+                if 'max_connections_per_ip' in data:
+                    locationData.write("        limit_conn {0}-byip {1};\n".format(zone_name, data['max_connections_per_ip']))
+                    zones.append("limit_conn_zone $binary_remote_addr zone={0}-byip:10m;".format(zone_name))
+                if 'max_connections' in data:
+                    locationData.write("        limit_conn {0}-total {1};\n".format(zone_name, data['max_connections']))
+                    zones.append("limit_conn_zone $server_name zone={0}-total:10m;".format(zone_name))
+                locationData.write("    }\n")
+                locations.append(locationData.getvalue())
+            locations = "\n".join(locations)
+            zones = "\n".join(zones)
             conf.write("""}
+
+%(zones)s
 
 server {
     listen 0.0.0.0:%(listenPort)s;
     server_name %(serverName)s;
-    location / {
-        proxy_pass http://__var_%%s;
-        proxy_set_header    Host $host;
-        proxy_set_header    X-Real-IP $remote_addr;
-        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
+
+    proxy_set_header    Host $host;
+    proxy_set_header    X-Real-IP $remote_addr;
+    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+
+%(locations)s
     error_page 500 502 503 504 =503 /unavailable.html;
     location /unavailable.html {
         root %%s;
     }
     client_max_body_size 0;
-}\n""" % locals() % (self._name, join(usrSharePath, 'failover')))
+}\n""" % locals() % (join(usrSharePath, 'failover')))
         elif self._unused:
             conf.write("""
 server {
