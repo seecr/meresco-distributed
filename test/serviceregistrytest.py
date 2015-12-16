@@ -265,6 +265,46 @@ class ServiceRegistryTest(SeecrTestCase):
             self.assertFalse(service[flagName], service)
             self.assertFalse(state[flagName], service)
 
+    def testShouldUpdateFlagsImmediate(self):
+        i = [0]
+        def addTimer(*args, **kwargs):
+            i[0] = i[0] + 1
+            return i[0]
+        reactor = CallTrace('reactor', methods=dict(addTimer=addTimer))
+        registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
+        observer = CallTrace('observer')
+        registry.addObserver(observer)
+
+        identifier = str(uuid4())
+        registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
+        registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
+
+        flagName, flag = "readable", READABLE
+        service = registry.listServices().get(identifier)
+        self.assertFalse(service[flagName], service)
+        state = registry.getStateFor(identifier)
+        self.assertFalse(state[flagName], service)
+        registry.setFlag(identifier, flag, True)
+        self.assertEqual(['addTimer'], reactor.calledMethodNames())
+
+        self.assertFalse(service[flagName], service)
+        state = registry.getStateFor(identifier)
+        self.assertTrue(state[flagName], service)
+        self.assertTrue(state[flagName + "_goingup"], service)
+
+        registry.setFlag(identifier, WRITABLE, False) #Doesn't reset timer of READABLE
+        self.assertEqual(['addTimer', 'addTimer'], reactor.calledMethodNames())
+
+        registry.setFlag(identifier, flag, False, immediate=True)
+        self.assertFalse(service[flagName], service)
+        state = registry.getStateFor(identifier)
+        self.assertFalse(state[flagName], service)
+        self.assertFalse(flagName + "_goingup" in state)
+        self.assertEqual(['addTimer', 'addTimer', 'removeTimer'], reactor.calledMethodNames())
+        self.assertEqual(1, reactor.calledMethods[-1].args[0])
+
+        registry.setFlag(identifier, WRITABLE, False, immediate=True) #Doesn't reset timer of READABLE
+        self.assertEqual(2, reactor.calledMethods[-1].args[0])
 
     def testShouldUpdateData(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname="zp.example.org")

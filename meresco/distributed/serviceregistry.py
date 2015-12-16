@@ -53,6 +53,8 @@ class ServiceRegistry(Observable):
         self._shutdownTime = modifiedTime(self._jsonFilepath)
         self._services = self._load()
 
+        self._timers = {}
+
     def updateService(self, identifier, type, ipAddress, infoport, data):
         self._disableLongGoneService()
         identifier = str(UUID(identifier))
@@ -109,26 +111,41 @@ class ServiceRegistry(Observable):
         if service.isDisabled():
             raise ValueError("service '%s' is too long gone. Reanable it first.")
 
+        timerId = identifier + "_" + flag.name
         if value:
             def setValue():
+                self._removeTimer(timerId)
                 service[flag.name] = True
+                service.removeState(flag.name + "_goingup")
                 self._save()
             service[flag.name] = False
             service.setState(flag.name, True)
+            service.setState(flag.name + "_goingup", True)
             if immediate:
                 setValue()
             else:
-                self._reactor.addTimer(self._timeout, setValue)
+                self._timers[timerId] = self._reactor.addTimer(self._timeout, setValue)
         else:
             def setValue():
+                self._removeTimer(timerId)
                 service.setState(flag.name, False)
+                service.removeState(flag.name + "_goingup")
             service[flag.name] = False
             self._save()
             service.setState(flag.name, True)
+            service.setState(flag.name + "_goingup", False)
             if immediate:
                 setValue()
             else:
-                self._reactor.addTimer(self._timeout, setValue)
+                self._timers[timerId] = self._reactor.addTimer(self._timeout, setValue)
+
+    def _removeTimer(self, timerId):
+        token = self._timers.pop(timerId, None)
+        if token:
+            try:
+                self._reactor.removeTimer(token)
+            except ValueError:
+                pass
 
     def reEnableService(self, identifier):
         self._services[identifier].enable()

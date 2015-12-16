@@ -53,6 +53,9 @@ class Service(dict):
     def setState(self, flag, value):
         self._state[flag] = value
 
+    def removeState(self, flag):
+        del self._state[flag]
+
     def getState(self):
         state = deepcopy(self._state)
         for flag in SERVICE_FLAGS.values():
