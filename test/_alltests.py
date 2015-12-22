@@ -53,6 +53,7 @@ from servicestatetest import ServiceStateTest
 from updateipstest import UpdateIpsTest
 from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
 from updateperiodiccalltest import UpdatePeriodicCallTest
+from updatemultipleperiodicdownloadtest import UpdateMultiplePeriodicDownloadTest
 
 if __name__ == '__main__':
     unittest.main()
