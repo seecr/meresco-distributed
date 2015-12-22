@@ -35,7 +35,7 @@ from os.path import join
 
 class UpdateMultiplePeriodicDownload(Observable):
 
-    def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, **kwargs):
+    def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, set=None, userAgentAddition=None, **kwargs):
         super(UpdateMultiplePeriodicDownload, self).__init__(**kwargs)
         self._reactor = reactor
         self._serviceManagement = serviceManagement
@@ -43,7 +43,9 @@ class UpdateMultiplePeriodicDownload(Observable):
         self._serviceType = serviceType
         self._downloadPath = downloadPath
         self._metadataPrefix = metadataPrefix
+        self._set = set
         self._statePath = statePath
+        self._userAgentAddition = userAgentAddition
         self._states = {}
         self._oaiDownloads = []
 
@@ -60,9 +62,12 @@ class UpdateMultiplePeriodicDownload(Observable):
         oaiDownload = OaiDownloadProcessor(
                 path=self._downloadPath,
                 metadataPrefix=self._metadataPrefix,
+                set=self._set,
                 workingDirectory=join(self._statePath, serviceIdentifier, self.observable_name()),
                 xWait=True,
-                name='{}-{}-{}-{}'.format(self._serviceType, serviceIdentifier, self.observable_name(), self._metadataPrefix)
+                name='{}-{}-{}-{}'.format(self._serviceType, serviceIdentifier, self.observable_name(), self._metadataPrefix),
+                autoCommit=False,
+                userAgentAddition=self._userAgentAddition,
             )
 
         updatePeriodicDownload = self._serviceManagement.makeUpdatePeriodicDownload(

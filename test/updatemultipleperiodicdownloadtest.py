@@ -40,7 +40,7 @@ class UpdateMultiplePeriodicDownloadTest(SeecrTestCase):
         downloadObserver = CallTrace()
         serviceSelector = SelectService(currentVersion='1.0')
         serviceManagement.returnValues['getServiceSelector'] = serviceSelector
-        mup = UpdateMultiplePeriodicDownload(reactor=reactor, serviceManagement=serviceManagement, createDownloadObserver=downloadObserver.create, name='type', downloadPath='/oai', serviceType='repository', metadataPrefix='records', statePath=self.tempdir)
+        mup = UpdateMultiplePeriodicDownload(reactor=reactor, serviceManagement=serviceManagement, createDownloadObserver=downloadObserver.create, name='type', downloadPath='/oai', serviceType='repository', metadataPrefix='records', set='a-set', statePath=self.tempdir)
 
         updateConfigKwargs = dict(services=dict([createService('id1', 1234)]))
         consume(serviceSelector.updateConfig(**updateConfigKwargs))
