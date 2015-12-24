@@ -30,7 +30,7 @@ from seecr.test import SeecrTestCase, CallTrace
 from weightless.core import compose
 from meresco.components import Schedule
 
-from meresco.distributed.constants import OAI_DOWNLOAD_PERIOD_CONFIG_KEY, READABLE
+from meresco.distributed.constants import OAI_DOWNLOAD_PERIOD_CONFIG_KEY, READABLE, PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_CONFIG_KEY
 from meresco.distributed import UpdatePeriodicDownload
 
 
@@ -41,7 +41,9 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
             host=None,
             port=None,
             schedule=Schedule(period=1),
-            paused=False)
+            paused=False,
+            retryAfterErrorTime=30,
+        )
 
         def setDownloadAddress(host, port):
             pdStateMock.host = host
@@ -86,6 +88,7 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
         list(compose(self.updatePeriodicDownload.updateConfig(
             config={
                 OAI_DOWNLOAD_PERIOD_CONFIG_KEY: 2,
+                PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_CONFIG_KEY: 1,
                 'identifier.periodicDownload.sourceService.paused': True
             },
             services={
@@ -100,8 +103,9 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'setSchedule', 'setDownloadAddress', 'pause'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEquals(['getState', 'setSchedule', 'setRetryAfterErrorTime', 'setDownloadAddress', 'pause'], self.periodicDownloadMock.calledMethodNames())
         self.assertEquals(2, self.periodicDownloadMock.calledMethods[1].kwargs['schedule'].period)
+        self.assertEquals({'seconds': 1}, self.periodicDownloadMock.calledMethods[2].kwargs)
         self.assertEquals(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
         self.assertEquals(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
 

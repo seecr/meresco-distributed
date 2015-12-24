@@ -30,7 +30,7 @@ from meresco.distributed.constants import WRITABLE, READABLE
 
 from meresco.components import Schedule
 
-from .constants import OAI_DOWNLOAD_INTERVAL, OAI_DOWNLOAD_PERIOD_CONFIG_KEY
+from .constants import OAI_DOWNLOAD_INTERVAL, OAI_DOWNLOAD_PERIOD_CONFIG_KEY, PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_TIME, PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_CONFIG_KEY
 
 
 class UpdatePeriodicDownload(Observable):
@@ -48,6 +48,10 @@ class UpdatePeriodicDownload(Observable):
         pollInterval = float(self._pollIntervalConfigSelector(config))
         if state.schedule.period != pollInterval:
             self.call.setSchedule(schedule=Schedule(period=pollInterval))
+        retryAfterErrorTime = float(retryAfterErrorTimeConfigSelector(config))
+        if state.retryAfterErrorTime != retryAfterErrorTime:
+            self.call.setRetryAfterErrorTime(seconds=retryAfterErrorTime)
+
         try:
             host, port = self.call.selectHostPortForService(type=self._sourceServiceType, flag=READABLE, remember=self._sourceServiceIdentifier is None, identifier=self._sourceServiceIdentifier, **self._extraKwargs)
         except ValueError:
@@ -68,3 +72,6 @@ class UpdatePeriodicDownload(Observable):
 
 def oaiDownloadConfigSelector(config):
     return config.get(OAI_DOWNLOAD_PERIOD_CONFIG_KEY, OAI_DOWNLOAD_INTERVAL)
+
+def retryAfterErrorTimeConfigSelector(config):
+    return config.get(PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_CONFIG_KEY, PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_TIME)
