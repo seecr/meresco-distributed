@@ -6,9 +6,9 @@
 #  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -85,11 +85,11 @@ class NginxConfig(object):
                 locationData.write("""    location {location} {{
         proxy_pass http://__var_{name};\n""".format(name=name, location=location))
                 if 'max_connections_per_ip' in data:
-                    locationData.write("        limit_conn {0}-byip {1};\n".format(zone_name, data['max_connections_per_ip']))
-                    zones.append("limit_conn_zone $binary_remote_addr zone={0}-byip:10m;".format(zone_name))
+                    locationData.write("        limit_conn {name}-{0}-byip {1};\n".format(zone_name, data['max_connections_per_ip'], name=self._name))
+                    zones.append("limit_conn_zone $binary_remote_addr zone={name}-{0}-byip:10m;".format(zone_name, name=self._name))
                 if 'max_connections' in data:
-                    locationData.write("        limit_conn {0}-total {1};\n".format(zone_name, data['max_connections']))
-                    zones.append("limit_conn_zone $server_name zone={0}-total:10m;".format(zone_name))
+                    locationData.write("        limit_conn {name}-{0}-total {1};\n".format(zone_name, data['max_connections'], name=self._name))
+                    zones.append("limit_conn_zone $server_name zone={name}-{0}-total:10m;".format(zone_name, name=self._name))
                 locationData.write("    }\n")
                 locations.append(locationData.getvalue())
             locations = "\n".join(locations)
