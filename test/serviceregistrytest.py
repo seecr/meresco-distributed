@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -25,17 +25,17 @@
 #
 ## end license ##
 
-from seecr.test import SeecrTestCase, CallTrace
-from uuid import uuid4
-
+from os import stat, utime
 from os.path import join
+from uuid import uuid4
+from time import time
 
+from seecr.test import SeecrTestCase, CallTrace
+
+from meresco.components.json import JsonDict
 from meresco.distributed import ServiceRegistry
 from meresco.distributed.serviceregistry import SERVICEREGISTRY_FILE
 from meresco.distributed.constants import WRITABLE, READABLE, SERVICE_FLAGS
-from time import time
-from os import stat, utime
-from meresco.components.json import JsonDict
 
 
 class ServiceRegistryTest(SeecrTestCase):
@@ -230,42 +230,39 @@ class ServiceRegistryTest(SeecrTestCase):
         for flagName, flag in SERVICE_FLAGS.items():
             service = registry.listServices().get(identifier)
             self.assertFalse(service[flagName], service)
-            state = registry.getStateFor(identifier)
+            state = registry.getPrivateStateFor(identifier)
             self.assertFalse(state[flagName], service)
 
             reactor.calledMethods.reset()
             registry.setFlag(identifier, flag, True)
             service = registry.listServices().get(identifier)
             self.assertFalse(service[flagName], service)
-            state = registry.getStateFor(identifier)
+            state = registry.getPrivateStateFor(identifier)
             self.assertTrue(state[flagName], service)
-            self.assertEquals(['addTimer'], reactor.calledMethodNames())
-            addTimer = reactor.calledMethods[0]
-            self.assertEquals(60, addTimer.args[0])
-            addTimer.args[1]()
+            registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
             registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
             service = registry.listServices().get(identifier)
-            state = registry.getStateFor(identifier)
+            state = registry.getPrivateStateFor(identifier)
             self.assertTrue(service[flagName], service)
             self.assertTrue(state[flagName], service)
 
             reactor.calledMethods.reset()
             registry.setFlag(identifier, flag, False)
             service = registry.listServices().get(identifier)
-            state = registry.getStateFor(identifier)
+            state = registry.getPrivateStateFor(identifier)
             self.assertFalse(service[flagName], service)
             self.assertTrue(state[flagName], service)
             self.assertEquals(['addTimer'], reactor.calledMethodNames())
             addTimer = reactor.calledMethods[0]
-            self.assertEquals(60, addTimer.args[0])
+            self.assertEquals(30, addTimer.args[0])
             addTimer.args[1]()
             registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
             service = registry.listServices().get(identifier)
-            state = registry.getStateFor(identifier)
+            state = registry.getPrivateStateFor(identifier)
             self.assertFalse(service[flagName], service)
             self.assertFalse(state[flagName], service)
 
-    def testShouldUpdateFlagsImmediate(self):
+    def testShouldSetFlagImmediate(self):
         i = [0]
         def addTimer(*args, **kwargs):
             i[0] = i[0] + 1
@@ -279,32 +276,59 @@ class ServiceRegistryTest(SeecrTestCase):
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
         registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
 
-        flagName, flag = "readable", READABLE
-        service = registry.listServices().get(identifier)
-        self.assertFalse(service[flagName], service)
-        state = registry.getStateFor(identifier)
-        self.assertFalse(state[flagName], service)
-        registry.setFlag(identifier, flag, True)
+        flag = READABLE
+        service = registry.getService(identifier)
+
+        registry.setFlag(identifier, flag, True, immediate=True)
+        registry.setFlag(identifier, flag, False)
         self.assertEqual(['addTimer'], reactor.calledMethodNames())
+        service = registry.getService(identifier)
+        self.assertFalse(service[flag.name], service)
+        state = registry.getPrivateStateFor(identifier)
+        self.assertTrue(state[flag.name], state)
+        self.assertFalse(state[flag.name + "_goingup"])
 
-        self.assertFalse(service[flagName], service)
-        state = registry.getStateFor(identifier)
-        self.assertTrue(state[flagName], service)
-        self.assertTrue(state[flagName + "_goingup"], service)
+        registry.setFlag(identifier, flag, True, immediate=True)
+        self.assertEqual(['addTimer', 'removeTimer'], reactor.calledMethodNames())
+        service = registry.getService(identifier)
+        self.assertTrue(service[flag.name], service)
+        state = registry.getPrivateStateFor(identifier)
+        self.assertTrue(state[flag.name], state)
+        self.assertFalse(flag.name + "_goingup" in state)
 
-        registry.setFlag(identifier, WRITABLE, False) #Doesn't reset timer of READABLE
-        self.assertEqual(['addTimer', 'addTimer'], reactor.calledMethodNames())
+    def testShouldUnsetFlagImmediate(self):
+        i = [0]
+        def addTimer(*args, **kwargs):
+            i[0] = i[0] + 1
+            return i[0]
+
+        reactor = CallTrace('reactor', methods=dict(addTimer=addTimer))
+        registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
+        observer = CallTrace('observer')
+        registry.addObserver(observer)
+
+        identifier = str(uuid4())
+        registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
+        registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
+
+        flag = READABLE
+        service = registry.getService(identifier)
+
+        registry.setFlag(identifier, flag, True)
+        self.assertEqual([], reactor.calledMethodNames())
+        service = registry.getService(identifier)
+        self.assertFalse(service[flag.name], service)
+        state = registry.getPrivateStateFor(identifier)
+        self.assertTrue(state[flag.name], state)
+        self.assertTrue(state[flag.name + "_goingup"])
 
         registry.setFlag(identifier, flag, False, immediate=True)
-        self.assertFalse(service[flagName], service)
-        state = registry.getStateFor(identifier)
-        self.assertFalse(state[flagName], service)
-        self.assertFalse(flagName + "_goingup" in state)
-        self.assertEqual(['addTimer', 'addTimer', 'removeTimer'], reactor.calledMethodNames())
-        self.assertEqual(1, reactor.calledMethods[-1].args[0])
-
-        registry.setFlag(identifier, WRITABLE, False, immediate=True) #Doesn't reset timer of READABLE
-        self.assertEqual(2, reactor.calledMethods[-1].args[0])
+        self.assertEqual([], reactor.calledMethodNames())
+        service = registry.getService(identifier)
+        self.assertFalse(service[flag.name], service)
+        state = registry.getPrivateStateFor(identifier)
+        self.assertFalse(state[flag.name], state)
+        self.assertFalse(flag.name + "_goingup" in state)
 
     def testShouldUpdateData(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname="zp.example.org")
@@ -384,7 +408,7 @@ class ServiceRegistryTest(SeecrTestCase):
 
     def testGetStateForNoneExistingService(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
-        self.assertEquals(None, registry.getStateFor(identifier='ehh'))
+        self.assertEquals(None, registry.getPrivateStateFor(identifier='ehh'))
 
     def testKeepDownServicesForAWhile(self):
         added_time = [0]

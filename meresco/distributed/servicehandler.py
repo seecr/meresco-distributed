@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
@@ -121,7 +121,7 @@ class ServiceHandler(Observable):
             this_service = self.call.getService(identifier=serviceIdentifier)
             if this_service is not None:
                 result['this_service'] = this_service
-                result['this_service']['state'] = self.call.getStateFor(identifier=serviceIdentifier)
+                result['this_service']['state'] = self.call.getPrivateStateFor(identifier=serviceIdentifier)
         result = JsonDict(api_version=apiVersion, **result)
         yield okJson
         yield result.pretty_print() if prettyPrint else str(result)

@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -36,6 +36,7 @@ from uuid import UUID
 
 from meresco.core import Observable
 from meresco.components.json import JsonDict, JsonList
+from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 from .constants import SERVICE_TIMEOUT, ULTIMATE_TIMEOUT, SERVICE_FLAGS, RETAIN_AFTER_STARTUP_TIMEOUT
 from .service import Service
 
@@ -52,8 +53,13 @@ class ServiceRegistry(Observable):
         self._startUpTime = self._now()
         self._shutdownTime = modifiedTime(self._jsonFilepath)
         self._services = self._load()
-
+        self._servicePollInterval = SERVICE_POLL_INTERVAL
         self._timers = {}
+
+    def updateConfig(self, config):
+        self._servicePollInterval = config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL)
+        return
+        yield
 
     def updateService(self, identifier, type, ipAddress, infoport, data):
         self._disableLongGoneService()
@@ -72,6 +78,7 @@ class ServiceRegistry(Observable):
                 )
             self._services[service.identifier] = service
         service.update(type=type, ipAddress=ipAddress, infoport=infoport, lastseen=self._now(), data=data)
+        self._applyWaitingFlagSet(service)
         self._save()
         self.do.updateZone(fqdn=service.fqdn(), ipAddress=ipAddress)
 
@@ -111,33 +118,39 @@ class ServiceRegistry(Observable):
         if service.isDisabled():
             raise ValueError("service '%s' is too long gone. Reanable it first.")
 
-        timerId = identifier + "_" + flag.name
         if value:
-            def setValue():
-                self._removeTimer(timerId)
-                service[flag.name] = True
-                service.removeState(flag.name + "_goingup")
-                self._save()
-            service[flag.name] = False
-            service.setState(flag.name, True)
-            service.setState(flag.name + "_goingup", True)
+            service.setPrivateFlagValue(flag.name, True)
+            service.setPrivateFlagValue(flag.name + GOINGUP_POSTFIX, True)
             if immediate:
-                setValue()
-            else:
-                self._timers[timerId] = self._reactor.addTimer(self._timeout, setValue)
+                self._reallySetFlag(service, flag)
+            return
+
+        service[flag.name] = False
+        self._save()
+        service.setPrivateFlagValue(flag.name, True)
+        service.setPrivateFlagValue(flag.name + GOINGUP_POSTFIX, False)
+        def flagChangeProcessed():
+            self._flagChangeProcessed(service, flag.name)
+        if immediate:
+            flagChangeProcessed()
         else:
-            def setValue():
-                self._removeTimer(timerId)
-                service.setState(flag.name, False)
-                service.removeState(flag.name + "_goingup")
-            service[flag.name] = False
-            self._save()
-            service.setState(flag.name, True)
-            service.setState(flag.name + "_goingup", False)
-            if immediate:
-                setValue()
-            else:
-                self._timers[timerId] = self._reactor.addTimer(self._timeout, setValue)
+            self._timers[identifier + "_" + flag.name] = self._reactor.addTimer(self._servicePollInterval, flagChangeProcessed)
+
+    def _applyWaitingFlagSet(self, service):
+        privateState = service.getPrivateState()
+        for flag in SERVICE_FLAGS.values():
+            if privateState.get(flag.name + GOINGUP_POSTFIX):
+                self._reallySetFlag(service, flag)
+
+    def _reallySetFlag(self, service, flag):
+        service[flag.name] = True
+        self._save()
+        self._flagChangeProcessed(service, flag.name)
+
+    def _flagChangeProcessed(self, service, flagName):
+        self._removeTimer(service.identifier + '_' + flagName)
+        service.removePrivateFlag(flagName)
+        service.removePrivateFlag(flagName + GOINGUP_POSTFIX)
 
     def _removeTimer(self, timerId):
         token = self._timers.pop(timerId, None)
@@ -151,11 +164,11 @@ class ServiceRegistry(Observable):
         self._services[identifier].enable()
         self._save()
 
-    def getStateFor(self, identifier):
+    def getPrivateStateFor(self, identifier):
         service = self._services.get(identifier)
         if service is None:
             return
-        return service.getState()
+        return service.getPrivateState()
 
     def _isActiveJustAfterStartup(self, service):
         since = self._shutdownTime
@@ -212,6 +225,7 @@ def modifiedTime(filepath):
         return None
     return stat(filepath).st_mtime
 
+
 SERVICEREGISTRY_FILE = 'serviceregistry.json'
 TYPE_RE = re.compile(r'^.*[^0-9]$')
-
+GOINGUP_POSTFIX = "_goingup"

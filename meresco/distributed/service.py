@@ -3,7 +3,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -25,11 +25,14 @@
 ## end license ##
 
 from uuid import UUID
-from .constants import SERVICE_FLAGS, READABLE, WRITABLE
 from time import time
 from copy import deepcopy
+
 from seecr.utils import Version
 from meresco.components import parseAbsoluteUrl
+
+from .constants import SERVICE_FLAGS, READABLE, WRITABLE
+
 
 class Service(dict):
     _REQUIRED_KEYS = set(['identifier', 'type', 'lastseen', 'ipAddress', 'number', 'infoport'])
@@ -44,23 +47,23 @@ class Service(dict):
             self._domainname = kwargs['fqdn'].split('.', 1)[1]
         self._timeout = timeout
         self._ultimateTimeout = ultimateTimeout
-        self._state = {}
+        self._privateState = {}
         self._time = _time or time
         for flag in SERVICE_FLAGS.values():
             if flag.name not in self:
                 self[flag.name] = flag.default
 
-    def setState(self, flag, value):
-        self._state[flag] = value
+    def setPrivateFlagValue(self, flag, value):
+        self._privateState[flag] = value
 
-    def removeState(self, flag):
-        del self._state[flag]
+    def removePrivateFlag(self, flag):
+        del self._privateState[flag]
 
-    def getState(self):
-        state = deepcopy(self._state)
+    def getPrivateState(self):
+        state = deepcopy(self._privateState)
         for flag in SERVICE_FLAGS.values():
-            value = self.get(flag.name, flag.default)
-            state.setdefault(flag.name, value)
+            if not flag.name in state:
+                state[flag.name] = self.get(flag.name, flag.default)
         return state
 
     def update(self, type, ipAddress, infoport, lastseen, data):
@@ -80,7 +83,7 @@ class Service(dict):
         self['longgone'] = True
         self[READABLE.name] = False
         self[WRITABLE.name] = False
-        self._state = {}
+        self._privateState = {}
 
     def enable(self):
         self.pop('longgone', None)
@@ -106,17 +109,17 @@ class Service(dict):
 
     def enrichAndClone(self, includeState=False):
         copy = Service(
-                domainname=self._domainname,
-                timeout=self._timeout,
-                ultimateTimeout=self._ultimateTimeout,
-                _time=self._time,
-                **deepcopy(dict(self.items()))
-            )
+            domainname=self._domainname,
+            timeout=self._timeout,
+            ultimateTimeout=self._ultimateTimeout,
+            _time=self._time,
+            **deepcopy(dict(self.items()))
+        )
         copy['fqdn'] = self.fqdn()
         copy['active'] = self.isActive()
         copy['lastseen_delta'] = int(self._now() - self.lastseen)
         if includeState:
-            copy['state'] = self.getState()
+            copy['state'] = self.getPrivateState()
         return copy
 
     def getVersion(self):
