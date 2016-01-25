@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -30,7 +30,8 @@ class ListVpnService(Transparent):
         self._convertDict = {}
 
     def updateConfig(self, config, **kwargs):
-        self._convertDict = config.get('vpn', {}).get('convert-ips',{})
+        vpn = config.get('vpn', {})
+        self._convertDict = vpn.get('convertIps', vpn.get('convert-ips',{}))
         return
         yield
 
