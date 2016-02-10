@@ -36,6 +36,7 @@ from zploadbalancer.failover.utils import usrSharePath
 from os import stat
 from os.path import isfile, join
 from uuid import uuid4
+from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 
 newId = lambda: str(uuid4())
 
@@ -455,5 +456,27 @@ server {
     client_max_body_size 0;
 }
 """ % usrSharePath, open(join(self.tempdir, 'api_18.frontend.conf')).read())
+
+    def testUseAdminDownloadPeriod(self):
+        config={
+            'api.frontend': {
+                'fqdn': 'api.front.example.org',
+            },
+            ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY: 5
+        }
+        n1 = NginxConfig(type='api', name='api_14', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
+        mustUpdate, sleeptime = n1.updateConfig(config=config, services={})
+        self.assertEquals(5, sleeptime)
+
+    def testUseAdminDownloadPeriodDefault(self):
+        config={
+            'api.frontend': {
+                'fqdn': 'api.front.example.org',
+            },
+        }
+        n1 = NginxConfig(type='api', name='api_14', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
+        mustUpdate, sleeptime = n1.updateConfig(config=config, services={})
+        self.assertEquals(SERVICE_POLL_INTERVAL, sleeptime)
+
 VERSION = '1.4'
 VERSION_PLUS_ONE = '1.5'

@@ -5,6 +5,8 @@ seecr-tools (>= 0.8.17)
 seecr-tools (<< 0.9)
 python-meresco-components (>= 4.10.19)
 python-meresco-components (<< 4.14)
+python-meresco-distributed (>> 0.2.18)
+python-meresco-distributed (<< 0.3)
 python-seecr-utils (>= 1.0.7)
 python-seecr-utils (<< 1.1)
 python-simplejson

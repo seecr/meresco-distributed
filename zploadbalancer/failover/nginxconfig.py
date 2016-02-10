@@ -37,6 +37,7 @@ from sys import stdout
 from zploadbalancer.failover.utils import usrSharePath
 from seecr.utils import Version
 from re import compile
+from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 
 READABLE = 'readable'
 WRITABLE = 'writable'
@@ -56,7 +57,7 @@ class NginxConfig(object):
 
     def updateConfig(self, config, services, **ignored):
         typeConfig = config['%s.frontend' % self._type]
-        sleeptime = typeConfig.get('reconfiguration.interval', 30)
+        sleeptime = typeConfig.get('reconfiguration.interval', config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL))
         mustUpdate = self._updateConfig(services, typeConfig)
         self._log("Sleeping: %ss\n" % sleeptime)
         return mustUpdate, sleeptime
