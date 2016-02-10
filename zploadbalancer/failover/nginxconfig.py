@@ -38,9 +38,11 @@ from zploadbalancer.failover.utils import usrSharePath
 from seecr.utils import Version
 from re import compile
 
+READABLE = 'readable'
+WRITABLE = 'writable'
 
 class NginxConfig(object):
-    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, name=None, **ignored):
+    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, flag=READABLE, name=None, **ignored):
         assert type.strip() != '', "Expected a type name."
         self._type = type
         self._name = self._type if name is None else name
@@ -50,6 +52,7 @@ class NginxConfig(object):
         self._minVersion = Version(minVersion)
         self._untilVersion = Version(untilVersion)
         self._unused = unused
+        self._flag = flag
 
     def updateConfig(self, config, services, **ignored):
         typeConfig = config['%s.frontend' % self._type]
@@ -159,7 +162,7 @@ server {
     def _selectHostAndPort(self, services):
         matchingServices = []
         for serviceIdentifier, service in services.items():
-            if not service.get('readable', False):
+            if not service.get(self._flag, False):
                 continue
             if service['type'] == self._type:
                 if self._minVersion <= Version(service['data']['VERSION']) < self._untilVersion:

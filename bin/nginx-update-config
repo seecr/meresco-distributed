@@ -7,9 +7,9 @@
 #  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2013-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2013-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2013-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -34,6 +34,7 @@ includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
 from os import system
 from zploadbalancer.failover import NginxConfig, VERSION
+from zploadbalancer.failover.nginxconfig import READABLE, WRITABLE
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
@@ -54,6 +55,7 @@ if __name__ == '__main__':
     parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
     parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
     parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
+    parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
