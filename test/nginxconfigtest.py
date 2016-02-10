@@ -36,7 +36,7 @@ from zploadbalancer.failover.utils import usrSharePath
 from os import stat
 from os.path import isfile, join
 from uuid import uuid4
-from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
+from zploadbalancer.failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 
 newId = lambda: str(uuid4())
 
