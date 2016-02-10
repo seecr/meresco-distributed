@@ -55,7 +55,7 @@ function show_usage {
 
 TEMP=$(getopt \
     --options "" \
-    --long type::,name::,ip::,adminIp::,adminPort::,minVersion::,untilVersion:: \
+    --long type::,name::,ip::,adminIp::,adminPort::,minVersion::,untilVersion::,flag:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -86,6 +86,7 @@ while true ; do
             ;;
         --flag)
             FLAG=$2; shift 2
+            ;;
         --)
             shift
             break
@@ -117,9 +118,11 @@ if [ -z "$NAME" ]; then
     NAME="$TYPE"
 fi
 
-if [ -z "$FLAG" ]; then
+if [ -n "$FLAG" ]; then
     FLAG=" \\
     --flag=$FLAG"
+fi
+
 function create_failover {
     SERVICEDIR=/opt/zp-services
     SERVICENAME="failover-${NAME}"
@@ -131,7 +134,7 @@ exec ${DOTSLASH}nginx-update-config \\
     --type=${TYPE} \\
     --name=${NAME} \\
     --minVersion=${MIN_VERSION} \\
-    --untilVersion=${UNTIL_VERSION}$FLAG
+    --untilVersion=${UNTIL_VERSION}${FLAG}
 "
     svc_prepare_service ${SERVICEDIR} ${SERVICENAME}
     nginx_restart
