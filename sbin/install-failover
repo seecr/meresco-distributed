@@ -2,12 +2,14 @@
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
-#  initiated by Stichting Bibliotheek.nl to provide a new search service
-#  for all public libraries in the Netherlands.
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014, 2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -47,6 +49,7 @@ function show_usage {
         [--ip=<virtual ipaddress> 'Only mandatory for type=admin'] \\
         [--name=<name for service, defaults to service type>] \\
         [--adminPort=10000]
+        [--flag=<readable or writable>]
     Allowed service types: api, apikey, gateway, admin"
 }
 
@@ -81,6 +84,8 @@ while true ; do
         --untilVersion)
             UNTIL_VERSION=$2; shift 2
             ;;
+        --flag)
+            FLAG=$2; shift 2
         --)
             shift
             break
@@ -112,6 +117,9 @@ if [ -z "$NAME" ]; then
     NAME="$TYPE"
 fi
 
+if [ -z "$FLAG" ]; then
+    FLAG=" \\
+    --flag=$FLAG"
 function create_failover {
     SERVICEDIR=/opt/zp-services
     SERVICENAME="failover-${NAME}"
@@ -123,7 +131,7 @@ exec ${DOTSLASH}nginx-update-config \\
     --type=${TYPE} \\
     --name=${NAME} \\
     --minVersion=${MIN_VERSION} \\
-    --untilVersion=${UNTIL_VERSION}
+    --untilVersion=${UNTIL_VERSION}$FLAG
 "
     svc_prepare_service ${SERVICEDIR} ${SERVICENAME}
     nginx_restart
