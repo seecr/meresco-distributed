@@ -46,7 +46,7 @@ function show_usage {
         [--name=<name for service, defaults to service type>] \\
         [--adminPort=10000]
         [--flag=<readable or writable>]
-    Allowed service types: api, gateway"
+    "
 }
 
 TEMP=$(getopt \
@@ -128,13 +128,4 @@ exec ${DOTSLASH}nginx-update-config \\
     iptables_open_port drenthe tcp 80
 }
 
-case $TYPE in
-    api|gateway)
-        create_failover
-        ;;
-    *)
-        echo "Unknown type $TYPE"
-        show_usage
-        exit 1
-        ;;
-esac
+create_failover
