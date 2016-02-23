@@ -30,8 +30,8 @@ from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
 includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
 from os import system
-from drentsarchief.loadbalancer.failover import NginxConfig, VERSION
-from drentsarchief.loadbalancer.failover.nginxconfig import READABLE, WRITABLE
+from failover import NginxConfig, VERSION
+from failover.nginxconfig import READABLE, WRITABLE
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments

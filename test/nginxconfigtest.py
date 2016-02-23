@@ -27,13 +27,12 @@
 
 from seecr.test import SeecrTestCase
 
-from drentsarchief.loadbalancer.failover import NginxConfig
-from drentsarchief.loadbalancer.failover.nginxconfig import WRITABLE
-from drentsarchief.utils import usrSharePath
+from failover import NginxConfig
+from failover.nginxconfig import WRITABLE, usrSharePath
 from os import stat
 from os.path import isfile, join
 from uuid import uuid4
-from drentsarchief.loadbalancer.failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
+from failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 
 newId = lambda: str(uuid4())
 

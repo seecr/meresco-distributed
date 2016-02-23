@@ -25,15 +25,17 @@
 #
 ## end license ##
 
-from os.path import isfile, join
+from os.path import isfile, join, dirname, abspath
 from os import rename
 from StringIO import StringIO
 from time import sleep
 from sys import stdout
 
-from drentsarchief.utils import usrSharePath
 from seecr.utils import Version
 from re import compile
+
+mydir = dirname(abspath(__file__))
+usrSharePath = join(dirname(mydir), "usr-share")
 
 READABLE = 'readable'
 WRITABLE = 'writable'

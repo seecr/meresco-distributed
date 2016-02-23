@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2012-2014, 2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -38,7 +38,7 @@ includeParentAndDeps(__file__, scanForDeps=True) #DO_NOT_DISTRIBUTE
 
 from unittest import main
 
-from loadbalancer.nginxconfigtest import NginxConfigTest
+from nginxconfigtest import NginxConfigTest
 
 if __name__ == '__main__':
     main()

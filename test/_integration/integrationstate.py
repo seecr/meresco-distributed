@@ -28,22 +28,22 @@
 from os.path import isdir, join, abspath, dirname
 from os import chmod, makedirs
 from uuid import uuid4
-from drentsarchief.testutils import BaseIntegrationState
-from drentsarchief.utils.constants import ADMIN_SERVICE
 from time import sleep
+from seecr.test.integrationtestcase import IntegrationState as _IntegrationState
+from seecr.test.mockadminserver import MockAdminServer
+from seecr.test.portnumbergenerator import PortNumberGenerator
 
 newId = lambda: str(uuid4())
 
 mydir = dirname(abspath(__file__))
 projectDir = dirname(dirname(mydir))
-documentationDir = join(projectDir, "doc")
 
-class IntegrationState(BaseIntegrationState):
+class IntegrationState(_IntegrationState):
     def __init__(self, stateName, tests=None, fastMode=False):
-        BaseIntegrationState.__init__(self, "failover-" + stateName, tests=tests, fastMode=fastMode)
+        _IntegrationState.__init__(self, "failover-" + stateName, tests=tests, fastMode=fastMode)
 
         self.testdataDir = join(dirname(mydir), 'data/integration')
-        self.admin = self.registerService(ADMIN_SERVICE.type)
+        self.adminPort = PortNumberGenerator.next()
         self.nginxConfigDir = join(self.integrationTempdir, 'nginx-conf.d')
         isdir(self.nginxConfigDir) or makedirs(self.nginxConfigDir)
         nginxScript = join(self.integrationTempdir, 'etc-init.d-nginx')
@@ -58,13 +58,21 @@ class IntegrationState(BaseIntegrationState):
         }
         chmod(nginxScript, 0770)
 
+    def binDir(self):
+        return join(projectDir, 'bin')
+
     def setUp(self):
         self.startMockAdminServer()
         self.waitForServicesStarted()
         sleep(0.2)
 
+    def startMockAdminServer(self):
+        self.mockAdminServer = MockAdminServer(self.adminPort)
+        self.mockAdminServer.configUpdate = self.config
+        self.mockAdminServer.start()
+
     def runNginxUpdateConfigNoDefaults(self, **kwargs):
         return self._runExecutable(join(self.binDir(), 'nginx-update-config'), **kwargs)
 
     def runNginxUpdateConfig(self, type, **kwargs):
-        return self.runNginxUpdateConfigNoDefaults(adminHostname='localhost', adminPort=self.admin.port, type=type, nginxConfigDir=self.nginxConfigDir, nginxReload=self.nginxReloadCommand, **kwargs)
+        return self.runNginxUpdateConfigNoDefaults(adminHostname='localhost', adminPort=self.adminPort, type=type, nginxConfigDir=self.nginxConfigDir, nginxReload=self.nginxReloadCommand, **kwargs)
