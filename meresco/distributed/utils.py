@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -26,12 +26,17 @@
 ## end license ##
 
 from hashlib import sha1
+from socket import gethostname, gethostbyname
+from os.path import dirname, abspath, join
+
+usrSharePath = '/usr/share/meresco-distributed'
+mydir = dirname(abspath(__file__))                  #DO_NOT_DISTRIBUTE
+usrSharePath = join(dirname(mydir), "usr-share")    #DO_NOT_DISTRIBUTE
 
 def serviceUpdateHash(secret, **kwargs):
     hashString = secret + ''.join(str(value) for key, value in sorted(kwargs.items()))
     return sha1(hashString).hexdigest()
 
-from socket import gethostname, gethostbyname
 IP_ADDRESS = gethostbyname(gethostname())
 
 def ipsAndRanges(ipSpecs, includeLocalhost=True, knownIps=None):

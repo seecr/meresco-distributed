@@ -28,11 +28,12 @@
 from seecr.test import SeecrTestCase
 
 from meresco.distributed.failover import NginxConfig
-from meresco.distributed.failover.nginxconfig import WRITABLE, usrSharePath
+from meresco.distributed.failover.nginxconfig import WRITABLE
 from os import stat
 from os.path import isfile, join
 from uuid import uuid4
 from meresco.distributed.failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
+from meresco.distributed.utils import usrSharePath
 
 newId = lambda: str(uuid4())
 
@@ -133,7 +134,7 @@ server {
 
 
     def testShouldConfigureApiServers(self):
-        n = NginxConfig(type='api', name='name', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
+        n = NginxConfig(type='api', name='name', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE, usrSharePath='/tmp/usr/share/failover')
         mustUpdate, sleeptime = n.updateConfig(
             services={
                 newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'readable': True, 'data':{'VERSION': VERSION}},
@@ -168,11 +169,11 @@ server {
 
     error_page 500 502 503 504 =503 /unavailable.html;
     location /unavailable.html {
-        root %s/failover;
+        root /tmp/usr/share/failover;
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, open(join(self.tempdir, 'name.frontend.conf')).read())
+""", open(join(self.tempdir, 'name.frontend.conf')).read())
 
     def testShouldConfigureAnyGivenTypeOfServiceWithPort(self):
         n = NginxConfig(type='other', nginxConfigDir=self.tempdir, minVersion=VERSION, untilVersion=VERSION_PLUS_ONE)
