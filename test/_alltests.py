@@ -40,7 +40,7 @@ sysPath.insert(0,'..')                            #DO_NOT_DISTRIBUTE
 
 from unittest import main
 
-from nginxconfigtest import NginxConfigTest
+from loadbalancer.nginxconfigtest import NginxConfigTest
 
 if __name__ == '__main__':
     main()
