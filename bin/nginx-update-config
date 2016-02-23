@@ -1,30 +1,27 @@
 #!/usr/bin/env python
 ## begin license ##
 #
-# "NBC+" also known as "ZP (ZoekPlatform)" is
-#  a project of the Koninklijke Bibliotheek
-#  and provides a search service for all public
-#  libraries in the Netherlands.
-# This package provides loadbalancer scripts
+# Drents Archief beoogt het Drents erfgoed centraal beschikbaar te stellen.
 #
 # Copyright (C) 2013-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2013-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
 #
-# This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
+# This file is part of "Drents Archief"
 #
-# "NBC+ (Zoekplatform BNL) Loadbalancer" is free software; you can redistribute it and/or modify
+# "Drents Archief" is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# "NBC+ (Zoekplatform BNL) Loadbalancer" is distributed in the hope that it will be useful,
+# "Drents Archief" is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with "NBC+ (Zoekplatform BNL) Loadbalancer"; if not, write to the Free Software
+# along with "Drents Archief"; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
@@ -33,8 +30,8 @@ from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
 includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
 from os import system
-from zploadbalancer.failover import NginxConfig, VERSION
-from zploadbalancer.failover.nginxconfig import READABLE, WRITABLE
+from drentsarchief.loadbalancer.failover import NginxConfig, VERSION
+from drentsarchief.loadbalancer.failover.nginxconfig import READABLE, WRITABLE
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
@@ -63,7 +60,7 @@ if __name__ == '__main__':
         exit(2)
 
     request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
-    request.add_header('User-Agent', 'ZP-Loadbalancer v%s' % VERSION)
+    request.add_header('User-Agent', 'NginxConfig-Loadbalancer v%s' % VERSION)
     configuration = load(urlopen(request))
     nginxConfig = NginxConfig(**vars(options))
 

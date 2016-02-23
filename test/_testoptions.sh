@@ -2,12 +2,14 @@
 ## begin license ##
 #
 # "NBC+" also known as "ZP (ZoekPlatform)" is
-#  initiated by Stichting Bibliotheek.nl to provide a new search service
-#  for all public libraries in the Netherlands.
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
 # This package provides loadbalancer scripts
 #
-# Copyright (C) 2014 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014, 2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
 # This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
 #
@@ -29,9 +31,3 @@
 
 export LANG=en_US.UTF-8
 export WEIGHTLESS_COMPOSE_TEST="PYTHON"
-if [ -f /etc/debian_version ]; then
-    export JAVA_BIN=/usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin
-else
-    export JAVA_BIN=/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0.x86_64/jre/bin
-fi
-

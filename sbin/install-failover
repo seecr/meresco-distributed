@@ -1,30 +1,27 @@
 #!/bin/bash
 ## begin license ##
 #
-# "NBC+" also known as "ZP (ZoekPlatform)" is
-#  a project of the Koninklijke Bibliotheek
-#  and provides a search service for all public
-#  libraries in the Netherlands.
-# This package provides loadbalancer scripts
+# Drents Archief beoogt het Drents erfgoed centraal beschikbaar te stellen.
 #
 # Copyright (C) 2014, 2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 #
-# This file is part of "NBC+ (Zoekplatform BNL) Loadbalancer"
+# This file is part of "Drents Archief"
 #
-# "NBC+ (Zoekplatform BNL) Loadbalancer" is free software; you can redistribute it and/or modify
+# "Drents Archief" is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# "NBC+ (Zoekplatform BNL) Loadbalancer" is distributed in the hope that it will be useful,
+# "Drents Archief" is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with "NBC+ (Zoekplatform BNL) Loadbalancer"; if not, write to the Free Software
+# along with "Drents Archief"; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
@@ -46,16 +43,15 @@ function show_usage {
         --adminIp=<adminaddress> \\
         --minVersion=<minimalVersion> \\
         --untilVersion=<majorVersion of next release> \\
-        [--ip=<virtual ipaddress> 'Only mandatory for type=admin'] \\
         [--name=<name for service, defaults to service type>] \\
         [--adminPort=10000]
         [--flag=<readable or writable>]
-    Allowed service types: api, apikey, gateway, admin"
+    Allowed service types: api, gateway"
 }
 
 TEMP=$(getopt \
     --options "" \
-    --long type::,name::,ip::,adminIp::,adminPort::,minVersion::,untilVersion::,flag:: \
+    --long type::,name::,adminIp::,adminPort::,minVersion::,untilVersion::,flag:: \
     -n "$0" -- "$@")
 
 eval set -- "$TEMP"
@@ -68,9 +64,6 @@ while true ; do
             ;;
         --name)
             NAME=$2; shift 2
-            ;;
-        --ip)
-            IPADDR=$2; shift 2
             ;;
         --adminIp)
             ADMIN_IP=$2; shift 2
@@ -107,13 +100,6 @@ for name in TYPE ADMIN_IP MIN_VERSION UNTIL_VERSION; do
     fi
 done
 
-if [ "$TYPE" == "admin" ]; then
-    if [ -z "$IPADDR" ]; then
-        show_usage
-        exit 1
-    fi
-fi
-
 if [ -z "$NAME" ]; then
     NAME="$TYPE"
 fi
@@ -124,7 +110,7 @@ if [ -n "$FLAG" ]; then
 fi
 
 function create_failover {
-    SERVICEDIR=/opt/zp-services
+    SERVICEDIR=/data//drents-archief-services
     SERVICENAME="failover-${NAME}"
     svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
 ${CD_BIN}
@@ -139,25 +125,12 @@ exec ${DOTSLASH}nginx-update-config \\
     svc_prepare_service ${SERVICEDIR} ${SERVICENAME}
     nginx_restart
 
-    iptables_open_port zp tcp 80
-}
-
-function create_admin_iptables_redirect {
-    cat > /etc/seecr/firewall/rules.d/1-admin-zp <<EOF
-#!/bin/bash
-source /etc/seecr/firewall/config
-\$IPTABLES -t nat -I PREROUTING -d $IPADDR -p tcp -j DNAT --to-destination $ADMIN_IP
-EOF
-    chmod +x /etc/seecr/firewall/rules.d/1-admin-zp
-    invoke-rc.d seecr-firewall reload
+    iptables_open_port drenthe tcp 80
 }
 
 case $TYPE in
-    api|gateway|apikey)
+    api|gateway)
         create_failover
-        ;;
-    admin)
-        create_admin_iptables_redirect
         ;;
     *)
         echo "Unknown type $TYPE"
