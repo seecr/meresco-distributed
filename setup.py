@@ -35,8 +35,6 @@ for path, dirs, files in walk('usr-share'):
         data_files.append((path.replace('usr-share', '/usr/share/meresco-distributed', 1), [join(path, f) for f in files]))
 for path, dirs, files in walk('etc'):
         data_files.append((path.replace('etc', '/etc', 1), [join(path, f) for f in files]))
-for path, dirs, files in walk('sbin'):
-        data_files.append((path.replace('sbin', '/sbin', 1), [join(path, f) for f in files]))
 scripts = []
 for path, dirs, files in walk('bin'):
     for file in files:

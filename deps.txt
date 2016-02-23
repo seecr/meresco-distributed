@@ -1,39 +1,21 @@
-python-gustos-meresco (>= 0.6.3.1)
-python-gustos-meresco (<< 0.7)
-python-meresco-components (>= 4.13.10)
+nginx
+python-lxml
+python-meresco-components (>= 4.13.11.1)
 python-meresco-components (<< 4.14)
 python-meresco-core (>= 4.0.8)
 python-meresco-core (<< 4.1)
-python-meresco-distributed (>= 0.2.19)
-python-meresco-distributed (<< 0.3)
-python-meresco-fetch (>= 0.2.0.4)
-python-meresco-fetch (<< 0.3)
-python-meresco-harvester (>= 8.4.1)
-python-meresco-harvester (<< 8.5)
 python-meresco-html (>= 1.4.11)
 python-meresco-html (<< 1.5)
-python-meresco-lucene (>= 0.101.3)
-python-meresco-lucene (<< 0.102)
 python-meresco-oai (>= 5.14.4)
 python-meresco-oai (<< 5.15)
-python-meresco-sequentialstore (>= 0.7.4)
-python-meresco-sequentialstore (<< 0.8)
-python-rdflib-jsonld
-python-seecr-test (>= 1.4.10)
-python-seecr-test (<< 1.5)
+python-meresco-xml (>= 4.2.2)
+python-meresco-xml (<< 4.3)
 python-seecr-utils (>= 1.0.9)
 python-seecr-utils (<< 1.1)
 python-seecr-web-lib (>= 0.1.0.2)
 python-seecr-web-lib (<< 0.2)
-python-simplejson (>= 3.6.5)
-python-simplejson (<< 3.7)
+python-seecr-zulutime (>= 0.2.8)
+python-seecr-zulutime (<< 0.3)
+python-simplejson
 python-weightless-core (>= 0.10.6)
 python-weightless-core (<< 0.11)
-seecr-daemontools-run
-seecr-firewall (>= 0.2.17)
-seecr-firewall (<< 0.3)
-seecr-tools (>= 0.8.21)
-seecr-tools (<< 0.9)
-python-simplejson
-apache2-mpm-worker
-nginx
