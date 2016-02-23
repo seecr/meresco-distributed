@@ -47,16 +47,18 @@ for path, dirs, files in walk('meresco'):
         packages.append(path.replace('/', '.'))
 
 setup(
-    name = 'meresco-distributed',
-    packages = [
+    name='meresco-distributed',
+    packages=[
         'meresco',                          #DO_NOT_DISTRIBUTE
     ] + packages,
-    version = '%VERSION%',
-    url = 'http://seecr.nl',
-    author = 'Seecr (Seek You Too B.V.)',
-    author_email = 'info@seecr.nl',
-    description = 'Meresco Distributed has components for group management based on Meresco Components.',
-    long_description = 'Meresco Distributed has components for group management based on Meresco Components.',
-    license = 'GPL',
-    platforms = 'all',
+    data_files=data_files,
+    scripts=scripts,
+    version='%VERSION%',
+    url='http://seecr.nl',
+    author='Seecr (Seek You Too B.V.)',
+    author_email='info@seecr.nl',
+    description='Meresco Distributed has components for group management based on Meresco Components.',
+    long_description='Meresco Distributed has components for group management based on Meresco Components.',
+    license='GPL',
+    platforms='all',
 )

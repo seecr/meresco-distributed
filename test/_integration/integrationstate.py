@@ -72,7 +72,7 @@ class IntegrationState(_IntegrationState):
         self.mockAdminServer.start()
 
     def runNginxUpdateConfigNoDefaults(self, **kwargs):
-        return self._runExecutable(join(self.binDir(), 'nginx-update-config'), **kwargs)
+        return self._runExecutable(executable=self.binPath('nginx-update-config'), **kwargs)
 
     def runNginxUpdateConfig(self, type, **kwargs):
         return self.runNginxUpdateConfigNoDefaults(adminHostname='localhost', adminPort=self.adminPort, type=type, nginxConfigDir=self.nginxConfigDir, nginxReload=self.nginxReloadCommand, **kwargs)

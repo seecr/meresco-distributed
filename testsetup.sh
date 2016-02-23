@@ -29,24 +29,19 @@ set -o errexit
 rm -rf tmp build
 mydir=$(cd $(dirname $0); pwd)
 source /usr/share/seecr-tools/functions.d/test
-pyversions="2.7"
 
 VERSION="x.y.z"
 
-for pyversion in $pyversions; do
-    definePythonVars $pyversion
-    echo "###### $pyversion, $PYTHON"
-    ${PYTHON} setup.py install --root tmp
-done
+definePythonVars
+python2.7 setup.py install --root tmp
+
 cp -r test tmp/test
 removeDoNotDistribute tmp
 find tmp -name '*.py' -exec sed -r -e "
     s/\\\$Version:[^\\\$]*\\\$/\\\$Version: ${VERSION}\\\$/;
-    s,usrSharePath = .*,usrSharePath = '$mydir/tmp/usr/share/meresco-distributed',;
-    s,binDir = '/usr/bin',binDir = '$mydir/tmp/usr/local/bin',;
+    s,^usrSharePath = .*,usrSharePath = '$mydir/tmp/usr/share/meresco-distributed',;
     " -i '{}' \;
 
-cp -r test tmp/test
 if [ -z "$@" ]; then
     runtests "alltests.sh integrationtest.sh"
 else
