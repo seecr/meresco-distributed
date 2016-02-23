@@ -110,7 +110,7 @@ if [ -n "$FLAG" ]; then
 fi
 
 function create_failover {
-    SERVICEDIR=/data//drents-archief-services
+    SERVICEDIR=/opt/services
     SERVICENAME="failover-${NAME}"
     svc_create_service root root ${SERVICEDIR} "" ${SERVICENAME} "
 ${CD_BIN}
