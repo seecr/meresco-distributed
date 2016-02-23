@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+## begin license ##
+#
+# Drents Archief beoogt het Drents erfgoed centraal beschikbaar te stellen.
+#
+# Copyright (C) 2013-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2013-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
+#
+# This file is part of "Drents Archief"
+#
+# "Drents Archief" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "Drents Archief" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "Drents Archief"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
+from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
+includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
+
+from os import system
+from meresco.distributed.failover import NginxConfig, VERSION
+from meresco.distributed.failover.nginxconfig import READABLE, WRITABLE
+from seecr.utils import isRootUser
+from time import sleep
+from meresco.components import ParseArguments
+from simplejson import load
+from urllib2 import urlopen, Request
+
+
+if __name__ == '__main__':
+    parser = ParseArguments()
+    parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
+    parser.addOption('', '--adminPort', help='Admin port', mandatory=True)
+    parser.addOption('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
+    parser.addOption('-c', '--nginxConfigDir', type='str', help='Configuration directory with files included by default nginx configuration (defaults to /etc/nginx/sites-enabled)', default='/etc/nginx/sites-enabled')
+    parser.addOption('-t', '--type', type='str', help='Service type to write nginx configuration for (default: api)', default='api')
+    parser.addOption('-n', '--name', default=None, help='Service name, defaults to type')
+    defaultNginxReloadCmd = 'svc -h /etc/service/nginx'
+    parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{0}")'.format(defaultNginxReloadCmd), default=defaultNginxReloadCmd)
+    parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
+    parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
+    parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
+    parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
+
+    options, arguments = parser.parse()
+    if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
+        print 'Run as rootuser for default nginx restart script.'
+        exit(2)
+
+    request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
+    request.add_header('User-Agent', 'NginxConfig-Loadbalancer v%s' % VERSION)
+    configuration = load(urlopen(request))
+    nginxConfig = NginxConfig(**vars(options))
+
+    mustUpdate, sleeptime = nginxConfig.updateConfig(**configuration)
+    if mustUpdate:
+        system(options.nginxReload)
+    sleep(sleeptime)
+
+

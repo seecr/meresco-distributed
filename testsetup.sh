@@ -3,7 +3,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2013, 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2013, 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
@@ -42,9 +42,14 @@ cp -r test tmp/test
 removeDoNotDistribute tmp
 find tmp -name '*.py' -exec sed -r -e "
     s/\\\$Version:[^\\\$]*\\\$/\\\$Version: ${VERSION}\\\$/;
+    s,usrSharePath = .*,usrSharePath = '$mydir/tmp/usr/share/meresco-distributed',;
+    s,binDir = '/usr/bin',binDir = '$mydir/tmp/usr/local/bin',;
     " -i '{}' \;
 
 cp -r test tmp/test
-runtests "$@"
+if [ -z "$@" ]; then
+    runtests "alltests.sh integrationtest.sh"
+else
+    runtests "$@"
+fi
 rm -rf tmp build
-

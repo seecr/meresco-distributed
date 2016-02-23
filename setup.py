@@ -5,7 +5,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -28,7 +28,19 @@
 
 from distutils.core import setup
 from os import walk
+from os.path import join
 
+data_files = []
+for path, dirs, files in walk('usr-share'):
+        data_files.append((path.replace('usr-share', '/usr/share/meresco-distributed', 1), [join(path, f) for f in files]))
+for path, dirs, files in walk('etc'):
+        data_files.append((path.replace('etc', '/etc', 1), [join(path, f) for f in files]))
+for path, dirs, files in walk('sbin'):
+        data_files.append((path.replace('sbin', '/sbin', 1), [join(path, f) for f in files]))
+scripts = []
+for path, dirs, files in walk('bin'):
+    for file in files:
+        scripts.append(join(path, file))
 packages = []
 for path, dirs, files in walk('meresco'):
     if '__init__.py' in files and path != 'meresco':
