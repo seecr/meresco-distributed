@@ -1,7 +1,7 @@
 nginx
 python-lxml
 python-meresco-components (>= 4.13.11.1)
-python-meresco-components (<< 4.14)
+python-meresco-components (<< 4.15)
 python-meresco-core (>= 4.0.8)
 python-meresco-core (<< 4.1)
 python-meresco-html (>= 1.4.11)
