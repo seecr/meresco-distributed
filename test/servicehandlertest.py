@@ -498,7 +498,7 @@ class ServiceHandlerTest(SeecrTestCase):
         result = asString(self.dna.all.handleRequest(
             path='/service/v2/list',
             Method='GET',
-            arguments={'keys':['__all__']}
+            arguments={'__all__':['True']}
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
