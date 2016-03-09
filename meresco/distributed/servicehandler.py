@@ -70,7 +70,7 @@ class ServiceHandler(Observable):
             else:
                 yield badRequest
             return
-        yield handleFunction(apiVersion=version, requestedKeys=requestedKeys(kwargs['arguments']), **kwargs)
+        yield handleFunction(apiVersion=version, requestedKeys=self._requestedKeys(kwargs['arguments']), **kwargs)
 
     def handleUpdate(self, Body, **kwargs):
         bodyArgs = parse_qs(Body)
@@ -127,16 +127,18 @@ class ServiceHandler(Observable):
         yield result.pretty_print() if prettyPrint else str(result)
 
 
-def requestedKeys(arguments):
-    requested = set(['config', 'services'])
-    for key in (k for c in arguments.get('keys', []) for k in c.split(',') if k):
-        if not key:
-            continue
-        if key.startswith('-'):
-            requested.discard(key[1:])
-        else:
-            requested.add(key)
-    return requested
+    def _requestedKeys(self, arguments):
+        requested = set(['config', 'services'])
+        for key in (k for c in arguments.get('keys', []) for k in c.split(',') if k):
+            if not key:
+                continue
+            if key.startswith('-'):
+                requested.discard(key[1:])
+            elif key == '__all__':
+                requested.update(name for name in (o.observable_name() for o in self.observers()) if name)
+            else:
+                requested.add(key)
+        return requested
 
 
 badRequest = 'HTTP/1.0 400 Bad Request' + CRLF*2

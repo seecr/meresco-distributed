@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
@@ -493,6 +493,16 @@ class ServiceHandlerTest(SeecrTestCase):
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
         self.assertEquals(['api_version', 'collections', 'config', 'services', 'this_service'], sorted(dictBodyV2.keys()))
+
+    def testKeysAll(self):
+        result = asString(self.dna.all.handleRequest(
+            path='/service/v2/list',
+            Method='GET',
+            arguments={'keys':['__all__']}
+        ))
+        header, body = httpSplit(result)
+        dictBodyV2 = JsonDict.loads(body)
+        self.assertEquals(['api_version', 'collections', 'config', 'other', 'services'], sorted(dictBodyV2.keys()))
 
     def testShouldNotAllowWrongPath(self):
         result = ''.join(compose(self.dna.all.handleRequest(path='/service/fluffy', arguments={'type': ['srv']}, Method='POST')))
