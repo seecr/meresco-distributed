@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -159,15 +159,12 @@ class _Cache(object):
         self.filepath = abspath(join(statePath, 'configuration_cache.json'))
 
     def update(self, configuration):
-        filePathTmp = self.filepath + '.tmp'
-        with open(filePathTmp, 'wb') as f:
-            configuration.dump(f)
-        rename(filePathTmp, self.filepath)
+        configuration.dump(self.filepath, indent=4, sort_keys=True)
 
     def retrieve(self):
         if not isfile(self.filepath):
             return None
-        return JsonDict().load(open(self.filepath, 'rb'))
+        return JsonDict().load(self.filepath)
 
 class _NoCache(object):
     filepath = None
