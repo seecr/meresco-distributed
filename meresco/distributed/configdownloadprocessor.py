@@ -25,7 +25,7 @@
 #
 ## end license ##
 
-from os import rename, makedirs
+from os import makedirs
 from os.path import join, abspath, isfile, isdir
 from urllib import urlencode
 from urllib2 import urlopen, HTTPError, URLError
@@ -45,10 +45,10 @@ from time import time
 class ConfigDownloadProcessor(Observable):
     apiVersion = 2
 
-    def __init__(self, statePath, version, keys=None, _bodyArgs=None, syncDownloadTimeout=15, forUpdate=True, name=None, identifier=None, type=None, useVpn=False, **data):
+    def __init__(self, statePath, version, keys=None, _bodyArgs=None, syncDownloadTimeout=15, forUpdate=True, name=None, identifier=None, type=None, additionalArguments=None, **data):
         Observable.__init__(self, name=name)
         self._version = version
-        self._originalArguments = dict(statePath=statePath, keys=keys, _bodyArgs=_bodyArgs, syncDownloadTimeout=syncDownloadTimeout, forUpdate=forUpdate, name=name, identifier=identifier, type=type, version=version, useVpn=useVpn, **data)
+        self._originalArguments = dict(statePath=statePath, keys=keys, _bodyArgs=_bodyArgs, syncDownloadTimeout=syncDownloadTimeout, forUpdate=forUpdate, name=name, identifier=identifier, type=type, version=version, additionalArguments=additionalArguments, **data)
         self._starttime = time()
         self._syncDownloadTimeout = syncDownloadTimeout
         self._bodyArgs = _bodyArgs
@@ -58,10 +58,10 @@ class ConfigDownloadProcessor(Observable):
         self._keys = '' if keys is None else ','.join(sorted(keys))
         self._cache = _NoCache() if statePath is None else _Cache(statePath)
         self._forUpdate = forUpdate
-        self._useVpn = useVpn
+        self._additionalArguments = dict() if additionalArguments is None else additionalArguments
 
     @classmethod
-    def forUpdate(cls, identifier, type, infoport, statePath, sharedSecret, ipAddress=None, useVpn=False, **kwargs):
+    def forUpdate(cls, identifier, type, infoport, statePath, sharedSecret, ipAddress=None, **kwargs):
         ipAddress = IP_ADDRESS if ipAddress is None else ipAddress
         _bodyArgs = {
             'identifier': identifier,
@@ -70,7 +70,7 @@ class ConfigDownloadProcessor(Observable):
             'infoport': infoport,
             'hash': serviceUpdateHash(secret=sharedSecret, identifier=identifier, type=type, ipAddress=ipAddress, infoport=infoport),
         }
-        return cls(statePath=statePath, _bodyArgs=_bodyArgs, forUpdate=True, identifier=identifier, type=type, useVpn=useVpn, **kwargs)
+        return cls(statePath=statePath, _bodyArgs=_bodyArgs, forUpdate=True, identifier=identifier, type=type, **kwargs)
 
     @classmethod
     def forDownload(cls, statePath=None, **kwargs):
@@ -85,8 +85,7 @@ class ConfigDownloadProcessor(Observable):
         args = dict(keys=self._keys)
         if self._identifier:
             args['identifier'] = self._identifier
-        if self._useVpn:
-            args['useVpn'] = self._useVpn
+        args.update(self._additionalArguments)
         return '/api/service/v{apiVersion}/list?{arguments}'.format(
                 arguments=urlencode(sorted(args.items())),
                 apiVersion=self.apiVersion,
@@ -101,10 +100,9 @@ class ConfigDownloadProcessor(Observable):
                 )
         postData = self._postArguments()
         arguments = dict(keys=self._keys)
-        if self._useVpn:
-            arguments['useVpn'] = self._useVpn
+        arguments.update(self._additionalArguments)
         return """POST /api/service/v{apiVersion}/update?{arguments} HTTP/1.0\r\nContent-Length: {length}{moreHeaders}\r\n\r\n{postData}""".format(
-            arguments=urlencode(arguments),
+            arguments=urlencode(sorted(arguments.items())),
             apiVersion=self.apiVersion,
             length=len(postData),
             moreHeaders=moreHeaders,

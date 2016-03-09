@@ -70,7 +70,7 @@ class ServiceHandler(Observable):
             else:
                 yield badRequest
             return
-        yield handleFunction(apiVersion=version, requestedKeys=self._requestedKeys(kwargs['arguments']), **kwargs)
+        yield handleFunction(apiVersion=version, **kwargs)
 
     def handleUpdate(self, Body, **kwargs):
         bodyArgs = parse_qs(Body)
@@ -102,19 +102,21 @@ class ServiceHandler(Observable):
         if hash != expectedHash:
             raise ValueError('Hash does not match expected hash.')
 
-    def _httpConfigAndServices(self, apiVersion, requestedKeys, arguments, serviceIdentifier=None, prettyPrint=False, **ignored):
+    def _httpConfigAndServices(self, apiVersion, arguments, serviceIdentifier=None, prettyPrint=False, **ignored):
         result = {}
         additionalConfigDict = result
         fullServiceInfo = arguments.get('allServiceInfo', ['False'])[0] == 'True'
         useVpn = arguments.get('useVpn', ['False'])[0] == 'True'
-        for key in requestedKeys:
+        retrieveAll = arguments.get('__all__', ['False'])[0] == 'True'
+        keys = self._allKeys() if retrieveAll else self._keysFromArgs(arguments)
+        for key in _requestedKeys(keys):
             try:
                 if key == 'services':
                     additionalConfigDict[key] = self.call.listServices(activeOnly=not fullServiceInfo, includeState=fullServiceInfo, convertIpsToVpn=useVpn)
                 elif key == 'config':
                     additionalConfigDict[key] = self.call.getConfig()
                 else:
-                    additionalConfigDict[key] = self.call[key].getConfiguration()
+                    additionalConfigDict[key] = self.call[key].getConfiguration(allConfiguration=retrieveAll)
             except NoneOfTheObserversRespond:
                 result.setdefault('errors', []).append("Key '%s' not found." % key)
         if serviceIdentifier:
@@ -126,19 +128,22 @@ class ServiceHandler(Observable):
         yield okJson
         yield result.pretty_print() if prettyPrint else str(result)
 
+    def _keysFromArgs(self, arguments):
+        return (k for c in arguments.get('keys', []) for k in c.split(',') if k)
 
-    def _requestedKeys(self, arguments):
-        requested = set(['config', 'services'])
-        for key in (k for c in arguments.get('keys', []) for k in c.split(',') if k):
-            if not key:
-                continue
-            if key.startswith('-'):
-                requested.discard(key[1:])
-            elif key == '__all__':
-                requested.update(name for name in (o.observable_name() for o in self.observers()) if name)
-            else:
-                requested.add(key)
-        return requested
+    def _allKeys(self):
+        return (name for name in (o.observable_name() for o in self.observers()) if name)
+
+def _requestedKeys(keys):
+    requested = set(['config', 'services'])
+    for key in keys:
+        if not key:
+            continue
+        if key.startswith('-'):
+            requested.discard(key[1:])
+        else:
+            requested.add(key)
+    return requested
 
 
 badRequest = 'HTTP/1.0 400 Bad Request' + CRLF*2

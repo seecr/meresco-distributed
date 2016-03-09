@@ -301,6 +301,6 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
 
     def testUseVpn(self):
         parameters = dict(identifier='id1', type='api', ipAddress='127.0.0.1', infoport=12345)
-        downloadProcessor = ConfigDownloadProcessor.forUpdate(statePath=self.tempdir, useVpn=True, sharedSecret=SHARED_SECRET, version=VERSION, **parameters)
+        downloadProcessor = ConfigDownloadProcessor.forUpdate(statePath=self.tempdir, additionalArguments=dict(useVpn=True, key='value'), sharedSecret=SHARED_SECRET, version=VERSION, **parameters)
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('POST /api/service/v2/update?keys=&useVpn=True HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
+        self.assertEquals('POST /api/service/v2/update?key=value&keys=&useVpn=True HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)

@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -202,7 +202,7 @@ class ServiceManagement(object):
 
     def configReadObject(self):
         class ConfigReadObject(object):
-            def getConfiguration(inner):
+            def getConfiguration(inner, **kwargs):
                 return self._latestConfiguration
         return ConfigReadObject()
 
