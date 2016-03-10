@@ -81,12 +81,14 @@ class ConfigDownloadProcessor(Observable):
         arguments.update(**kwargs)
         return ConfigDownloadProcessor(**arguments)
 
-    def _downloadPathAndArgs(self):
+    def _downloadPathAndArgs(self, forUpdate=None):
+        forUpdate = forUpdate if forUpdate is not None else self._forUpdate
         args = dict(keys=self._keys)
-        if self._identifier:
+        if self._identifier and not forUpdate:
             args['identifier'] = self._identifier
         args.update(self._additionalArguments)
-        return '/api/service/v{apiVersion}/list?{arguments}'.format(
+        return '/api/service/v{apiVersion}/{0}?{arguments}'.format(
+                "update" if forUpdate and self._forUpdate else "list",
                 arguments=urlencode(sorted(args.items())),
                 apiVersion=self.apiVersion,
             )
@@ -101,9 +103,8 @@ class ConfigDownloadProcessor(Observable):
         postData = self._postArguments()
         arguments = dict(keys=self._keys)
         arguments.update(self._additionalArguments)
-        return """POST /api/service/v{apiVersion}/update?{arguments} HTTP/1.0\r\nContent-Length: {length}{moreHeaders}\r\n\r\n{postData}""".format(
-            arguments=urlencode(sorted(arguments.items())),
-            apiVersion=self.apiVersion,
+        return """POST {path} HTTP/1.0\r\nContent-Length: {length}{moreHeaders}\r\n\r\n{postData}""".format(
+            path=self._downloadPathAndArgs(forUpdate=True),
             length=len(postData),
             moreHeaders=moreHeaders,
             postData=postData)
@@ -124,26 +125,37 @@ class ConfigDownloadProcessor(Observable):
         self._cache.update(configuration=d)
         yield self.updateConfig(**d)
 
+    def downloadAndUpdate(self, adminHostname, adminPort):
+        adminUrl = "http://{0}:{1}{path}".format(
+                adminHostname,
+                adminPort,
+                path=self._downloadPathAndArgs(forUpdate=True),
+            )
+        return self._download(adminUrl, timeout=self._syncDownloadTimeout, data=self._postArguments())
+
     def download(self, adminHostname, adminPort):
         adminUrl = "http://{0}:{1}{path}".format(
                 adminHostname,
                 adminPort,
-                path=self._downloadPathAndArgs(),
+                path=self._downloadPathAndArgs(forUpdate=False),
             )
+        return self._download(url=adminUrl, timeout=self._syncDownloadTimeout)
+
+    def _download(self, url, **kwargs):
         try:
-            configuration = JsonDict.load(urlopen(adminUrl, timeout=self._syncDownloadTimeout))
+            configuration = JsonDict.load(urlopen(url, **kwargs))
             self._cache.update(configuration)
         except (HTTPError, URLError, timeout), e:
             sys.stderr.write("""%s (%s).
 Tried: %s
 -----
-""" % (e.__class__.__name__, str(e), adminUrl))
+""" % (e.__class__.__name__, str(e), url))
             configuration = self._cache.retrieve()
             if configuration is None:
-                sys.stderr.write('%s: configuration cachefile "%s" not found, cannot start!\n' % (self.__class__.__name__, self._cache.filepath))
+                sys.stderr.write('%s: configuration cachefile "%s" not found!\n' % (self.__class__.__name__, self._cache.filepath))
                 sys.stderr.flush()
                 raise
-            sys.stderr.write('%s: configuration cachefile "%s" found, starting.\n' % (self.__class__.__name__, self._cache.filepath))
+            sys.stderr.write('%s: configuration cachefile "%s" found.\n' % (self.__class__.__name__, self._cache.filepath))
             sys.stderr.flush()
         return configuration
 

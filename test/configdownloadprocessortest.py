@@ -85,7 +85,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
                 self.fail('Should not happen.')
 
             self.assertTrue('URLError (<urlopen error [Errno 111] Connection refused>).\nTried: http://localhost:0/api/service/v2/list?identifier=id&keys=' in err.getvalue(), err.getvalue())
-            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found, cannot start!\n' % self.tempdir in err.getvalue(), err.getvalue())
+            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found!\n' % self.tempdir in err.getvalue(), err.getvalue())
 
     def testShouldAbortSyncDownloadWhenTimeoutReached(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=12345, statePath=self.tempdir, syncDownloadTimeout=1, sharedSecret=SHARED_SECRET, version=VERSION)
@@ -105,7 +105,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
 
             self.assertTrue('timed out' in err.getvalue(), err.getvalue())
             self.assertTrue('Tried: http://localhost:%s/api/service/v2/list?identifier=id&keys=' % serverPort in err.getvalue(), err.getvalue())
-            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found, cannot start!\n' % self.tempdir in err.getvalue(), err.getvalue())
+            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found!\n' % self.tempdir in err.getvalue(), err.getvalue())
 
     def testShouldAbortSyncDownloadWhenRecievedAWrongHttpResponse(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=0, statePath=self.tempdir, syncDownloadTimeout=1, sharedSecret=SHARED_SECRET, version=VERSION)
@@ -125,7 +125,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
                     self.fail('Should not happen.')
 
             self.assertTrue('HTTPError (HTTP Error 500: Internal Server Stuff).\nTried: http://localhost:%s/api/service/v2/list?identifier=id&keys=' % serverPort in err.getvalue(), err.getvalue())
-            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found, cannot start!\n' % self.tempdir in err.getvalue(), err.getvalue())
+            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" not found!\n' % self.tempdir in err.getvalue(), err.getvalue())
 
     def testShouldSaveConfigOnSuccesfullDownload(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=0, statePath=self.tempdir, syncDownloadTimeout=1, sharedSecret=SHARED_SECRET, version=VERSION)
@@ -210,7 +210,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             self.assertTrue('timed out' in err.getvalue(), err.getvalue())
             self.assertTrue('Tried: http://localhost:%s/api/service/v2/list?identifier=id&keys=' % serverPort in err.getvalue(), err.getvalue())
 
-            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" found, starting.\n' % self.tempdir in err.getvalue(), err.getvalue())
+            self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" found.\n' % self.tempdir in err.getvalue(), err.getvalue())
 
         self.assertEquals(mockConfig, configuration)
 
@@ -250,6 +250,19 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         downloadProcessor = ConfigDownloadProcessor.forDownload(statePath=self.tempdir, keys=['collections', 'apiKeys'], identifier='12345678-1234-1234-1234-1234567890ab', type='api', sharedSecret=SHARED_SECRET, version=VERSION)
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
         self.assertEquals('GET /api/service/v2/list?identifier=12345678-1234-1234-1234-1234567890ab&keys=apiKeys%%2Ccollections HTTP/1.0\r\nUser-Agent: api 12345678-1234-1234-1234-1234567890ab v%s' % VERSION, header)
+
+    def testBuildRequestDownloadForUpdate(self):
+        # Used by PeriodicDownload
+        downloadProcessor = ConfigDownloadProcessor.forUpdate(statePath=self.tempdir, keys=['collections', 'apiKeys'], identifier='12345678-1234-1234-1234-1234567890ab', type='api', sharedSecret=SHARED_SECRET, version=VERSION, ipAddress=IP_ADDRESS, infoport=1234)
+
+        mockConfig = {
+            "config": {'key': 'value'},
+            "services": "stuff",
+        }
+        with httpResponder() as (ms, serverPort):
+            ms.response = 'HTTP/1.0 200 OK.\r\n\r\n%s' % JsonDict(mockConfig).dumps()
+            configuration = downloadProcessor.downloadAndUpdate('localhost', serverPort)
+        self.assertEqual({'services': 'stuff', 'config': {'key': 'value'}}, configuration)
 
     def testBuildRequestWithIpAddressDefault(self):
         parameters = dict(identifier='id1', type='api', infoport=12345)
