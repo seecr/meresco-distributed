@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -96,3 +96,18 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc.addObserver(observer)
         consume(upc.updateConfig(config={'akey': {'period': 2}}, services={}))
         self.assertEquals(['getState'], observer.calledMethodNames())
+
+    def testPeriodConfigKey(self):
+        class MockState():
+            paused = True
+            schedule = None
+        observer = CallTrace(returnValues=dict(getState=MockState()))
+        upc = UpdatePeriodicCall(periodConfigKey='akey')
+        upc.addObserver(observer)
+        consume(upc.updateConfig(config={'akey': 1}, services={}))
+        self.assertEquals(['getState', 'setSchedule', 'resume'], observer.calledMethodNames())
+        self.assertEquals(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
+
+    def testBothScheduleAndPeriodNotAllowed(self):
+        self.assertRaises(ValueError, lambda: UpdatePeriodicCall(periodConfigKey='akey', scheduleConfigKey='otherkey'))
+
