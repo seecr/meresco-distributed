@@ -40,7 +40,7 @@ class Service(dict):
     _ALL_KEYS = _REQUIRED_KEYS.union(_OPTIONAL_KEYS)
 
     def __init__(self, domainname=None, timeout=None, ultimateTimeout=None, _time=None, *args, **kwargs):
-        super(Service, self).__init__(*args, **kwargs)
+        dict.__init__(self, *args, **kwargs)
         if domainname is not None:
             self._domainname = domainname
         elif 'fqdn' in kwargs:

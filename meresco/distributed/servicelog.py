@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -34,7 +34,7 @@ from time import strftime, localtime
 class ServiceLog(Observable):
 
     def __init__(self, identifier, serviceDir='/etc/service', **kwargs):
-        super(ServiceLog, self).__init__(**kwargs)
+        Observable.__init__(self, **kwargs)
         self._identifier = identifier
         self._serviceDir = serviceDir
 

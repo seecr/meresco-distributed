@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -34,7 +34,7 @@ from meresco.distributed.flagcheck import FlagCheck
 
 class FlagCheckTest(SeecrTestCase):
     def setUp(self):
-        super(FlagCheckTest, self).setUp()
+        SeecrTestCase.setUp(self)
         self.flagCheck = FlagCheck(serviceIdentifier='identifier', flag=READABLE)
         def handleRequest(**kwargs):
             yield 'HTTP/1.0 200 Ok\r\nContent-Type: plain/text\r\n\r\nRESULT'

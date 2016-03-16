@@ -1,27 +1,24 @@
 ## begin license ##
 #
-# "Edurep" is a service for searching in educational repositories.
-# "Edurep" is developed for Stichting Kennisnet (http://www.kennisnet.nl) by
-# Seek You Too (http://www.cq2.nl). The project is based on the opensource
-# project Meresco (http://www.meresco.com).
+# "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
-# This file is part of "Edurep"
+# This file is part of "Meresco Distributed"
 #
-# "Edurep" is free software; you can redistribute it and/or modify
+# "Meresco Distributed" is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# "Edurep" is distributed in the hope that it will be useful,
+# "Meresco Distributed" is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with "Edurep"; if not, write to the Free Software
+# along with "Meresco Distributed"; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
@@ -36,7 +33,7 @@ from os.path import join
 class UpdateMultiplePeriodicDownload(Observable):
 
     def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, set=None, userAgentAddition=None, **kwargs):
-        super(UpdateMultiplePeriodicDownload, self).__init__(**kwargs)
+        Observable.__init__(self, **kwargs)
         self._reactor = reactor
         self._serviceManagement = serviceManagement
         self._createDownloadObserver = createDownloadObserver
