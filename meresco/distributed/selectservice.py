@@ -3,7 +3,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -35,12 +35,16 @@ from .service import Service
 class SelectService(object):
     def __init__(self, currentVersion, statePath=None, services=None):
         self._serviceList = self._ServiceList(services)
-        self.updateConfig = self._serviceList.updateConfig
         self._currentVersion = Version(currentVersion)
         self._statePath = statePath
         if self._statePath:
             isdir(self._statePath) or makedirs(self._statePath)
         self._chosenService = dict()
+        self._cache = dict()
+
+    def updateConfig(self, **kwargs):
+        self._cache.clear()
+        yield self._serviceList.updateConfig(**kwargs)
 
     def selectHostPortForService(self, type, flag, remember=False, endpoint=None, **kwargs):
         return self.selectService(type=type, flag=flag, remember=remember, **kwargs).selectHostAndPort(endpoint)
@@ -68,12 +72,16 @@ class SelectService(object):
             yield service.selectHostAndPort(endpoint)
 
     def findServices(self, type, flag, minVersion=None, untilVersion=None, **ignored):
-        matchingServices = []
+        key = (type, flag, minVersion, untilVersion)
+        matchingServices = self._cache.get(key, [])
+        if matchingServices:
+            return matchingServices
         minVersion = self._currentVersion.majorVersion() if minVersion is None else Version(minVersion)
         untilVersion = minVersion.nextMajorVersion() if untilVersion is None else Version(untilVersion)
         for service in self._serviceList.iterServices():
             if service.type == type and flag.isSet(service) and minVersion <= service.getVersion() < untilVersion:
                 matchingServices.append(service)
+        self._cache[key] = matchingServices
         return matchingServices
 
     def _getChosenService(self, type):
@@ -101,7 +109,11 @@ class SelectService(object):
     def forAdmin(cls, serviceRegistry, **kwargs):
         result = cls(**kwargs)
         result._serviceList = serviceRegistry
-        delattr(result, 'updateConfig')
+        def updateConfig(self, **kwargs):
+            self._cache.clear()
+            return
+            yield
+        result.updateConfig = updateConfig
         return result
 
     class _ServiceList(object):

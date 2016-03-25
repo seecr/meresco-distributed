@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -33,6 +33,7 @@ from seecr.utils import Version
 from weightless.core import consume
 from meresco.distributed import Service, SelectService
 from meresco.distributed.constants import READABLE
+from time import time
 
 VERSION = "42.0"
 class SelectServiceTest(SeecrTestCase):
@@ -268,7 +269,6 @@ class SelectServiceTest(SeecrTestCase):
         selectService = SelectService.forAdmin(serviceRegistry, currentVersion=VERSION)
         hostsAndPorts = list(selectService.hostsAndPortsForService(type='type', flag=READABLE))
         self.assertEquals([2], [port for h, port in hostsAndPorts])
-        self.assertFalse(hasattr(selectService, 'updateConfig'))
 
     def testSelectHostPortForGivenIdentifier(self):
         serviceIdentifier = str(uuid4())
@@ -285,3 +285,20 @@ class SelectServiceTest(SeecrTestCase):
             selectedHostPort.add(result)
         self.assertEquals(set([('1.2.3.5', 2000)]), selectedHostPort)
 
+    def testRequestTwiceFromCache(self):
+        serviceIdentifier = str(uuid4())
+        consume(self.selectService.updateConfig(
+            config={},
+            services={
+                serviceIdentifier: {'identifier': serviceIdentifier, 'type': 'plein', 'ipAddress': '1.2.3.5', 'infoport': 2000, 'readable': True, 'data':{'VERSION': VERSION}},
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport': 2001, 'readable': True, 'data':{'VERSION': VERSION}},
+            },
+        ))
+        selectedHostPort = set()
+        t0 = time()
+        for i in xrange(1000):
+            result = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
+            selectedHostPort.add(result)
+        t1 = time()
+        self.assertTrue(t1 - t0 < 0.01, t1 - t0)
+        self.assertEquals(set([('1.2.3.5', 2000), ('1.2.3.6', 2001)]), selectedHostPort)
