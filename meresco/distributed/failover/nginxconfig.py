@@ -49,8 +49,8 @@ class NginxConfig(object):
         namecheck(self._name)
         self._nginxConfigFile = join(nginxConfigDir, '%s.frontend.conf' % self._name)
         self._verbose = verbose
-        self._minVersion = Version(minVersion)
-        self._untilVersion = Version(untilVersion)
+        self._minVersion = Version.create(minVersion)
+        self._untilVersion = Version.create(untilVersion)
         self._unused = unused
         self._flag = flag
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath  is None else usrSharePath

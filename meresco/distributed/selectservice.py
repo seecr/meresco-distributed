@@ -35,7 +35,7 @@ from .service import Service
 class SelectService(object):
     def __init__(self, currentVersion, statePath=None, services=None):
         self._serviceList = self._ServiceList(services)
-        self._currentVersion = Version(currentVersion)
+        self._currentVersion = Version.create(currentVersion)
         self._statePath = statePath
         if self._statePath:
             isdir(self._statePath) or makedirs(self._statePath)
@@ -76,8 +76,8 @@ class SelectService(object):
         matchingServices = self._cache.get(key, [])
         if matchingServices:
             return matchingServices
-        minVersion = self._currentVersion.majorVersion() if minVersion is None else Version(minVersion)
-        untilVersion = minVersion.nextMajorVersion() if untilVersion is None else Version(untilVersion)
+        minVersion = self._currentVersion.majorVersion() if minVersion is None else Version.create(minVersion)
+        untilVersion = minVersion.nextMajorVersion() if untilVersion is None else Version.create(untilVersion)
         for service in self._serviceList.iterServices():
             if service.type == type and flag.isSet(service) and minVersion <= service.getVersion() < untilVersion:
                 matchingServices.append(service)
