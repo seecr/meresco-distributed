@@ -55,4 +55,5 @@ def ipsAndRanges(ipSpecs, includeLocalhost=True, knownIps=None):
         for ipItem in ipSpecs
         if 'start' in ipItem and 'end' in ipItem
     )
+    ipRanges.update(set(ipItem['range'] for ipItem in ipSpecs if 'range' in ipItem))
     return ips, ipRanges
