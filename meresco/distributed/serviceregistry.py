@@ -67,8 +67,8 @@ class ServiceRegistry(Observable):
         if not TYPE_RE.match(type):
             raise ValueError('Service type "%s" must not end with a number.' % type)
         service = self._services.get(identifier)
+        timeout = self._timeout if 'updateInterval' not in data else 2 * data['updateInterval']
         if service is None:
-            timeout=self._timeout if 'updateInterval' not in data else 2 * data['updateInterval']
             service = Service(
                     identifier=identifier,
                     number=self._newNumber(type),
@@ -78,6 +78,8 @@ class ServiceRegistry(Observable):
                     _time=self._now,
                 )
             self._services[service.identifier] = service
+        else:
+            service.updateTimeout(timeout)
         service.update(type=type, ipAddress=ipAddress, infoport=infoport, lastseen=self._now(), data=data)
         self._applyWaitingFlagSet(service)
         self._save()

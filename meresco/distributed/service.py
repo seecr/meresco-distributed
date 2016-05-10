@@ -135,5 +135,8 @@ class Service(dict):
                 raise ValueError("No endpoint '%s' found for service '%s' with identifier '%s'." % (endpoint, self.type, self.identifier))
         return self.ipAddress, self.infoport
 
+    def updateTimeout(self, timeout):
+        self._timeout = timeout
+
     def _now(self):
         return self._time()

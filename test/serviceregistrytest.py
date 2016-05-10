@@ -522,3 +522,8 @@ class ServiceRegistryTest(SeecrTestCase):
         self.assertTrue(registry.getService(identifier).isActive())
         sleep(3600)
         self.assertFalse(registry.getService(identifier).isActive())
+
+        registry.updateService(identifier=identifier, type='script', ipAddress='127.0.0.1', infoport=0, data={'updateInterval': 1})
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(2)
+        self.assertFalse(registry.getService(identifier).isActive())
