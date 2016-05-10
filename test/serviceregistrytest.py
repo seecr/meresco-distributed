@@ -499,4 +499,26 @@ class ServiceRegistryTest(SeecrTestCase):
         )
         self.assertEquals(set([uuid1, uuid2]), set(registry.listServices(activeOnly=False).keys()))
 
+    def testUpdateScriptAsService(self):
+        times = [12345678.0]
+        registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
+        observer = CallTrace('observer')
+        registry.addObserver(observer)
+        self.assertEquals(60, registry._timeout)
+        def sleep(seconds):
+            times[0] += seconds
+        registry._now = lambda: times[0]
 
+        identifier = str(uuid4())
+        registry.updateService(identifier=identifier, type='script', ipAddress='127.0.0.1', infoport=0, data={'updateInterval': 3600})
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(59)
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(2)
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(1200)
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(3600)
+        self.assertTrue(registry.getService(identifier).isActive())
+        sleep(3600)
+        self.assertFalse(registry.getService(identifier).isActive())

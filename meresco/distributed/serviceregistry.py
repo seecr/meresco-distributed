@@ -68,11 +68,12 @@ class ServiceRegistry(Observable):
             raise ValueError('Service type "%s" must not end with a number.' % type)
         service = self._services.get(identifier)
         if service is None:
+            timeout=self._timeout if 'updateInterval' not in data else 2 * data['updateInterval']
             service = Service(
                     identifier=identifier,
                     number=self._newNumber(type),
                     domainname=self._domainname,
-                    timeout=self._timeout,
+                    timeout=timeout,
                     ultimateTimeout=self._ultimateTimeout,
                     _time=self._now,
                 )
