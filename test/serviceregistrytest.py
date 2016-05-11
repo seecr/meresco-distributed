@@ -91,10 +91,7 @@ class ServiceRegistryTest(SeecrTestCase):
             self.assertEquals('Service type "aType1" must not end with a number.', str(e))
 
         self.assertRaises(ValueError, lambda: registry.updateService(identifier=str(uuid4()), type='aType5', ipAddress='127.0.0.1', infoport=1234, data={}))
-
         registry.updateService(identifier=str(uuid4()), type='1234a', ipAddress='127.0.0.1', infoport=1234, data={})
-
-        self.assertRaises(ValueError, lambda: registry.updateService(identifier='notAUUID', type='aType', ipAddress='127.0.0.1', infoport=1234, data={}))
 
     def testShouldCountServicesAsNotActiveAfterCertainTimeout(self):
         times = [12345678.0]

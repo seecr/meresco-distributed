@@ -30,9 +30,10 @@ from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
 includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
 from os import system
+from meresco.distributed import ConfigDownloadProcessor
 from meresco.distributed.utils import usrSharePath
 from meresco.distributed.failover import NginxConfig, VERSION
-from meresco.distributed.failover.nginxconfig import READABLE, WRITABLE
+from meresco.distributed.failover.nginxconfig import READABLE, WRITABLE, SERVICE_POLL_INTERVAL
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
@@ -56,15 +57,28 @@ if __name__ == '__main__':
     parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
     parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
     parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
+    parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin')
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
         print 'Run as rootuser for default nginx restart script.'
         exit(2)
 
-    request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
-    request.add_header('User-Agent', 'NginxConfig-Loadbalancer v%s' % VERSION)
-    configuration = load(urlopen(request))
+    configDownloadProcessor = ConfigDownloadProcessor.forUpdate(
+            identifier="nginx-failover-" + options.name,
+            type="nginx-failover",
+            infoport=0,
+            statePath=None,
+            keys=[],
+            version=VERSION,
+            sharedSecret=options.sharedSecret,
+            updateInterval=SERVICE_POLL_INTERVAL
+        )
+    configuration = configDownloadProcessor.downloadAndUpdate(options.adminHostname, options.adminPort)
+
+    # request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
+    # request.add_header('User-Agent', 'NginxConfig-Loadbalancer v%s' % VERSION)
+    # configuration = load(urlopen(request))
     nginxConfig = NginxConfig(**vars(options))
 
     mustUpdate, sleeptime = nginxConfig.updateConfig(**configuration)

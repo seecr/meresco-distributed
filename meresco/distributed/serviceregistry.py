@@ -63,7 +63,7 @@ class ServiceRegistry(Observable):
 
     def updateService(self, identifier, type, ipAddress, infoport, data):
         self._disableLongGoneService()
-        identifier = str(UUID(identifier))
+        identifier = str(identifier)
         if not TYPE_RE.match(type):
             raise ValueError('Service type "%s" must not end with a number.' % type)
         service = self._services.get(identifier)
