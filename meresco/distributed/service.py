@@ -39,7 +39,7 @@ class Service(dict):
     _OPTIONAL_KEYS = set(['data', 'longgone']).union(SERVICE_FLAGS)
     _ALL_KEYS = _REQUIRED_KEYS.union(_OPTIONAL_KEYS)
 
-    def __init__(self, domainname=None, timeout=None, ultimateTimeout=None, _time=None, *args, **kwargs):
+    def __init__(self, domainname=None, timeout=None, ultimateTimeout=None, _time=None, data=None, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
         if domainname is not None:
             self._domainname = domainname
@@ -52,6 +52,7 @@ class Service(dict):
         for flag in SERVICE_FLAGS.values():
             if flag.name not in self:
                 self[flag.name] = flag.default
+        self['data'] = data
 
     def setPrivateFlagValue(self, flag, value):
         self._privateState[flag] = value
@@ -98,7 +99,8 @@ class Service(dict):
         return "%s%s.%s" % (self.type, self.number, self._domainname)
 
     def isActive(self, since=None):
-        return self.lastseen + self._timeout > (since or self._now())
+        timeout = 2 * self.data["updateInterval"] if self.data and 'updateInterval' in self.data else self._timeout
+        return self.lastseen + timeout > (since or self._now())
 
     def validate(self):
         assert str(UUID(self.identifier)) == self.identifier, "Service identifier must be a uuid"
@@ -134,9 +136,6 @@ class Service(dict):
             except KeyError:
                 raise ValueError("No endpoint '%s' found for service '%s' with identifier '%s'." % (endpoint, self.type, self.identifier))
         return self.ipAddress, self.infoport
-
-    def updateTimeout(self, timeout):
-        self._timeout = timeout
 
     def _now(self):
         return self._time()

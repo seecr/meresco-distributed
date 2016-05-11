@@ -300,5 +300,5 @@ class SelectServiceTest(SeecrTestCase):
             result = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
             selectedHostPort.add(result)
         t1 = time()
-        self.assertTrue(t1 - t0 < 0.01, t1 - t0)
+        self.assertTrue(t1 - t0 < 0.011, t1 - t0)
         self.assertEquals(set([('1.2.3.5', 2000), ('1.2.3.6', 2001)]), selectedHostPort)
