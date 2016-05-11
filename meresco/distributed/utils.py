@@ -29,9 +29,11 @@ from hashlib import sha1
 from socket import gethostname, gethostbyname
 from os.path import dirname, abspath, join
 
+mydir = dirname(abspath(__file__))
+dynamicPath = join(mydir, 'dynamic')
 usrSharePath = '/usr/share/meresco-distributed'
-mydir = dirname(abspath(__file__))                  #DO_NOT_DISTRIBUTE
-usrSharePath = join(dirname(mydir), "usr-share")    #DO_NOT_DISTRIBUTE
+usrSharePath = join(dirname(dirname(mydir)), "usr-share")    #DO_NOT_DISTRIBUTE
+staticPath = join(usrSharePath, 'static')
 
 def serviceUpdateHash(secret, **kwargs):
     hashString = secret + ''.join(str(value) for key, value in sorted(kwargs.items()))

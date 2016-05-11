@@ -31,30 +31,33 @@ assert getuid() != 0, "Do not run tests as 'root'"
 
 from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
 includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
+from os import system                            #DO_NOT_DISTRIBUTE
+system('find .. -name "*.pyc" | xargs rm -f')    #DO_NOT_DISTRIBUTE
 
 import unittest
 from warnings import simplefilter
 simplefilter('default')
 
-from crashdetecttest import CrashDetectTest
 from compositestatetest import CompositeStateTest
-from configurationtest import ConfigurationTest
-from confighandlertest import ConfigHandlerTest
 from configdownloadprocessortest import ConfigDownloadProcessorTest
+from confighandlertest import ConfigHandlerTest
+from configurationtest import ConfigurationTest
+from crashdetecttest import CrashDetectTest
 from flagchecktest import FlagCheckTest
 from listvpnservicetest import ListVpnServiceTest
-from utilstest import UtilsTest
+from nginxconfigtest import NginxConfigTest
 from selectservicetest import SelectServiceTest
-from serviceregistrytest import ServiceRegistryTest
+from servicegrouptest import ServiceGroupTest
 from servicehandlertest import ServiceHandlerTest
 from servicelogtest import ServiceLogTest
 from servicemanagementtest import ServiceManagementTest
+from serviceregistrytest import ServiceRegistryTest
 from servicestatetest import ServiceStateTest
 from updateipstest import UpdateIpsTest
-from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
-from updateperiodiccalltest import UpdatePeriodicCallTest
 from updatemultipleperiodicdownloadtest import UpdateMultiplePeriodicDownloadTest
-from nginxconfigtest import NginxConfigTest
+from updateperiodiccalltest import UpdatePeriodicCallTest
+from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
+from utilstest import UtilsTest
 
 if __name__ == '__main__':
     unittest.main()

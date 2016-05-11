@@ -103,7 +103,6 @@ class Service(dict):
         return self.lastseen + timeout > (since or self._now())
 
     def validate(self):
-        assert str(UUID(self.identifier)) == self.identifier, "Service identifier must be a uuid"
         missingKeys = self._REQUIRED_KEYS.difference(self.keys())
         assert not missingKeys, "Service %s: %s misses required keys: %s" % (self.identifier, self, missingKeys)
         unknownKeys = set(self.keys()).difference(self._ALL_KEYS)
