@@ -30,3 +30,16 @@ div.remarks {
 .number {
     text-align: right;
 }
+
+td.state_wait::after {
+    content: "wait";
+}
+
+
+.longgone, .longgone a, .longgone span {
+    color: lightgray;
+}
+
+.longgone, input[type="image"] {
+    margin-right: 2px;
+}
