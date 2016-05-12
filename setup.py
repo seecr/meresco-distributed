@@ -28,7 +28,7 @@
 
 from distutils.core import setup
 from os import walk
-from os.path import join
+from os.path import join, relpath
 
 data_files = []
 for path, dirs, files in walk('usr-share'):
@@ -43,12 +43,20 @@ packages = []
 for path, dirs, files in walk('meresco'):
     if '__init__.py' in files and path != 'meresco':
         packages.append(path.replace('/', '.'))
+package_data = {}
+for path, dirs, files in walk('meresco'):
+    for ext in ['sf']:
+        if any(f.endswith('.'+ext) for f in files):
+            filepath = join(path, '*.'+ext)
+            filepath = relpath(filepath, 'meresco')
+            package_data.setdefault('meresco', []).append(filepath)
 
 setup(
     name='meresco-distributed',
     packages=[
         'meresco',                          #DO_NOT_DISTRIBUTE
     ] + packages,
+    package_data=package_data,
     data_files=data_files,
     scripts=scripts,
     version='%VERSION%',

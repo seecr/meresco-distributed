@@ -75,4 +75,4 @@ class IntegrationState(_IntegrationState):
         return self._runExecutable(executable=self.binPath('nginx-update-config'), **kwargs)
 
     def runNginxUpdateConfig(self, type, **kwargs):
-        return self.runNginxUpdateConfigNoDefaults(adminHostname='localhost', adminPort=self.adminPort, type=type, nginxConfigDir=self.nginxConfigDir, nginxReload=self.nginxReloadCommand, **kwargs)
+        return self.runNginxUpdateConfigNoDefaults(adminHostname='localhost', adminPort=self.adminPort, type=type, nginxConfigDir=self.nginxConfigDir, nginxReload=self.nginxReloadCommand, sharedSecret="test", **kwargs)

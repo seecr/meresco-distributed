@@ -55,5 +55,5 @@ class NginxUpdateConfigTest(IntegrationTestCase):
         self.runNginxUpdateConfig(processName='testRunNormal', type='api', minVersion='0.40', untilVersion='1.0')
         self.assertEquals(1, len(self.mockAdminServer.requests))
         header, body = self.mockAdminServer.requests[0].split('\r\n\r\n')
-        self.assertTrue('GET /api/service/v2/list' in header, header)
+        self.assertTrue('POST /api/service/v2/update' in header, header)
 

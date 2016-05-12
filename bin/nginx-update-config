@@ -38,7 +38,6 @@ from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
 from simplejson import load
-from urllib2 import urlopen, Request
 from os.path import join
 
 
@@ -57,7 +56,7 @@ if __name__ == '__main__':
     parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
     parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
     parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
-    parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin')
+    parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
@@ -65,7 +64,7 @@ if __name__ == '__main__':
         exit(2)
 
     configDownloadProcessor = ConfigDownloadProcessor.forUpdate(
-            identifier="nginx-failover-" + options.name,
+            identifier="nginx-failover-" + (options.name or options.type),
             type="nginx-failover",
             infoport=0,
             statePath=None,
