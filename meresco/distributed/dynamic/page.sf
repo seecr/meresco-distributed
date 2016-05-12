@@ -1,0 +1,64 @@
+## begin license ##
+#
+# "Meresco Distributed" has components for group management based on "Meresco Components."
+#
+# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+#
+# This file is part of "Meresco Distributed"
+#
+# "Meresco Distributed" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "Meresco Distributed" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "Meresco Distributed"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
+def header(title, **kwargs):
+    yield """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="author" content="Seecr" />
+    <title>{title}</title>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/gif"/>
+    <link rel="stylesheet" type="text/css" href="/static/info.css?version={version}"/>
+    <link rel="stylesheet" href="/static/css/seecr-view.css?version={version}"/>
+    <link rel="stylesheet" href="/static/css/seecr-banner.css?version={version}"/>
+    <link rel="stylesheet" href="/static/services.css?version={version}"/>
+    <script type="text/javascript" src="/static/admin.js?version={version}"></script>
+    <script type="text/javascript" src="/static/services.js?version={version}"></script>
+    <script type="text/javascript" src="/static/javascript/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/jquery.autosize-1.18.13.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/seecr-toggleable.js?version={version}"></script>
+</head>
+<body class="info">
+   <!-- ~~~~~ SEECR BANNER ~~~~~ -->
+<div id="seecr-banner" class="vcard no-print">
+    <div class="wrap">
+        <h2>By <span class="org">Seecr</span></h2>
+        <p class="note">Software Craftsmanship</p>
+        <p>
+            <a class="url" href="http://seecr.nl" rel="me" title="Visit the Seecr website">Seecr - Software Craftsmanship</a>
+            A service by <span class="fn">Seecr</span>, <a href="mailto:info@seecr.nl" class="email">info@seecr.nl</a><br/>
+        </p>
+    </div>
+</div>
+   <!-- ~~~~~ / SEECR BANNER ~~~~~ -->
+    """.format(title=escapeHtml(title), version=VERSION)
+    yield '<div id="main-content">\n'
+
+
+def footer(**kwargs):
+    yield """
+    </div>
+    </body>
+</html>""".format(SERVICE_TYPE, identifier, VERSION)
