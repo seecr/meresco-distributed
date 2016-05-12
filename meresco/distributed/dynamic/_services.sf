@@ -1,0 +1,139 @@
+# -*- encoding: utf-8 -*-
+## begin license ##
+#
+# "NBC+" also known as "ZP (ZoekPlatform)" is
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
+#
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
+#
+# This file is part of "NBC+ (Zoekplatform BNL)"
+#
+# "NBC+ (Zoekplatform BNL)" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "NBC+ (Zoekplatform BNL)" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "NBC+ (Zoekplatform BNL)"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
+import page
+
+def differentState(service, flag):
+    state = service.get('state', {}).get(flag.name, flag.default)
+    flagValue = service.get(flag.name, flag.default)
+    return state != flagValue
+
+def niceUptime(uptime):
+    if uptime is None:
+        return '?'
+    days, remainder = uptime // 86400, uptime % 86400
+    hours, remainder = remainder // 3600, remainder % 3600
+    minutes, seconds = remainder // 60, remainder % 60
+    return '%d days %02d:%02d:%02d' % (days, hours, minutes, seconds)
+
+def deleteEnableButtons(identifier, service):
+    tdStarted = False
+    if service.get('active') and service.get('longgone'):
+        yield """<td>"""
+        tdStarted = True
+        yield """<input type="image" src="/static/images/add.png" name="reEnableService" title="Re-enable this service (Has been down for more than 24 hours)" value="{0}" onclick="postServiceAction(this, true, true); return false;" />""".format(identifier)
+    if not service.get('active') or service.get('longgone'):
+        if not tdStarted:
+            tdStarted = True
+            yield """<td>"""
+        yield """<input type="image" src="/static/images/delete.png" name="deleteService" title="Delete service, has been down for more than 24 hours." value="{0}" onclick="postServiceAction(this, true, true); return false;" />""".format(identifier)
+    if tdStarted:
+        yield """</td>"""
+
+def showService(service):
+    identifier = service.identifier
+    data = service.get('data', {})
+    yield '<tr{0}>'.format(" class='longgone'" if service.get('longgone') else "")
+    if service["infoport"] != 0:
+        yield '<td><a href="http://{ipAddress}:{infoport}/info" title="{fqdn} (type={type})">{hostname}</a></td>'.format(hostname=service['fqdn'].split('.')[0], **service)
+    else:
+        yield '<td>{hostname}</td>'.format(hostname=service['fqdn'].split('.')[0])
+    yield '<td title="{0}">{1}…</td>'.format(identifier, identifier.split('-')[0])
+    version = data['VERSION']
+    yield '<td>%s</td>' % version
+    yield '<td id="%s_active">' % identifier
+    if not service['active']:
+        yield '<span class="error">R</span>'
+    yield '</td>'
+    yield '<td class="number" id="%s_lastseen">%ds</td>' % (identifier, time() - service['lastseen'])
+    yield '<td class="number" id="%s_uptime">%s</td>' % (identifier, niceUptime(data.get('uptime')))
+    for flagName, flag in sorted(SERVICE_FLAGS.items()):
+        disabled = ' disabled="disabled"' if service.get('longgone') else ''
+        className = "state_wait" if differentState(service=service, flag=flag) else "state_ok"
+        yield '<td class="%s" id="%s_%s">' % (className, identifier, flagName)
+        checked = service.get(flagName, flag.default)
+        if differentState(service=service, flag=flag):
+            checked = service.get('state', {}).get(flag.name + "_goingup", False)
+        checked = ' checked="checked"' if checked else ''
+        yield '<input class="{flag}_input" name="{identifier}_{flag}" type="checkbox"{checked} onchange="postServiceAction(this, false, false, {wait}); return false;" {disabled}>'.format(
+                    identifier=identifier,
+                    flag=flag,
+                    checked=checked,
+                    wait="true" if differentState(service=service, flag=flag) else "false",
+                    disabled=disabled,
+                )
+        yield '</td>\n'
+    yield '<td>'
+    if 'endpoints' in data:
+        for key, endpoint in data['endpoints'].items():
+            yield '<a href="{0}">{1}</a> '.format(endpoint, key)
+
+    try:
+        for link in observable.call.serviceLinks(service):
+            yield link
+    except NoneOfTheObserversRespond:
+        pass
+    yield '</td><td>'
+    if 'errors' in data:
+        yield '<span class="error">{number} error{s}</span>'.format(number=data['errors'], s='' if data['errors'] == 1 else 's')
+    if 'warnings' in data:
+        yield '<span class="warning">{number} warning{s}</span>'.format(number=data['warnings'], s='' if data['warnings'] == 1 else 's')
+    yield '</td>'
+    yield deleteEnableButtons(identifier, service)
+    yield '</tr>\n'
+
+def servicesTable(title, services):
+    servicesTableId = "services_" + str(uuid4())
+    yield '<h3>%s</h3>\n' % escapeHtml(title)
+    yield '<table style="border=none" id="{}">\n'.format(servicesTableId)
+    yield '<tr><td>name</td><td>id</td><td>version</td><td>state</td><td title="Seconds since last update">&Delta; *</td><td>uptime</td><td>readable</td><td>writable</td><td>link</td><td>info</td><td></td></tr>\n'
+    for service in services:
+        yield showService(service=service)
+    yield """<tr>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+        <td>All: <a onclick="checkAll('{0}', 'readable', true);">on</a>/<a onclick="checkAll('{0}', 'readable', false);">off</a></td>
+        <td>All: <a onclick="checkAll('{0}', 'writable', true);">on</a>/<a onclick="checkAll('{0}', 'writable', false);">off</a></td>
+    </tr>""".format(servicesTableId)
+    yield '</table>\n'
+
+def services(useVpn=False, groupingKey=None, **kwargs):
+    inBetween = ''
+    yield '<form id="servicesForm" action="services.action" method="post">'
+    for groupName, services in observable.call.groupAndServices(activeOnly=False, includeState=True, convertIpsToVpn=useVpn, groupingKey=groupingKey):
+        yield inBetween
+        inBetween = '<p></p>'
+        yield servicesTable(title=groupName, services=services)
+    yield '</form>'
+
+def main(user, session, **kwargs):
+    if not user.isAdmin():
+        yield http.redirect('/')
+        return
+    yield services(useVpn=session.get('useVpn', False), groupingKey=session.get('groupingKey'), session=session, **kwargs)

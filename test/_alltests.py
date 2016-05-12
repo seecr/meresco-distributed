@@ -46,6 +46,7 @@ from crashdetecttest import CrashDetectTest
 from flagchecktest import FlagCheckTest
 from listvpnservicetest import ListVpnServiceTest
 from nginxconfigtest import NginxConfigTest
+from remarkstest import RemarksTest
 from selectservicetest import SelectServiceTest
 from servicegrouptest import ServiceGroupTest
 from servicehandlertest import ServiceHandlerTest

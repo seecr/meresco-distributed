@@ -1,0 +1,124 @@
+# -*- encoding: utf-8 -*-
+## begin license ##
+#
+# "NBC+" also known as "ZP (ZoekPlatform)" is
+#  a project of the Koninklijke Bibliotheek
+#  and provides a search service for all public
+#  libraries in the Netherlands.
+#
+# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
+#
+# This file is part of "NBC+ (Zoekplatform BNL)"
+#
+# "NBC+ (Zoekplatform BNL)" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "NBC+ (Zoekplatform BNL)" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "NBC+ (Zoekplatform BNL)"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
+import page
+import _services
+
+def main(path, session, user, **kwargs):
+    if not user.isAdmin():
+        yield http.redirect('/')
+        return
+    if not 'useVpn' in session:
+        session['useVpn'] = 'vpn' in kwargs.get('Headers', {}).get('Host', '')
+    useVpn = session.get('useVpn', False)
+    groupingKey = session.get('groupingKey')
+
+    domain = observable.call.getDomain()
+    config = observable.call.getConfig()
+
+    yield page.header(title='Current group members', **kwargs)
+    yield """<script type="text/javascript">
+function postServiceAction(elm, mustConfirm, addSelf, immediateFlagChange) {
+    if (mustConfirm && !confirm('Weet je het zeker?')) {
+        return;
+    }
+
+    var data = $(servicesForm).serialize();
+    if (addSelf) {
+        data += "&" + elm.name + "=" + elm.value;
+    }
+    var url = "services.action";
+    if (immediateFlagChange) {
+        data += "&" + elm.name + "_immediate=True";
+    }
+    $.ajax({
+        type: "POST",
+        url: url,
+        timeout: 1000,
+        data: data,
+    });
+}
+
+function postSettings() {
+    $.post(\'services.action\', $(servicesSettingsForm).serialize());
+    $("#poll_interval_saved").show();
+    window.setTimeout(function() {
+        $("#poll_interval_saved").hide();
+    }, 1000);
+    return false;
+}
+
+function checkAll(servicesTableId, type, checked) {
+    if (type == "readable" && checked == false) {
+        if (!confirm("Are you sure you want to disable all service for the readable flag?")) {
+            return;
+        }
+    }
+    $("#" + servicesTableId + " ." + type + "_input").each(function(i, elm) {
+        elm.checked = checked;
+    });
+    postServiceAction(null, false, false, false);
+}
+</script>
+"""
+
+    yield '<p>This page lists the current membership of the group. Group membership is maintained automatically by the group communication system and is shared by all members.</p>\n'
+    remarks = observable.call.getRemarks('group_members')
+    yield '<h3>Opmerkingen<sup title="Autosave">*</sup>:</h3>\n'
+    yield '<div id="remarks" class="remarks" onblur="save_remarks(\'group_members\', this);" onkeyup="save_remarks(\'group_members\', this)" contentEditable="true">{0}</div>'.format(remarks)
+    yield '<div id="services_box">'
+    yield _services.services(useVpn=useVpn, groupingKey=groupingKey)
+    yield '</div>'
+
+    yield '<p></p><h3>Powertools</h3>\n'
+    yield '<form id="servicesSettingsForm" action="services.action" method="post">'
+    yield '<input type="hidden" value="settings" name="settings"/>'
+    yield """<p>
+            <label for='useVpn'>Gebruik VPN ip's</label>
+            <input type='checkbox' id='useVpn' name='useVpn' onchange="return postSettings();" {}/>
+        </p>""".format('checked="checked"' if useVpn else '')
+    yield '<p>Weergave groep: <select name="groupingKey" onchange="postSettings()">'
+    availableGroups = observable.call.listGroupings()
+    def selected(selected):
+        return ' selected="selected"' if selected else ''
+    for key, name in availableGroups:
+        yield '<option value="{1}" {0}>{2}</option>'.format(selected(key == groupingKey), key, name)
+    yield '</select></p>'
+    yield """<p>
+            Service poll interval: <input type="number" name="admin_download_period" value="{}" min="1"/>
+            <input type="button" value="Save" onclick="return postSettings();"/>
+            <span id="poll_interval_saved" class="hidden">Saved!</span>
+        </p>""".format(config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL))
+    yield "</form>"
+
+    yield "<script type='text/javascript'>reload_services();</script>"
+    yield '<p class="footer">* Opmerkingen worden automatisch opgeslagen.</p>\n'
+    yield page.footer(**kwargs)
+
