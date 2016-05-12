@@ -44,12 +44,12 @@ for path, dirs, files in walk('meresco'):
     if '__init__.py' in files and path != 'meresco':
         packages.append(path.replace('/', '.'))
 package_data = {}
-for path, dirs, files in walk('meresco'):
+for path, dirs, files in walk('meresco/distributed'):
     for ext in ['sf']:
         if any(f.endswith('.'+ext) for f in files):
             filepath = join(path, '*.'+ext)
-            filepath = relpath(filepath, 'meresco')
-            package_data.setdefault('meresco', []).append(filepath)
+            filepath = relpath(filepath, 'meresco/distributed')
+            package_data.setdefault('meresco.distributed', []).append(filepath)
 
 setup(
     name='meresco-distributed',
