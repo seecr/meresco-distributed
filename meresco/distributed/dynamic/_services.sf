@@ -35,13 +35,21 @@ def differentState(service, flag):
     flagValue = service.get(flag.name, flag.default)
     return state != flagValue
 
-def niceUptime(uptime):
-    if uptime is None:
+def niceTime(time):
+    if time is None:
         return '?'
-    days, remainder = uptime // 86400, uptime % 86400
+    time = int(time)
+    if time < 120:
+        return "{0:d}s".format(time)
+    days, remainder = time // 86400, time % 86400
     hours, remainder = remainder // 3600, remainder % 3600
     minutes, seconds = remainder // 60, remainder % 60
-    return '%d days %02d:%02d:%02d' % (days, hours, minutes, seconds)
+    if days > 0:
+        return "{0:d} days {1:d}h {2:2d}m".format(days, hours, minutes)
+    if hours > 0:
+        return "{0:d}h {1:2d}m".format(hours, minutes)
+    return "{0:d}m {1:2d}s".format(minutes, seconds)
+
 
 def deleteEnableButtons(identifier, service):
     tdStarted = False
@@ -72,8 +80,8 @@ def showService(service):
     if not service['active']:
         yield '<span class="error">R</span>'
     yield '</td>'
-    yield '<td class="number" id="%s_lastseen">%ds</td>' % (identifier, time() - service['lastseen'])
-    yield '<td class="number" id="%s_uptime">%s</td>' % (identifier, niceUptime(data.get('uptime')))
+    yield '<td class="number" id="%s_lastseen">%s</td>' % (identifier, niceTime(time() - service['lastseen']))
+    yield '<td class="number" id="%s_uptime">%s</td>' % (identifier, niceTime(data.get('uptime')))
     for flagName, flag in sorted(SERVICE_FLAGS.items()):
         disabled = ' disabled="disabled"' if service.get('longgone') else ''
         className = "state_wait" if differentState(service=service, flag=flag) else "state_ok"

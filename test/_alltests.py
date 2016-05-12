@@ -60,5 +60,7 @@ from updateperiodiccalltest import UpdatePeriodicCallTest
 from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
 from utilstest import UtilsTest
 
+from dynamic.servicespagetest import ServicesPageTest
+
 if __name__ == '__main__':
     unittest.main()
