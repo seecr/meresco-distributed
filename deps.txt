@@ -1,15 +1,15 @@
 nginx
 python-lxml
 python-meresco-components (>= 4.13.11.1)
-python-meresco-components (<< 4.15)
+python-meresco-components (<< 4.16)
 python-meresco-core (>= 4.0.8)
 python-meresco-core (<< 4.1)
 python-meresco-html (>= 1.5.7)
 python-meresco-html (<< 1.6)
 python-meresco-oai (>= 5.13.3)
-python-meresco-oai (<< 5.15)
+python-meresco-oai (<< 5.16)
 python-meresco-xml (>= 4.2.2)
-python-meresco-xml (<< 4.3)
+python-meresco-xml (<< 4.4)
 python-seecr-utils (>= 1.0.11)
 python-seecr-utils (<< 1.1)
 python-seecr-web-lib (>= 0.1.0.2)
