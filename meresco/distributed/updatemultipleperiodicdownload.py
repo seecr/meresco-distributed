@@ -32,7 +32,7 @@ from os.path import join
 
 class UpdateMultiplePeriodicDownload(Observable):
 
-    def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, set=None, userAgentAddition=None, **kwargs):
+    def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, set=None, userAgentAddition=None, createOaiDownloadProcessor=None, **kwargs):
         Observable.__init__(self, **kwargs)
         self._reactor = reactor
         self._serviceManagement = serviceManagement
@@ -45,6 +45,7 @@ class UpdateMultiplePeriodicDownload(Observable):
         self._userAgentAddition = userAgentAddition
         self._states = {}
         self._oaiDownloads = []
+        self._createOaiDownloadProcessor = firstNotNone(createOaiDownloadProcessor, OaiDownloadProcessor)
 
     def updateConfig(self, **kwargs):
         serviceSelector = self._serviceManagement.getServiceSelector()
@@ -56,7 +57,7 @@ class UpdateMultiplePeriodicDownload(Observable):
 
     def _createDownloader(self, serviceIdentifier):
         periodicDownload = PeriodicDownload(self._reactor, autoStart=False)
-        oaiDownload = OaiDownloadProcessor(
+        oaiDownload = self._createOaiDownloadProcessor(
                 path=self._downloadPath,
                 metadataPrefix=self._metadataPrefix,
                 set=self._set,
@@ -83,3 +84,9 @@ class UpdateMultiplePeriodicDownload(Observable):
 
     def getState(self):
         return self._states.values()
+
+def firstNotNone(*args):
+    for a in args:
+        if a is not None:
+            return a
+    return None
