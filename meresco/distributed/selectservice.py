@@ -33,7 +33,7 @@ from seecr.utils import Version
 from .service import Service
 
 class SelectService(object):
-    def __init__(self, currentVersion, statePath=None, services=None):
+    def __init__(self, currentVersion, statePath=None, services=None, useCache=True):
         self._serviceList = self._ServiceList(services)
         self._currentVersion = Version.create(currentVersion)
         self._statePath = statePath
@@ -41,6 +41,9 @@ class SelectService(object):
             isdir(self._statePath) or makedirs(self._statePath)
         self._chosenService = dict()
         self._cache = dict()
+        def setCacheItem(key, value):
+            self._cache[key] = value
+        self._setCacheItem = setCacheItem if useCache else lambda key, value: None
 
     def updateConfig(self, **kwargs):
         self._cache.clear()
@@ -81,7 +84,7 @@ class SelectService(object):
         for service in self._serviceList.iterServices():
             if service.type == type and flag.isSet(service) and minVersion <= service.getVersion() < untilVersion:
                 matchingServices.append(service)
-        self._cache[key] = matchingServices
+        self._setCacheItem(key, matchingServices)
         return matchingServices
 
     def _getChosenService(self, type):
@@ -107,13 +110,9 @@ class SelectService(object):
 
     @classmethod
     def forAdmin(cls, serviceRegistry, **kwargs):
-        result = cls(**kwargs)
+        result = cls(useCache=False, **kwargs)
         result._serviceList = serviceRegistry
-        def updateConfig(self, **kwargs):
-            self._cache.clear()
-            return
-            yield
-        result.updateConfig = updateConfig
+        result.updateConfig = lambda **kwargs: None
         return result
 
     class _ServiceList(object):
