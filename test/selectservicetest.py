@@ -31,7 +31,7 @@ from uuid import uuid4
 
 from seecr.utils import Version
 from weightless.core import consume
-from meresco.distributed import Service, SelectService
+from meresco.distributed import Service, SelectService, ServiceRegistry
 from meresco.distributed.constants import READABLE
 from time import time
 
@@ -302,3 +302,16 @@ class SelectServiceTest(SeecrTestCase):
         t1 = time()
         self.assertTrue(t1 - t0 < 0.01, t1 - t0)
         self.assertEquals(set([('1.2.3.5', 2000), ('1.2.3.6', 2001)]), selectedHostPort)
+
+    def testNoCacheForAdmin(self):
+        serviceRegistry = ServiceRegistry(reactor=None, stateDir=self.tempdir, domainname='example.org')
+        selectService = SelectService.forAdmin(serviceRegistry, currentVersion=VERSION, statePath=join(self.tempdir, 'state'))
+        serviceIdentifier = str(uuid4())
+        serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2000, data={'VERSION': VERSION})
+        serviceRegistry.setFlag(identifier=serviceIdentifier, flag=READABLE, value=True, immediate=True)
+        result = selectService.selectHostPortForService(type='plein', flag=READABLE)
+        self.assertEquals(('1.2.3.5', 2000), result)
+
+        serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2001, data={'VERSION': VERSION})
+        result = selectService.selectHostPortForService(type='plein', flag=READABLE)
+        self.assertEquals(('1.2.3.5', 2001), result)
