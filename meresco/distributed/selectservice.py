@@ -31,12 +31,10 @@ from random import choice
 from seecr.utils import Version
 
 from .service import Service
-from socket import socket, error as SocketError, TCP_KEEPIDLE, IPPROTO_TCP, TCP_KEEPINTVL, SOL_SOCKET, SO_KEEPALIVE, TCP_KEEPCNT
 
 class SelectService(object):
-    def __init__(self, reactor, currentVersion, statePath=None, services=None, useCache=True):
-        self._serviceList = self._ServiceList(reactor)
-        self._serviceList.updateConfig(services)
+    def __init__(self, currentVersion, statePath=None, services=None, useCache=True):
+        self._serviceList = self._ServiceList(services)
         self._currentVersion = Version.create(currentVersion)
         self._statePath = statePath
         if self._statePath:
@@ -112,55 +110,21 @@ class SelectService(object):
 
     @classmethod
     def forAdmin(cls, serviceRegistry, **kwargs):
-        result = cls(reactor=None, useCache=False, **kwargs)
+        result = cls(useCache=False, **kwargs)
         result._serviceList = serviceRegistry
         result.updateConfig = lambda **kwargs: None
         return result
 
     class _ServiceList(object):
-        def __init__(self, reactor):
-            self._reactor = reactor
-            self._services = []
-            self._soks = []
+        def __init__(self, services):
+            self._services = [] if services is None else services
 
         def updateConfig(self, services, **kwargs):
             self._services = []
-            for sok in self._soks:
-                self._reactor.removeReader(sok)
-                sok.close()
-            self._soks = []
             for serviceDict in services.values():
-                service = Service(**serviceDict)
-                if service.infoport > 0:
-                    self._connect(service)
-                self._services.append(service)
+                self._services.append(Service(**serviceDict))
             return
             yield
 
         def iterServices(self):
-            return iter([s for s in self._services if not s.get('isDead')])
-
-        def _connect(self, service):
-            try:
-                sok = self._createSocket(service.selectHostAndPort())
-            except SocketError:
-                self._markDead(None, service)
-            else:
-                self._soks.append(sok)
-                self._reactor.addReader(sok, lambda: self._markDead(sok, service))
-
-        def _createSocket(self, hostPort):
-            sok = socket()
-            sok.connect(hostPort)
-            sok.setsockopt(SOL_SOCKET, SO_KEEPALIVE, 1)
-            sok.setsockopt(IPPROTO_TCP, TCP_KEEPIDLE, 1)
-            sok.setsockopt(IPPROTO_TCP, TCP_KEEPINTVL, 1)
-            sok.setsockopt(IPPROTO_TCP, TCP_KEEPCNT, 1)
-            return sok
-
-        def _markDead(self, sok, service):
-            if sok:
-                self._reactor.removeReader(sok)
-                self._soks.remove(sok)
-                sok.close()
-            service["isDead"] = True
+            return iter(self._services)

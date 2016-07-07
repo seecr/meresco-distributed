@@ -39,13 +39,10 @@ VERSION = "42.0"
 class SelectServiceTest(SeecrTestCase):
     def setUp(self):
         SeecrTestCase.setUp(self)
-        self.reactor = CallTrace()
         self.selectService = SelectService(
-            reactor=self.reactor,
             currentVersion=VERSION,
             statePath=join(self.tempdir, 'state'),
         )
-        self.selectService._serviceList._createSocket = lambda hostPort: CallTrace()
 
     def testShouldCreateStatePathIfNecessary(self):
         self.assertTrue(isdir(join(self.tempdir, 'state')))
@@ -318,27 +315,3 @@ class SelectServiceTest(SeecrTestCase):
         serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2001, data={'VERSION': VERSION})
         result = selectService.selectHostPortForService(type='plein', flag=READABLE)
         self.assertEquals(('1.2.3.5', 2001), result)
-
-    def testServiceListMonitorsDead(self):
-        serviceList = self.selectService._serviceList
-        services={
-                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport': 2001, 'readable': True, 'data':{'VERSION': VERSION}},
-            }
-        consume(serviceList.updateConfig(services=services))
-        self.assertEqual(['addReader'], self.reactor.calledMethodNames())
-        sok = self.reactor.calledMethods[0].args[0]
-
-        del self.reactor.calledMethods[:]
-        consume(serviceList.updateConfig(services=services))
-        self.assertEqual(['removeReader', 'addReader'], self.reactor.calledMethodNames())
-        self.assertEqual(sok, self.reactor.calledMethods[0].args[0])
-        self.assertNotEquals(sok, self.reactor.calledMethods[1].args[0])
-
-        self.assertEqual(1, len(list(serviceList.iterServices())))
-        self.reactor.calledMethods[-1].args[1]()
-        self.assertEqual(0, len(list(serviceList.iterServices())))
-        self.assertEqual(['removeReader', 'addReader', 'removeReader'], self.reactor.calledMethodNames())
-
-        consume(serviceList.updateConfig(services=services))
-        self.assertEqual(1, len(list(serviceList.iterServices())))
-

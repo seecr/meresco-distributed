@@ -56,7 +56,7 @@ class ServiceManagement(object):
         self.identifier = identifier
         self._serviceType = serviceType
         self._version = version
-        self._selectService = SelectService(reactor=reactor, statePath=statePath, currentVersion=self._version) if enableSelectService else DummySelectService()
+        self._selectService = SelectService(statePath=statePath, currentVersion=self._version) if enableSelectService else DummySelectService()
         self._latestConfiguration = JsonDict({})
         self._configDownloadProcessor = configDownloadProcessor
         self._documentationPath = documentationPath
