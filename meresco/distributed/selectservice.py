@@ -34,7 +34,7 @@ from .service import Service
 from socket import socket, error as SocketError, TCP_KEEPIDLE, IPPROTO_TCP, TCP_KEEPINTVL, SOL_SOCKET, SO_KEEPALIVE, TCP_KEEPCNT
 
 class SelectService(object):
-    def __init__(self, reactor, currentVersion, statePath=None, services=None, useCache=True):
+    def __init__(self, currentVersion, reactor=None, statePath=None, services=None, useCache=True):
         self._serviceList = self._ServiceList(reactor)
         self._serviceList.updateConfig(services)
         self._currentVersion = Version.create(currentVersion)
@@ -125,13 +125,14 @@ class SelectService(object):
 
         def updateConfig(self, services, **kwargs):
             self._services = []
-            for sok in self._soks:
-                self._reactor.removeReader(sok)
-                sok.close()
-            self._soks = []
+            if self._reactor:
+                for sok in self._soks:
+                    self._reactor.removeReader(sok)
+                    sok.close()
+                self._soks = []
             for serviceDict in services.values():
                 service = Service(**serviceDict)
-                if service.infoport > 0:
+                if self._reactor and service.infoport > 0:
                     self._connect(service)
                 self._services.append(service)
             return
@@ -159,6 +160,8 @@ class SelectService(object):
             return sok
 
         def _markDead(self, sok, service):
+            print 'Marked service {identifier} of type {type} as dead.'.format(**service)
+            import sys; sys.stdout.flush()
             if sok:
                 self._reactor.removeReader(sok)
                 self._soks.remove(sok)

@@ -26,6 +26,7 @@
 ## end license ##
 
 from seecr.test import SeecrTestCase, CallTrace
+from seecr.test.io import stdout_replaced
 from os.path import join, isdir
 from uuid import uuid4
 
@@ -321,8 +322,9 @@ class SelectServiceTest(SeecrTestCase):
 
     def testServiceListMonitorsDead(self):
         serviceList = self.selectService._serviceList
+        identifier = str(uuid4())
         services={
-                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport': 2001, 'readable': True, 'data':{'VERSION': VERSION}},
+                identifier: {'identifier': identifier, 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport': 2001, 'readable': True, 'data':{'VERSION': VERSION}},
             }
         consume(serviceList.updateConfig(services=services))
         self.assertEqual(['addReader'], self.reactor.calledMethodNames())
@@ -335,7 +337,9 @@ class SelectServiceTest(SeecrTestCase):
         self.assertNotEquals(sok, self.reactor.calledMethods[1].args[0])
 
         self.assertEqual(1, len(list(serviceList.iterServices())))
-        self.reactor.calledMethods[-1].args[1]()
+        with stdout_replaced() as e:
+            self.reactor.calledMethods[-1].args[1]()
+        self.assertEqual('Marked service {} of type plein as dead.\n'.format(identifier), e.getvalue())
         self.assertEqual(0, len(list(serviceList.iterServices())))
         self.assertEqual(['removeReader', 'addReader', 'removeReader'], self.reactor.calledMethodNames())
 
