@@ -37,8 +37,8 @@ from meresco.distributed.failover.nginxconfig import READABLE, WRITABLE, SERVICE
 from seecr.utils import isRootUser
 from time import sleep
 from meresco.components import ParseArguments
-from simplejson import load
 from os.path import join
+from urllib2 import HTTPError
 
 
 if __name__ == '__main__':
@@ -73,11 +73,12 @@ if __name__ == '__main__':
             sharedSecret=options.sharedSecret,
             updateInterval=SERVICE_POLL_INTERVAL
         )
-    configuration = configDownloadProcessor.downloadAndUpdate(options.adminHostname, options.adminPort)
+    try:
+        configuration = configDownloadProcessor.downloadAndUpdate(options.adminHostname, options.adminPort)
+    except HTTPError:
+        # Some older meresco-distributed versions cannot accept updates from scripts.
+        configuration = configDownloadProcessor.download(options.adminHostname, options.adminPort)
 
-    # request = Request('http://{0}:{1}/api/service/v2/list'.format(options.adminHostname, options.adminPort))
-    # request.add_header('User-Agent', 'NginxConfig-Loadbalancer v%s' % VERSION)
-    # configuration = load(urlopen(request))
     nginxConfig = NginxConfig(**vars(options))
 
     mustUpdate, sleeptime = nginxConfig.updateConfig(**configuration)
