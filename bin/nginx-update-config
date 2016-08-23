@@ -57,6 +57,8 @@ if __name__ == '__main__':
     parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
     parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
     parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
+    parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
+    parser.addOption('', '--sslKey', help='Path to ssl key. Will generate https proxy.')
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
