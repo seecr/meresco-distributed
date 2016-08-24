@@ -35,6 +35,7 @@ from seecr.utils import Version
 from re import compile
 from meresco.components import parseAbsoluteUrl
 from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
+from warnings import warn
 
 
 READABLE = 'readable'
@@ -43,7 +44,7 @@ ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY = 'debug.global.adminDownload.period'
 SERVICE_POLL_INTERVAL = 30
 
 class NginxConfig(object):
-    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, flag=READABLE, usrSharePath=None, name=None, sslCertificate=None, sslKey=None, endpoint=None, **ignored):
+    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, flags=None, usrSharePath=None, name=None, sslCertificate=None, sslKey=None, endpoint=None, **ignored):
         assert type.strip() != '', "Expected a type name."
         self._type = type
         self._name = self._type if name is None else name
@@ -53,7 +54,10 @@ class NginxConfig(object):
         self._minVersion = Version.create(minVersion)
         self._untilVersion = Version.create(untilVersion)
         self._unused = unused
-        self._flag = flag
+        self._flags = [READABLE] if not flags else flags
+        if 'flag' in ignored and ignored['flag'] is not None:
+            self._flags=[ignored['flag']]
+            warn("Option 'flag' has been replaced by 'flags'", DeprecationWarning)
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath  is None else usrSharePath
         self._sslLines = _ssl(sslCertificate, sslKey)
         self._defaultPort = 443 if self._sslLines else 80
@@ -176,7 +180,7 @@ server {
     def _selectHostAndPort(self, services):
         matchingServices = []
         for serviceIdentifier, service in services.items():
-            if not service.get(self._flag, False):
+            if not all(service.get(flag, False) for flag in self._flags):
                 continue
             if service['type'] != self._type:
                 continue

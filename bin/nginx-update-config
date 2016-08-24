@@ -54,7 +54,7 @@ if __name__ == '__main__':
     parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
     parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
     parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
-    parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], default=READABLE, dest='flag', help='Base active on flag readable or writable')
+    parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
     parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
     parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
     parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
