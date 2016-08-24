@@ -59,6 +59,7 @@ if __name__ == '__main__':
     parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
     parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
     parser.addOption('', '--sslKey', help='Path to ssl key. Will generate https proxy.')
+    parser.addOption('', '--endpoint', help='Connect to other address than default ipAddress and infoport from the service.')
 
     options, arguments = parser.parse()
     if options.nginxReload == defaultNginxReloadCmd and not isRootUser():

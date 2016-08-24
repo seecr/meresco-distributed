@@ -33,6 +33,7 @@ from sys import stdout
 
 from seecr.utils import Version
 from re import compile
+from meresco.components import parseAbsoluteUrl
 from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
 
 
@@ -42,7 +43,7 @@ ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY = 'debug.global.adminDownload.period'
 SERVICE_POLL_INTERVAL = 30
 
 class NginxConfig(object):
-    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, flag=READABLE, usrSharePath=None, name=None, sslCertificate=None, sslKey=None, **ignored):
+    def __init__(self, type, nginxConfigDir, minVersion, untilVersion, verbose=False, unused=False, flag=READABLE, usrSharePath=None, name=None, sslCertificate=None, sslKey=None, endpoint=None, **ignored):
         assert type.strip() != '', "Expected a type name."
         self._type = type
         self._name = self._type if name is None else name
@@ -56,6 +57,7 @@ class NginxConfig(object):
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath  is None else usrSharePath
         self._sslLines = _ssl(sslCertificate, sslKey)
         self._defaultPort = 443 if self._sslLines else 80
+        self._endpoint = endpoint
 
     def updateConfig(self, config, services, **ignored):
         typeConfig = config['%s.frontend' % self._type]
@@ -176,9 +178,16 @@ server {
         for serviceIdentifier, service in services.items():
             if not service.get(self._flag, False):
                 continue
-            if service['type'] == self._type:
-                if self._minVersion <= Version(service['data']['VERSION']) < self._untilVersion:
+            if service['type'] != self._type:
+                continue
+            if self._minVersion <= Version(service['data']['VERSION']) < self._untilVersion:
+                if self._endpoint is None:
                     matchingServices.append((service['ipAddress'], service['infoport']))
+                else:
+                    endpoint = parseAbsoluteUrl(service['data'].get('endpoints',{}).get(self._endpoint, ''))
+                    if endpoint is not None:
+                        matchingServices.append((endpoint['host'], endpoint['port']))
+
         return matchingServices
 
 NAME_RE = compile(r'^\w+$')
