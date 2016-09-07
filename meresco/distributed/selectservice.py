@@ -33,9 +33,10 @@ from seecr.utils import Version
 from .service import Service
 
 class SelectService(object):
-    def __init__(self, currentVersion, statePath=None, services=None, useCache=True):
+    def __init__(self, currentVersion, statePath=None, services=None, useCache=True, untilVersion=None):
         self._serviceList = self._ServiceList(services)
         self._currentVersion = Version(currentVersion)
+        self._untilVersion = self._currentVersion.nextMajorVersion() if untilVersion is None else Version(untilVersion)
         self._statePath = statePath
         if self._statePath:
             isdir(self._statePath) or makedirs(self._statePath)
@@ -80,7 +81,7 @@ class SelectService(object):
         if matchingServices:
             return matchingServices
         minVersion = self._currentVersion.majorVersion() if minVersion is None else Version(minVersion)
-        untilVersion = minVersion.nextMajorVersion() if untilVersion is None else Version(untilVersion)
+        untilVersion = self._untilVersion.majorVersion() if untilVersion is None else Version(untilVersion)
         for service in self._serviceList.iterServices():
             if service.type == type and flag.isSet(service) and minVersion <= service.getVersion() < untilVersion:
                 matchingServices.append(service)
