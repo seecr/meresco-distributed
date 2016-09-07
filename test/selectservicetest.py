@@ -112,6 +112,22 @@ class SelectServiceTest(SeecrTestCase):
         currentHigherVersion = str(currentMajor) + '.3'
         self.assertRaises(ValueError, lambda: self.selectService.selectHostPortForService(type='plein', flag=READABLE, minVersion=currentHigherVersion, untilVersion=None))
 
+    def testSelectWithUntilVersion(self):
+        self.selectService = SelectService(
+            currentVersion='4.5',
+            statePath=join(self.tempdir, 'state'),
+            untilVersion='25.3',
+        )
+        consume(self.selectService.updateConfig(
+            config={},
+            services={
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.4', 'infoport':2000, 'readable': True, 'data':{'VERSION': '1.0'}},
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.5', 'infoport':2001, 'readable': True, 'data':{'VERSION': '24.5'}},
+            },
+        ))
+        host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
+        self.assertEquals(2001, port)
+
     def testShouldRaiseValueErrorIfServiceNotAvailable(self):
         consume(self.selectService.updateConfig(
             config={},
