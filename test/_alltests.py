@@ -45,7 +45,6 @@ from configurationtest import ConfigurationTest
 from crashdetecttest import CrashDetectTest
 from flagchecktest import FlagCheckTest
 from listvpnservicetest import ListVpnServiceTest
-from nginxconfigtest import NginxConfigTest
 from remarkstest import RemarksTest
 from selectservicetest import SelectServiceTest
 from servicegrouptest import ServiceGroupTest
@@ -61,6 +60,8 @@ from updateperiodicdownloadtest import UpdatePeriodicDownloadTest
 from utilstest import UtilsTest
 
 from dynamic.servicespagetest import ServicesPageTest
+
+from failover.nginxconfigtest import NginxConfigTest
 
 if __name__ == '__main__':
     unittest.main()
