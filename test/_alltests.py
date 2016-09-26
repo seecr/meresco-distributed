@@ -7,7 +7,6 @@
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
-# Copyright (C) 2016 SURFmarket https://surf.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -63,7 +62,6 @@ from utilstest import UtilsTest
 from dynamic.servicespagetest import ServicesPageTest
 
 from failover.nginxconfigtest import NginxConfigTest
-from failover.nginxconfigngtest import NginxConfigNGTest
 
 if __name__ == '__main__':
     unittest.main()
