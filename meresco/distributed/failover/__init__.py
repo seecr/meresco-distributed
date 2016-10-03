@@ -28,4 +28,5 @@
 
 VERSION = '$Version: 1.0.x$'[9:-1].strip()
 from nginxconfig import NginxConfig
-from nginxconfigng import NginxConfigNG
+from nginxconfigng import NginxConfigNG, SslConfig
+from ._serviceconfig import ServiceConfig

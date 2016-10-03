@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -45,3 +45,11 @@ class _Flag(object):
 READABLE = _Flag('readable', default=False)
 WRITABLE = _Flag('writable', default=False)
 _Flag.__init__ = None
+
+class CombinedFlag(_Flag):
+    def __init__(self, flags):
+        self._flags = flags
+        self.name = '/'.join(f.name for f in flags)
+
+    def isSet(self, d):
+        return all(f.isSet(d) for f in self._flags)
