@@ -3,7 +3,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -35,4 +35,4 @@ OAI_DOWNLOAD_INTERVAL = 0.1
 PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_CONFIG_KEY = 'debug.global.periodicDownload.retryAfterErrorTime'
 PERIODIC_DOWNLOAD_RETRY_AFTER_ERROR_TIME = 30
 
-from _serviceflags import READABLE, WRITABLE, SERVICE_FLAGS
+from _serviceflags import READABLE, WRITABLE, SERVICE_FLAGS, READWRITE

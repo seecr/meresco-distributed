@@ -25,6 +25,8 @@
 from StringIO import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
+from ._utils import log, noLog
+import re
 
 class ServiceConfig(object):
     def __init__(self, type, minVersion, untilVersion, path='/', flag=READABLE, endpoint=None, port=None, name=None):
@@ -38,10 +40,14 @@ class ServiceConfig(object):
         self._typeConfig = {}
         self._port = 80 if port is None else port
         self._name = self._type if name is None else name
+        namecheck(self._name)
         self._locations = None
         self._zones = None
+        self._log = noLog
 
     def updateConfig(self, config, services, **kwargs):
+        if kwargs.get('verbose', False):
+            self._log = log
         select = SelectService(self._minVersion, services=services, untilVersion=self._untilVersion)
         yield select.updateConfig(config=config, services=services, **kwargs)
         for service in select.findServices(type=self._type, flag=self._flag):
@@ -76,12 +82,25 @@ class ServiceConfig(object):
             self._throttling()
         yield '\n'.join(self._locations)
 
+    def matchingServices(self):
+        if self._matchingServices:
+            servers = ['    server {0}:{1};'.format(*s) for s in self._matchingServices]
+            yield 'upstream __var_{0} {{\n{1}\n}}\n'.format(self._name, '\n'.join(servers))
+            self._log(''.join('Service {name} at {0}:{1}\n'.format(host, port, name=self._name) for host, port in self._matchingServices))
+
     def _throttling(self):
         throttling = self._typeConfig.get('throttling', {})
         if self._path not in throttling:
             throttling[self._path] = {}
         self._locations = []
         self._zones = []
+        if not self._matchingServices:
+            self._locations.append('''    location {0} {{
+        location /unavailable.html {{
+        }}
+        return 503;
+    }}'''.format(self._path))
+            return
         for location, data in sorted(throttling.items()):
             zone_name = location.replace("/", "")
             locationData = StringIO()
@@ -95,3 +114,8 @@ class ServiceConfig(object):
                 self._zones.append("limit_conn_zone $server_name zone={name}-{0}-total:10m;".format(zone_name, name=self._name))
             locationData.write("    }")
             self._locations.append(locationData.getvalue())
+
+NAME_RE = re.compile(r'^\w+$')
+def namecheck(name):
+    if not NAME_RE.match(name):
+        raise ValueError('Only alphanumeric characters allowed.')

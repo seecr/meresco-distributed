@@ -32,7 +32,7 @@ from uuid import uuid4
 class NginxConfigNGTest(SeecrTestCase):
     def setUp(self):
         SeecrTestCase.setUp(self)
-        self.config = NginxConfigNG(join(self.tempdir, 'server.conf'))
+        self.config = NginxConfigNG(name='test', nginxConfigFile=join(self.tempdir, 'server.conf'))
 
 
     def testEmpty(self):
@@ -80,12 +80,12 @@ server {
 
     def testUpdateConfig(self):
         self.config.generate = lambda **kwargs: 'config'
-        result = self.config.update(config={}, services={})
+        result = self.config.update(config={}, services={}, verbose=False)
         self.assertEqual((True, 30), (result.mustUpdate, result.sleeptime))
-        result = self.config.update(config={}, services={})
+        result = self.config.update(config={}, services={}, verbose=False)
         self.assertEqual((False, 30), result)
         self.config.generate = lambda **kwargs: 'config2'
-        result = self.config.update(config={}, services={})
+        result = self.config.update(config={}, services={}, verbose=False)
         self.assertEqual((True, 30), result)
         self.assertEqual('config2', open(join(self.tempdir, 'server.conf')).read())
 
@@ -149,12 +149,32 @@ server {
         consume(c.updateConfig(**configServices))
         self.assertEquals('    listen 10.0.0.1:443;\n    listen 10.0.0.2:443;\n    listen 10.0.0.3:443;\n', asString(c.listenLines()))
 
+    def testNotAvailable(self):
+        c = ServiceConfig(type='web', minVersion="4.2", untilVersion="5.0", path='/main', port=443)
+        consume(c.updateConfig(**CONFIG_SERVICES()))
+        self.assertEqual([
+            '    location /main {',
+            '        location /unavailable.html {',
+            '        }',
+            '        return 503;',
+            '    }'
+            ], asString(c.locations()).split('\n'))
+
+    def testMatchingServices(self):
+        c = ServiceConfig(type='api', minVersion="4.2", untilVersion="5.0", path='/main', port=443)
+        consume(c.updateConfig(**CONFIG_SERVICES()))
+        self.assertEqual([
+                'upstream __var_api {',
+                '    server 10.0.0.2:1234;',
+                '}',
+                ''
+            ], asString(c.matchingServices()).split('\n'))
 
 
 def CONFIG_SERVICES():
     return dict(
         services={
-            newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'active':True, 'data':{'VERSION': "4.3"}},
+            newId(): {'type':'api', 'ipAddress':'10.0.0.2', 'infoport':1234, 'readable':True, 'data':{'VERSION': "4.3"}},
         },
         config={
             'api.frontend': {

@@ -25,28 +25,30 @@
 
 from weightless.core import asList, asString
 from meresco.core import Observable
-from meresco.distributed import SelectService
-from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL, READABLE
+from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
 from os import rename
 from os.path import join, isfile
 from collections import namedtuple
+from ._utils import log, noLog
 
 class NginxConfigNG(Observable):
-    def __init__(self, nginxConfigFile, usrSharePath=None, **kwargs):
+    def __init__(self, nginxConfigFile, usrSharePath=None, name=None, **kwargs):
         Observable.__init__(self, **kwargs)
         self._nginxConfigFile = nginxConfigFile
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath is None else usrSharePath
 
-    def update(self, config, **kwargs):
+    def update(self, config, verbose=True, **kwargs):
         sleeptime = config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL)
-        newConfig = self.generate(config=config, **kwargs)
+        newConfig = self.generate(config=config, verbose=verbose, **kwargs)
+        _log = log if verbose else noLog
         mustUpdate = False
         if not isfile(self._nginxConfigFile) or newConfig != open(self._nginxConfigFile).read():
             with open(self._nginxConfigFile+'~', 'w') as fd:
                 fd.write(newConfig)
             rename(self._nginxConfigFile+'~', self._nginxConfigFile)
             mustUpdate = True
+        _log("Config in {0}. Must update: {1}\n".format(repr(self._nginxConfigFile), mustUpdate))
         return UpdateResult(mustUpdate, sleeptime)
 
     def generate(self, **kwargs):
@@ -92,24 +94,5 @@ class NginxConfigNG(Observable):
         return 503;
     }
 '''
-
-
-class SslConfig(object):
-    def __init__(self, certificate, key):
-        self._sslKey = key
-        self._sslCertificate = certificate
-
-    def sslLines(self):
-        yield """
-    ssl on;
-
-    ssl_certificate         {crt};
-    ssl_certificate_key     {pem};
-    ssl_protocols           TLSv1 TLSv1.1 TLSv1.2;
-    keepalive_timeout       60;
-    ssl_session_cache       shared:SSL:10m;
-
-    proxy_redirect          http:// https://;
-""".format(crt=self._sslCertificate, pem=self._sslKey)
 
 UpdateResult = namedtuple('UpdateResult', ['mustUpdate', 'sleeptime'])

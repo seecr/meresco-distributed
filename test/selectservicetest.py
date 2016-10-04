@@ -32,7 +32,7 @@ from uuid import uuid4
 from seecr.utils import Version
 from weightless.core import consume
 from meresco.distributed import Service, SelectService, ServiceRegistry
-from meresco.distributed.constants import READABLE
+from meresco.distributed.constants import READABLE, READWRITE
 from time import time
 
 VERSION = "42.0"
@@ -331,3 +331,19 @@ class SelectServiceTest(SeecrTestCase):
         serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2001, data={'VERSION': VERSION})
         result = selectService.selectHostPortForService(type='plein', flag=READABLE)
         self.assertEquals(('1.2.3.5', 2001), result)
+
+    def testSelectWithBothReadableAndWritableFlag(self):
+        self.selectService = SelectService(
+            currentVersion='4.5',
+            statePath=join(self.tempdir, 'state'),
+        )
+        consume(self.selectService.updateConfig(
+            config={},
+            services={
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.4', 'infoport':2000, 'readable': False, 'writable': True, 'data':{'VERSION': '4.5'}},
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.4', 'infoport':2001, 'readable': True, 'writable': False, 'data':{'VERSION': '4.5'}},
+                str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.4', 'infoport':2002, 'readable': True, 'writable': True, 'data':{'VERSION': '4.5'}},
+            },
+        ))
+        host, port = self.selectService.selectHostPortForService(type='plein', flag=READWRITE)
+        self.assertEquals(2002, port)

@@ -2,11 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
-# Copyright (C) 2016 SURFmarket https://surf.nl
+# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -26,9 +22,10 @@
 #
 ## end license ##
 
-from .__version__ import VERSION
-from nginxconfig import NginxConfig
-from nginxconfigng import NginxConfigNG
-from ._serviceconfig import ServiceConfig
-from ._sslconfig import SslConfig
-from ._staticpathconfig import StaticPathConfig
+class StaticPathConfig(object):
+    def __init__(self, path, config):
+        self._path = path
+        self._config = config
+
+    def locations(self):
+        yield '   location {0} {{\n{1}\n    }}\n'.format(self._path, self._config)

@@ -46,10 +46,17 @@ READABLE = _Flag('readable', default=False)
 WRITABLE = _Flag('writable', default=False)
 _Flag.__init__ = None
 
-class CombinedFlag(_Flag):
+class CombinedFlag(object):
     def __init__(self, flags):
         self._flags = flags
         self.name = '/'.join(f.name for f in flags)
+        self.__str__ = lambda: self.name
 
     def isSet(self, d):
         return all(f.isSet(d) for f in self._flags)
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, repr(self.name))
+
+READWRITE = CombinedFlag([READABLE, WRITABLE])
+
