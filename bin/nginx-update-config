@@ -34,7 +34,7 @@ from meresco.distributed.utils import usrSharePath
 from seecr.utils import isRootUser
 from meresco.components import ParseArguments
 from os.path import join
-from meresco.distributed.failover import Failover, NginxConfigNG, ServiceConfig, SslConfig, StaticLocations
+from meresco.distributed.failover import Failover, NginxConfig, ServiceConfig, SslConfig, StaticLocations
 from warnings import warn
 
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
 
     name = options.name or options.type
-    config = NginxConfigNG(
+    config = NginxConfig(
             usrSharePath=options.usrSharePath,
             nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
             name=name,
