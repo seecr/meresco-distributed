@@ -501,7 +501,7 @@ server {
     proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
 
     location / {
-        root %s/failover;
+        root %(path)s/failover;
         location /unused.html {
         }
         return 410;
@@ -509,11 +509,11 @@ server {
     error_page 410 /unused.html;
     error_page 500 502 503 504 =503 /unavailable.html;
     location /unavailable.html {
-        root /home/sharekit/meresco-distributed/usr-share/failover;
+        root %(path)s/failover;
     }
     client_max_body_size 0;
 }
-'''%usrSharePath, open(self.configFile).read())
+''' % dict(path=usrSharePath), open(self.configFile).read())
 
 
     def testShouldConfigureThrottling(self):
@@ -834,10 +834,10 @@ server {
 
     error_page 500 502 503 504 =503 /unavailable.html;
     location /unavailable.html {
-        root /home/sharekit/meresco-distributed/usr-share/failover;
+        root %s/failover;
     }
     client_max_body_size 0;
-}''', result)
+}''' % usrSharePath, result)
         self.assertEquals([
                 'updateConfig',
                 'matchingServices',

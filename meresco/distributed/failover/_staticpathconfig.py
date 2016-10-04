@@ -29,7 +29,7 @@ class StaticPathConfig(object):
         self._config = config
 
     def locations(self):
-        yield '   location {0} {{\n{1}\n    }}\n'.format(self._path, self._config)
+        yield '    location {0} {{\n{1}\n    }}\n'.format(self._path, self._config)
 
 class StaticLocations(object):
     def __init__(self, config):

@@ -69,7 +69,7 @@ class NginxConfig(Observable):
         yield ';\n\n'
         yield self.proxy_settings
         yield self.all.sslLines()
-        locations = asString(self.all.locations())
+        locations = '\n'.join(asList(self.all.locations()))
         if not locations:
             yield self._allLocationsUnavailable()
         else:
