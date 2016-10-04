@@ -32,3 +32,4 @@ from nginxconfigng import NginxConfigNG
 from ._serviceconfig import ServiceConfig
 from ._sslconfig import SslConfig
 from ._staticpathconfig import StaticPathConfig
+from ._unusedconfig import UnusedConfig

@@ -30,15 +30,15 @@ import re
 
 class ServiceConfig(object):
     def __init__(self, type, minVersion, untilVersion, path='/', flag=READABLE, endpoint=None, port=None, name=None):
-        self._type = type
         self._minVersion = minVersion
         self._untilVersion = untilVersion
+        self._typeConfig = {}
+        self._port = 80 if port is None else port
+        self._type = type
         self._path = path
         self._flag = flag
         self._endpoint = endpoint
         self._matchingServices = []
-        self._typeConfig = {}
-        self._port = 80 if port is None else port
         self._name = self._type if name is None else name
         namecheck(self._name)
         self._locations = None
@@ -46,6 +46,7 @@ class ServiceConfig(object):
         self._log = noLog
 
     def updateConfig(self, config, services, **kwargs):
+        self._typeConfig = config.get('{0}.frontend'.format(self._type), {})
         if kwargs.get('verbose', False):
             self._log = log
         select = SelectService(self._minVersion, services=services, untilVersion=self._untilVersion)
@@ -55,9 +56,16 @@ class ServiceConfig(object):
                 self._matchingServices.append(service.selectHostAndPort(endpoint=self._endpoint))
             except ValueError:
                 pass
-        self._typeConfig = config.get('{0}.frontend'.format(self._type), {})
-        return
-        yield
+
+    def zones(self):
+        if self._zones is None:
+            self._throttling()
+        yield '\n'.join(self._zones)
+
+    def locations(self):
+        if self._locations is None:
+            self._throttling()
+        yield '\n'.join(self._locations)
 
     def servernames(self):
         if 'fqdn' in self._typeConfig:
@@ -72,19 +80,9 @@ class ServiceConfig(object):
         for listenIp in listenIps:
             yield "    listen {0}:{1};\n".format(listenIp, self._port)
 
-    def zones(self):
-        if self._zones is None:
-            self._throttling()
-        yield '\n'.join(self._zones)
-
-    def locations(self):
-        if self._locations is None:
-            self._throttling()
-        yield '\n'.join(self._locations)
-
     def matchingServices(self):
         if self._matchingServices:
-            servers = ['    server {0}:{1};'.format(*s) for s in self._matchingServices]
+            servers = ['    server {0}:{1};'.format(*s) for s in sorted(self._matchingServices)]
             yield 'upstream __var_{0} {{\n{1}\n}}\n'.format(self._name, '\n'.join(servers))
             self._log(''.join('Service {name} at {0}:{1}\n'.format(host, port, name=self._name) for host, port in self._matchingServices))
 

@@ -23,11 +23,28 @@
 ## end license ##
 
 
-class StaticPathConfig(object):
-    def __init__(self, path, config):
-        self._path = path
-        self._config = config
+from os.path import join
+from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
+
+class UnusedConfig(object):
+    def __init__(self, servername, listenIps=None, port=None, usrSharePath=None):
+        self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath is None else usrSharePath
+        port = 80 if port is None else port
+        listenIps = ['0.0.0.0'] if listenIps is None else listenIps
+        self._listenLines = '\n'.join("    listen {0}:{1};".format(ip, port) for ip in listenIps) + '\n'
+        self._servername = servername
+
+    def servernames(self):
+        yield self._servername
+
+    def listenLines(self):
+        yield self._listenLines
 
     def locations(self):
-        yield '   location {0} {{\n{1}\n    }}\n'.format(self._path, self._config)
-
+        yield """    location / {
+        root %s;
+        location /unused.html {
+        }
+        return 410;
+    }
+    error_page 410 /unused.html;""" % self._usrSharePath
