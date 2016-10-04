@@ -33,7 +33,7 @@ class StaticPathConfig(object):
 
 class StaticLocations(object):
     def __init__(self, config):
-        self._config
+        self._config = config
 
     def locations(self):
         yield self._config

@@ -63,7 +63,6 @@ from utilstest import UtilsTest
 from dynamic.servicespagetest import ServicesPageTest
 
 from failover.nginxconfigtest import NginxConfigTest
-from failover.nginxconfigngtest import NginxConfigNGTest
 
 if __name__ == '__main__':
     unittest.main()

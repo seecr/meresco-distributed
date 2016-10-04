@@ -27,7 +27,7 @@
 ## end license ##
 
 from .__version__ import VERSION
-from nginxconfigng import NginxConfigNG
+from .nginxconfig import NginxConfig
 from ._serviceconfig import ServiceConfig
 from ._sslconfig import SslConfig
 from ._staticpathconfig import StaticPathConfig, StaticLocations
