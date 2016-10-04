@@ -28,11 +28,11 @@
 from seecr.test import SeecrTestCase
 
 from meresco.distributed.constants import WRITABLE, READWRITE, READABLE
-from meresco.distributed.failover import NginxConfig, NginxConfigNG, ServiceConfig, UnusedConfig, SslConfig
+from meresco.distributed.failover import NginxConfigNG, ServiceConfig, UnusedConfig, SslConfig
 from os import stat
 from os.path import isfile, join
 from uuid import uuid4
-from meresco.distributed.failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
+from meresco.distributed.failover.nginxconfig import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from meresco.distributed.utils import usrSharePath
 
 

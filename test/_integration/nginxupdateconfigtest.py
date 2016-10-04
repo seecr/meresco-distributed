@@ -27,6 +27,7 @@
 
 from seecr.test.integrationtestcase import IntegrationTestCase
 from uuid import uuid4
+from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 
 newId = lambda: str(uuid4())
 
@@ -48,8 +49,8 @@ class NginxUpdateConfigTest(IntegrationTestCase):
                 'api.frontend': {
                     'ipAddress': '10.1.2.3',
                     'fqdn': 'api.frontend.example.org',
-                    'reconfiguration.interval': 1,
-                }
+                },
+                ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY: 1,
             },
         }
         self.runNginxUpdateConfig(processName='testRunNormal', type='api', minVersion='0.40', untilVersion='1.0')

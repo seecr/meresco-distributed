@@ -65,7 +65,6 @@ if __name__ == '__main__':
         print 'Run as rootuser for default nginx restart script.'
         exit(2)
 
-    f = Failover()
 
     name = options.name or options.type
     config = NginxConfigNG(
@@ -73,10 +72,11 @@ if __name__ == '__main__':
             nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
             name=name,
         )
+    flags = options.flags or []
     flag = READABLE
-    if 'writable' in options.flags:
+    if 'writable' in flags:
         flag = WRITABLE
-        if 'readable' in options.flags:
+        if 'readable' in flags:
             flag = READWRITE
     config.addObserver(ServiceConfig(
             type=options.type,
@@ -96,6 +96,9 @@ if __name__ == '__main__':
         config.addObserver(StaticLocations(options.additionalLocation))
     if options.unused:
         raise ValueError('No longer supported. Please create your own')
+
+    f = Failover()
+    f.addConfiguration(config)
 
     f.main(**vars(options))
 
