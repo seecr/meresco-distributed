@@ -34,14 +34,14 @@ from ._utils import log
 
 defaultNginxReloadCmd = 'svc -h /etc/service/nginx'
 
-class Main(object):
+class Failover(object):
     def __init__(self):
         self._nginxConfigurations = []
 
     def addConfiguration(self, config):
         self._nginxConfigurations.append(config)
 
-    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True):
+    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True, **ignored):
         if nginxReload == defaultNginxReloadCmd and not isRootUser():
             raise ValueError('Run as rootuser for default nginx restart script.')
 

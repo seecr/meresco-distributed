@@ -29,19 +29,17 @@
 from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
 includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 
-from os import system
-from meresco.distributed import ConfigDownloadProcessor
+from meresco.distributed.constants import READABLE, WRITABLE, READWRITE
 from meresco.distributed.utils import usrSharePath
-from meresco.distributed.failover import NginxConfig, VERSION
-from meresco.distributed.failover.nginxconfig import READABLE, WRITABLE, SERVICE_POLL_INTERVAL
 from seecr.utils import isRootUser
-from time import sleep
 from meresco.components import ParseArguments
 from os.path import join
-from urllib2 import HTTPError
+from meresco.distributed.failover import Failover, NginxConfigNG, ServiceConfig, SslConfig, StaticLocations
+from warnings import warn
 
 
 if __name__ == '__main__':
+    warn('This script will disappear, please write your own custom script.', DeprecationWarning)
     parser = ParseArguments()
     parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
     parser.addOption('', '--adminPort', help='Admin port', default=10000, type='int')
@@ -54,7 +52,7 @@ if __name__ == '__main__':
     parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
     parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
     parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
-    parser.addOption('', '--flag', type="choice", choices=[READABLE, WRITABLE], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
+    parser.addOption('', '--flag', type="choice", choices=['readable', 'writable'], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
     parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
     parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
     parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
@@ -67,27 +65,38 @@ if __name__ == '__main__':
         print 'Run as rootuser for default nginx restart script.'
         exit(2)
 
-    configDownloadProcessor = ConfigDownloadProcessor.forUpdate(
-            identifier="nginx-failover-" + (options.name or options.type),
-            type="nginx-failover",
-            infoport=0,
-            statePath=None,
-            keys=[],
-            version=VERSION,
-            sharedSecret=options.sharedSecret,
-            updateInterval=SERVICE_POLL_INTERVAL
+    f = Failover()
+
+    name = options.name or options.type
+    config = NginxConfigNG(
+            usrSharePath=options.usrSharePath,
+            nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
+            name=name,
         )
-    try:
-        configuration = configDownloadProcessor.downloadAndUpdate(options.adminHostname, options.adminPort)
-    except HTTPError:
-        # Some older meresco-distributed versions cannot accept updates from scripts.
-        configuration = configDownloadProcessor.download(options.adminHostname, options.adminPort)
+    flag = READABLE
+    if 'writable' in options.flags:
+        flag = WRITABLE
+        if 'readable' in options.flags:
+            flag = READWRITE
+    config.addObserver(ServiceConfig(
+            type=options.type,
+            minVersion=options.minVersion,
+            untilVersion=options.untilVersion,
+            flag=flag,
+            endpoint=options.endpoint,
+            port=80 if not options.sslCertificate else 443,
+            name=name,
+        ))
+    if options.sslKey and options.sslCertificate:
+        config.addObserver(SslConfig(
+                certificate=options.sslCertificate,
+                key=options.sslKey,
+            ))
+    if options.additionalLocation:
+        config.addObserver(StaticLocations(options.additionalLocation))
+    if options.unused:
+        raise ValueError('No longer supported. Please create your own')
 
-    nginxConfig = NginxConfig(**vars(options))
-
-    mustUpdate, sleeptime = nginxConfig.updateConfig(**configuration)
-    if mustUpdate:
-        system(options.nginxReload)
-    sleep(sleeptime)
+    f.main(**vars(options))
 
 
