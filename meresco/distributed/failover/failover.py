@@ -73,8 +73,8 @@ class Failover(object):
             log('Sleeping: {0}s\n'.format(sleeptime))
         sleep(sleeptime)
 
-
-    def mainWithParseArguments(self):
+    @staticmethod
+    def createParserWithDefaults():
         parser = ParseArguments()
         parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
         parser.addOption('', '--adminPort', help='Admin port', default=10000, type='int')
@@ -82,5 +82,8 @@ class Failover(object):
         parser.addOption('-n', '--name', default='', help='Service name, defaults to ""')
         parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
         parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
+
+    def mainWithParseArguments(self, parser=None):
+        parser = self.createParserWithDefaults() if parser is None else parser
         options, args = parser.parse()
         return self.main(**vars(options))
