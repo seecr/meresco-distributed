@@ -34,7 +34,7 @@ from meresco.distributed.utils import usrSharePath
 from seecr.utils import isRootUser
 from meresco.components import ParseArguments
 from os.path import join
-from meresco.distributed.failover import Failover, NginxConfig, ServiceConfig, SslConfig, StaticLocations
+from meresco.distributed.failover import Failover, Proxy, ServiceConfig, SslConfig, StaticLocations
 from warnings import warn
 
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
 
     name = options.name or options.type
-    config = NginxConfig(
+    proxy = Proxy(
             usrSharePath=options.usrSharePath,
             nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
             name=name,
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         flag = WRITABLE
         if 'readable' in flags:
             flag = READWRITE
-    config.addObserver(ServiceConfig(
+    proxy.addObserver(ServiceConfig(
             type=options.type,
             minVersion=options.minVersion,
             untilVersion=options.untilVersion,
@@ -88,17 +88,17 @@ if __name__ == '__main__':
             name=name,
         ))
     if options.sslKey and options.sslCertificate:
-        config.addObserver(SslConfig(
+        proxy.addObserver(SslConfig(
                 certificate=options.sslCertificate,
                 key=options.sslKey,
             ))
     if options.additionalLocation:
-        config.addObserver(StaticLocations(options.additionalLocation))
+        proxy.addObserver(StaticLocations(options.additionalLocation))
     if options.unused:
         raise ValueError('No longer supported. Please create your own')
 
     f = Failover()
-    f.addConfiguration(config)
+    f.addConfiguration(proxy)
 
     f.main(**vars(options))
 
