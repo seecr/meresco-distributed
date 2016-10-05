@@ -41,7 +41,7 @@ class Failover(object):
     def addConfiguration(self, config):
         self._nginxConfigurations.append(config)
 
-    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True, **ignored):
+    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True, version=None, **ignored):
         if nginxReload == defaultNginxReloadCmd and not isRootUser():
             raise ValueError('Run as rootuser for default nginx restart script.')
 
@@ -51,7 +51,7 @@ class Failover(object):
                 infoport=0,
                 statePath=None,
                 keys=[],
-                version=VERSION,
+                version=version or VERSION,
                 sharedSecret=sharedSecret,
                 updateInterval=SERVICE_POLL_INTERVAL
             )
