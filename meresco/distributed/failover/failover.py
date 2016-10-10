@@ -82,6 +82,7 @@ class Failover(object):
         parser.addOption('-n', '--name', default='', help='Service name, defaults to ""')
         parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
         parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
+        return parser
 
     def mainWithParseArguments(self, parser=None):
         parser = self.createParserWithDefaults() if parser is None else parser
