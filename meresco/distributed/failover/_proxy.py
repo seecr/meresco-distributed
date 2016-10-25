@@ -23,7 +23,7 @@
 #
 ## end license ##
 
-from weightless.core import asList
+from weightless.core import asList, asString
 from ._nginxconfig import _NginxConfig
 
 class Proxy(_NginxConfig):
@@ -33,7 +33,11 @@ class Proxy(_NginxConfig):
         yield self.all.matchingServices()
         yield self.all.zones()
         yield '\nserver {\n'
-        yield self.all.listenLines()
+        listenLinesDone = set()
+        for listenLine in asString(self.all.listenLines()).split('\n'):
+            if listenLine.strip() and listenLine not in listenLinesDone:
+                yield listenLine + '\n'
+                listenLinesDone.add(listenLine)
         yield '    server_name '
         servernames = ' '.join(asList(self.all.servernames()))
         if not servernames:
