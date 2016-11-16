@@ -25,7 +25,7 @@
 from StringIO import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
-from ._utils import log, noLog
+from ._utils import log, noLog, formatIp
 import re
 
 class ServiceConfig(object):
@@ -78,7 +78,7 @@ class ServiceConfig(object):
         if not listenIps:
             listenIps.append('0.0.0.0')
         for listenIp in listenIps:
-            yield "    listen {0}:{1};\n".format(listenIp, self._port)
+            yield "    listen {0}:{1};\n".format(formatIp(listenIp), self._port)
 
     def matchingServices(self):
         if self._matchingServices:

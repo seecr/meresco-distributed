@@ -22,18 +22,22 @@
 #
 ## end license ##
 
-import sys
-from netaddr import IPAddress
+from seecr.test import SeecrTestCase
+from meresco.distributed.failover import ServiceConfig
+from weightless.core import consume, asString
 
-def log(msg):
-    sys.stdout.write(msg)
-    sys.stdout.flush()
+class ServiceConfigTest(SeecrTestCase):
+    def testListenLines(self):
+        config = ServiceConfig(type='server', minVersion='1', untilVersion='99')
+        consume(config.updateConfig(config={
+                'server.frontend': {
+                    'ip': '10.11.12.13',
+                    'ipAddresses': ['2001::3'],
+                }
+            },
+            services={}))
 
-def noLog(msg):
-    pass
-
-def formatIp(ipAddress):
-    ip = IPAddress(ipAddress)
-    if ip.version == 6:
-        return '[%s]' % ip.format()
-    return ip.format()
+        self.assertEqual([
+                'listen 10.11.12.13:80;',
+                'listen [2001::3]:80;'
+            ], [l.strip() for l in asString(config.listenLines()).split('\n') if l.strip()])

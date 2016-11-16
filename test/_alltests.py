@@ -63,6 +63,8 @@ from utilstest import UtilsTest
 from dynamic.servicespagetest import ServicesPageTest
 
 from failover.proxytest import ProxyTest
+from failover.serviceconfigtest import ServiceConfigTest
+from failover.unusedconfigtest import UnusedConfigTest
 
 if __name__ == '__main__':
     unittest.main()

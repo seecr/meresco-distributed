@@ -22,18 +22,15 @@
 #
 ## end license ##
 
-import sys
-from netaddr import IPAddress
+from seecr.test import SeecrTestCase
+from meresco.distributed.failover import UnusedConfig
+from weightless.core import asString
 
-def log(msg):
-    sys.stdout.write(msg)
-    sys.stdout.flush()
+class UnusedConfigTest(SeecrTestCase):
 
-def noLog(msg):
-    pass
-
-def formatIp(ipAddress):
-    ip = IPAddress(ipAddress)
-    if ip.version == 6:
-        return '[%s]' % ip.format()
-    return ip.format()
+    def testListenLines(self):
+        config = UnusedConfig(servername='example.org', listenIps=['10.11.12.13', '2001:0::3'])
+        self.assertEqual([
+                'listen 10.11.12.13:80;',
+                'listen [2001::3]:80;'
+            ], [l.strip() for l in asString(config.listenLines()).split('\n') if l.strip()])

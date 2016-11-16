@@ -25,13 +25,14 @@
 
 from os.path import join
 from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
+from ._utils import formatIp
 
 class UnusedConfig(object):
     def __init__(self, servername, listenIps=None, port=None, usrSharePath=None):
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath is None else usrSharePath
         port = 80 if port is None else port
         listenIps = ['0.0.0.0'] if listenIps is None else listenIps
-        self._listenLines = '\n'.join("    listen {0}:{1};".format(ip, port) for ip in listenIps) + '\n'
+        self._listenLines = '\n'.join("    listen {0}:{1};".format(formatIp(ip), port) for ip in listenIps) + '\n'
         self._servername = servername
 
     def servernames(self):
