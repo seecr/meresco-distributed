@@ -269,6 +269,7 @@ server {
     rewrite  ^ https://api.front.example.org$request_uri? permanent;
 }
 """, open(self.configFile).read())
+
     def testShouldConfigureAnyGivenTypeOfServiceWithPort(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
         n1.addObserver(ServiceConfig(
@@ -1013,7 +1014,7 @@ server {
             '    }',
             '    error_page 500 502 503 504 =503 /unavailable.html;',
             '    location /unavailable.html {',
-            '        root /home/sharekit/sharekit-story-authenticatie/deps.d/meresco-distributed/usr-share/failover;',
+            '        root %s/failover;' % usrSharePath,
             '    }',
             '    client_max_body_size 0;',
             '}',
