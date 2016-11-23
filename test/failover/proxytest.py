@@ -716,7 +716,6 @@ server {
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
-    proxy_redirect          http:// https://;
     location / {
         location /unavailable.html {
         }
@@ -778,7 +777,6 @@ server {
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
-    proxy_redirect          http:// https://;
     location / {
         proxy_pass http://__var_api;
     }
@@ -913,7 +911,6 @@ server {
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
-    proxy_redirect          http:// https://;
 ''', asString(c.sslLines()))
 
     def testServiceConfig(self):

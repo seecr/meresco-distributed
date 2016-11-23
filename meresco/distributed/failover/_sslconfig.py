@@ -37,5 +37,4 @@ class SslConfig(object):
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
-    proxy_redirect          http:// https://;
 """.format(crt=self._sslCertificate, pem=self._sslKey)
