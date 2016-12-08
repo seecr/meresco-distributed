@@ -93,11 +93,17 @@ class ServiceConfig(object):
         self._locations = []
         self._zones = []
         if not self._matchingServices:
-            self._locations.append('''    location {0} {{
+            if self._path == '/':
+                self._locations.append('''    location {0} {{
         location /unavailable.html {{
         }}
         return 503;
     }}'''.format(self._path))
+            else:
+                self._locations.append('''    location {0} {{
+        return 503;
+    }}'''.format(self._path))
+
             return
         for location, data in sorted(throttling.items()):
             zone_name = location.replace("/", "")

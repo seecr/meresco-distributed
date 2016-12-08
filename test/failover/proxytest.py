@@ -964,6 +964,15 @@ server {
         consume(c.updateConfig(**CONFIG_SERVICES()))
         self.assertEqual([
             '    location /main {',
+            '        return 503;',
+            '    }'
+            ], asString(c.locations()).split('\n'))
+
+    def testNotAvailableRoot(self):
+        c = ServiceConfig(type='web', minVersion="4.2", untilVersion="5.0", path='/', port=443)
+        consume(c.updateConfig(**CONFIG_SERVICES()))
+        self.assertEqual([
+            '    location / {',
             '        location /unavailable.html {',
             '        }',
             '        return 503;',
