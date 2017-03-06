@@ -3,7 +3,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2016 SURFmarket https://surf.nl
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -35,7 +35,7 @@ from ._utils import log, noLog
 class _NginxConfig(Observable):
     def __init__(self, nginxConfigFile, usrSharePath=None, name=None, **kwargs):
         Observable.__init__(self, **kwargs)
-        self._nginxConfigFile = nginxConfigFile
+        self._nginxConfigFile = nginxConfigFile.format(name=name)
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath is None else usrSharePath
 
     def update(self, config, verbose=True, **kwargs):
