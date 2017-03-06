@@ -31,11 +31,13 @@ from os import rename
 from os.path import join, isfile
 from collections import namedtuple
 from ._utils import log, noLog
+from escaping import escapeFilename
+from seecr.tools import atomic_write
 
 class _NginxConfig(Observable):
     def __init__(self, nginxConfigFile, usrSharePath=None, name=None, **kwargs):
         Observable.__init__(self, **kwargs)
-        self._nginxConfigFile = nginxConfigFile.format(name=name)
+        self._nginxConfigFile = nginxConfigFile.format(name=name if name is None else escapeFilename(name))
         self._usrSharePath = join(defaultUsrSharePath, 'failover') if usrSharePath is None else usrSharePath
 
     def update(self, config, verbose=True, **kwargs):
@@ -44,9 +46,8 @@ class _NginxConfig(Observable):
         _log = log if verbose else noLog
         mustUpdate = False
         if not isfile(self._nginxConfigFile) or newConfig != open(self._nginxConfigFile).read():
-            with open(self._nginxConfigFile+'~', 'w') as fd:
+            with atomic_write(self._nginxConfigFile) as fd:
                 fd.write(newConfig)
-            rename(self._nginxConfigFile+'~', self._nginxConfigFile)
             mustUpdate = True
         _log("Config in {0}. Must update: {1}\n".format(repr(self._nginxConfigFile), mustUpdate))
         return UpdateResult(mustUpdate, sleeptime)

@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -74,12 +74,15 @@ class Failover(object):
         sleep(sleeptime)
 
     @staticmethod
-    def createParserWithDefaults():
+    def createParserWithDefaults(nameMandatory=False):
         parser = ParseArguments()
         parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
         parser.addOption('', '--adminPort', help='Admin port', default=10000, type='int')
         parser.addOption('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
-        parser.addOption('-n', '--name', default='', help='Service name, defaults to ""')
+        if nameMandatory:
+            parser.addOption('-n', '--name', help='Service name', mandatory=True)
+        else:
+            parser.addOption('-n', '--name', default='', help='Service name, defaults to ""')
         parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
         parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
         return parser
