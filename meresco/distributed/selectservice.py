@@ -3,7 +3,7 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -121,9 +121,7 @@ class SelectService(object):
             self._services = [] if services is None else services
 
         def updateConfig(self, services, **kwargs):
-            self._services = []
-            for serviceDict in services.values():
-                self._services.append(Service(**serviceDict))
+            self._services = [Service(**serviceDict) for serviceDict in services.values()]
             return
             yield
 
