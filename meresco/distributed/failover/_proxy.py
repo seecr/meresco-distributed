@@ -39,7 +39,11 @@ class Proxy(_NginxConfig):
                 yield listenLine + '\n'
                 listenLinesDone.add(listenLine)
         yield '    server_name '
-        servernames = ' '.join(asList(self.all.servernames()))
+        all_servernames = []
+        for name in asList(self.all.servernames()):
+            if not name in all_servernames:
+                all_servernames.append(name)
+        servernames = ' '.join(all_servernames)
         if not servernames:
             raise ValueError('Cannot generate config without servername.')
         yield servernames
