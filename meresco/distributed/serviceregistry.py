@@ -1,26 +1,31 @@
 ## begin license ##
 #
-# "Meresco Distributed" has components for group management based on "Meresco Components."
+# "Nationale Aggregator" (also known as 'http://digitalecollectie.nl') is a service that gathers
+# all Dutch heritage metadata in one place, primarily for ingestion into Europeana.
+# Other services can be added in time."Nationale Aggregator" is developed for the
+# Netherlands Institute for Sound and Vision (http://instituut.beeldengeluid.nl/) by Seecr (http://seecr.nl).
+# The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
+# Copyright (C) 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
 #
-# This file is part of "Meresco Distributed"
+# This file is part of "Nationale Aggregator"
 #
-# "Meresco Distributed" is free software; you can redistribute it and/or modify
+# "Nationale Aggregator" is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# "Meresco Distributed" is distributed in the hope that it will be useful,
+# "Nationale Aggregator" is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with "Meresco Distributed"; if not, write to the Free Software
+# along with "Nationale Aggregator"; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
@@ -31,8 +36,6 @@ from os.path import join, isfile
 import re
 
 from time import time
-
-from uuid import UUID
 
 from meresco.core import Observable
 from meresco.components.json import JsonDict, JsonList
@@ -115,9 +118,9 @@ class ServiceRegistry(Observable):
             raise ValueError("flag '%s' not known." % flag)
         service = self._services.get(identifier)
         if service is None:
-            raise ValueError("service '%s' unknown.")
+            raise ValueError("service '%s' unknown." % identifier)
         if service.isDisabled():
-            raise ValueError("service '%s' is too long gone. Reanable it first.")
+            raise ValueError("service '%s' is disabled (gone too long). Reenable it first." % identifier)
 
         if value:
             service.setPrivateFlagValue(flag.name, True)
