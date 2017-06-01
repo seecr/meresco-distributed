@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2014-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2014-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -25,14 +25,15 @@
 #
 ## end license ##
 
-from meresco.core import Observable
 from os import listdir, stat
 from os.path import join, basename, isfile
 from string import atol
 from time import strftime, localtime
 
-class ServiceLog(Observable):
+from meresco.core import Observable
 
+
+class ServiceLog(Observable):
     def __init__(self, identifier, serviceDir='/etc/service', **kwargs):
         Observable.__init__(self, **kwargs)
         self._identifier = identifier
@@ -60,6 +61,7 @@ class ServiceLog(Observable):
             if not filterStamp or filterStamp in time:
                 yield time, value
 
+
 def formatStamp(stamp):
     return strftime("%Y-%m-%d %H:%M:%S", localtime(stamp))
 
@@ -74,4 +76,3 @@ def tai64ToTime(stamp):
     return "%s.%03d" % (strftime("%Y-%m-%d %H:%M:%S", localtime(int(secs - EPOCH))), nsec/10**6)
 
 EPOCH = 4611686018427387914L
-

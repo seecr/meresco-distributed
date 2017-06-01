@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
@@ -26,15 +26,15 @@
 #
 ## end license ##
 
-from meresco.core import Observable
-
-from meresco.components.http.utils import CRLF, Ok
-
-from meresco.components.json import JsonDict
-from meresco.distributed import serviceUpdateHash
-from simplejson import loads
 from urlparse import parse_qs
+from simplejson import loads
+
 from weightless.core import NoneOfTheObserversRespond
+from meresco.core import Observable
+from meresco.components.http.utils import CRLF, Ok
+from meresco.components.json import JsonDict
+
+from meresco.distributed import serviceUpdateHash
 
 
 class ServiceHandler(Observable):
@@ -133,6 +133,7 @@ class ServiceHandler(Observable):
 
     def _allKeys(self):
         return (name for name in (o.observable_name() for o in self.observers()) if name)
+
 
 def _requestedKeys(keys):
     requested = set(['config', 'services'])

@@ -4,8 +4,9 @@
 #
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
+# Copyright (C) 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
 #
 # This file is part of "Meresco Distributed"
 #
@@ -25,27 +26,33 @@
 #
 ## end license ##
 
+import re
+
+from simplejson import loads
+
+from seecr.zulutime import ZuluTime
+
+from seecr.weblib import seecrWebLibPath
+
+from weightless.core import be
+from weightless.http import httpget
+from meresco.components import Schedule, PeriodicDownload
+from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
+from meresco.components.http.utils import ContentTypePlainText
+from meresco.components.json import JsonDict
+from meresco.html import DynamicHtml
+from meresco.oai import stamp2zulutime
+from meresco.oai.resumptiontoken import ResumptionToken
+
+from meresco.distributed.utils import ipsAndRanges
+from meresco.distributed.flagcheck import FlagCheck
+from _serviceflags import WRITABLE, READABLE
 from .selectservice import SelectService
 from .servicelog import ServiceLog
 from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY
 from .updateperiodicdownload import UpdatePeriodicDownload
 from .updateips import UpdateIps
-from meresco.components import Schedule, PeriodicDownload
-from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
-from meresco.components.http.utils import ContentTypePlainText
-from meresco.components.json import JsonDict
-from meresco.distributed.utils import ipsAndRanges
-from meresco.distributed.flagcheck import FlagCheck
-from meresco.oai import stamp2zulutime
-from meresco.oai.resumptiontoken import ResumptionToken
-from weightless.core import be
-from weightless.http import httpget
-from _serviceflags import WRITABLE, READABLE
-from simplejson import loads
-from meresco.html import DynamicHtml
-from seecr.weblib import seecrWebLibPath
-from seecr.zulutime import ZuluTime
-import re
+
 
 class ServiceManagement(object):
     def __init__(self, reactor, admin, configDownloadProcessor, identifier, serviceType, statePath, version=None, documentationPath=None, enableSelectService=True, name=None):
@@ -78,7 +85,6 @@ class ServiceManagement(object):
             'ZuluTime': ZuluTime,
             're': re,
             'datastreamStates': [],
-            'processingStates': [],
         }
         self.commonDynamicPaths = []
         self.commonStaticPaths = [seecrWebLibPath]
@@ -102,24 +108,22 @@ class ServiceManagement(object):
     def createConfigUpdateTree(self, configObservers=None):
         configObservers = configObservers or []
         if not getattr(self, '_configPeriodicDownload', None):
-            self._configPeriodicDownload = PeriodicDownload(
-                reactor=self._reactor,
-                host=self._adminHostname,
-                port=self._adminPort,
-                schedule=Schedule(period=SERVICE_POLL_INTERVAL),
-                prio=9,
-                name='config')
-            self._periodicConfigDownloadTree = be(
-                (self._configPeriodicDownload,
+            self._configPeriodicDownload = be(
+                (PeriodicDownload(
+                        reactor=self._reactor,
+                        host=self._adminHostname,
+                        port=self._adminPort,
+                        schedule=Schedule(period=SERVICE_POLL_INTERVAL),
+                        prio=9,
+                        name='config'),
                     (self._configDownloadProcessor,
                         (self,),
-                        (self._serviceLog,),
                     )
                 )
             )
         for configObserver in configObservers:
             self.addConfigObserver(configObserver)
-        return self._periodicConfigDownloadTree
+        return self._configPeriodicDownload
 
     def addConfigObserver(self, configObserver):
         self._configDownloadProcessor.addObserver(configObserver)
@@ -211,13 +215,13 @@ class ServiceManagement(object):
         self.addConfigObserver(check)
         return check
 
+
 class SimpleServer(object):
     def __init__(self, completeHttpResponse):
         self._response = completeHttpResponse
 
     def handleRequest(self, *args, **kwargs):
         yield self._response
-
 
 
 class DummySelectService(object):

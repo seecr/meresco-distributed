@@ -32,6 +32,7 @@ from seecr.utils import Version
 
 from .service import Service
 
+
 class SelectService(object):
     def __init__(self, currentVersion, statePath=None, services=None, useCache=True, untilVersion=None):
         self._serviceList = self._ServiceList(services)
@@ -115,6 +116,7 @@ class SelectService(object):
         result._serviceList = serviceRegistry
         result.updateConfig = lambda **kwargs: None
         return result
+
 
     class _ServiceList(object):
         def __init__(self, services):

@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -25,22 +25,23 @@
 #
 ## end license ##
 
+import sys
 from os import makedirs
 from os.path import join, abspath, isfile, isdir
 from urllib import urlencode
 from urllib2 import urlopen, HTTPError, URLError
 from socket import timeout
-import sys
-
-from meresco.components.http.utils import createHttpHeaders
-from meresco.core import Observable
-
-from .utils import serviceUpdateHash, IP_ADDRESS
-from meresco.components.json import JsonDict
+from time import time
 from copy import copy
+
 from simplejson import dumps
 
-from time import time
+from meresco.core import Observable
+from meresco.components.http.utils import createHttpHeaders
+from meresco.components.json import JsonDict
+
+from .utils import serviceUpdateHash, IP_ADDRESS
+
 
 class ConfigDownloadProcessor(Observable):
     apiVersion = 2
@@ -162,6 +163,7 @@ Tried: %s
     def updateConfig(self, **kwargs):
         yield self.all.updateConfig(**kwargs)
 
+
 class _Cache(object):
     def __init__(self, statePath):
         if not isdir(statePath):
@@ -176,6 +178,7 @@ class _Cache(object):
             return None
         return JsonDict().load(self.filepath)
 
+
 class _NoCache(object):
     filepath = None
     def update(self, configuration):
@@ -183,6 +186,7 @@ class _NoCache(object):
 
     def retrieve(self):
         return None
+
 
 def createUserAgent(type=None, identifier=None, version=None):
     return ' '.join([
