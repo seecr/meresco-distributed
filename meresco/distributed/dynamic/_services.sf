@@ -105,7 +105,7 @@ def showService(service):
 
     try:
         for link in observable.call.serviceLinks(service):
-            yield link
+            yield link + ' '
     except NoneOfTheObserversRespond:
         pass
     yield '</td><td>'
