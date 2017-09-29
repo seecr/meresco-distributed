@@ -36,6 +36,7 @@ from seecr.weblib import seecrWebLibPath
 
 from weightless.core import be
 from weightless.http import httpget
+from meresco.core import Transparent
 from meresco.components import Schedule, PeriodicDownload
 from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
 from meresco.components.http.utils import ContentTypePlainText
@@ -155,10 +156,14 @@ class ServiceManagement(object):
     def readableCheck(self):
         return self._flagCheck(flag=READABLE)
 
-    def createInfoHelix(self, dynamicPath, additionalGlobals=None):
+    def createInfoHelix(self, dynamicPath, additionalGlobals=None, observers=None):
+        _observers = Transparent()
         allAdditionalGlobals = dict(self.allAdditionalGlobals)
         if additionalGlobals:
             allAdditionalGlobals.update(additionalGlobals)
+        if observers:
+            for observer in observers:
+                _observers.addObserver(observer)
         return \
             (PathFilter('/info'),
                 (PathRename(lambda path: path[len('/info'):] or '/'),
@@ -180,6 +185,7 @@ class ServiceManagement(object):
                             ),
                             (self.configReadObject(),),
                             (self._serviceLog,),
+                            (_observers,),
                         )
                     )
                 ),
