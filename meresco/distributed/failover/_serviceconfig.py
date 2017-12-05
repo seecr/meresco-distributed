@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -26,6 +26,7 @@ from StringIO import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
 from ._utils import log, noLog, formatIp
+from hashlib import md5
 import re
 
 class ServiceConfig(object):
@@ -80,10 +81,13 @@ class ServiceConfig(object):
         for listenIp in listenIps:
             yield "    listen {0}:{1};\n".format(formatIp(listenIp), self._port)
 
+    def _varname(self):
+        return '__var_{0}_{1}'.format(md5(''.join(self.servernames())).hexdigest(), self._name)
+
     def matchingServices(self):
         if self._matchingServices:
             servers = ['    server {0}:{1};'.format(*s) for s in sorted(self._matchingServices)]
-            yield 'upstream __var_{0} {{\n{1}\n}}\n'.format(self._name, '\n'.join(servers))
+            yield 'upstream {0} {{\n{1}\n}}\n'.format(self._varname(), '\n'.join(servers))
             self._log(''.join('Service {name} at {0}:{1}\n'.format(host, port, name=self._name) for host, port in self._matchingServices))
 
     def _throttling(self):
@@ -109,7 +113,7 @@ class ServiceConfig(object):
             zone_name = location.replace("/", "")
             locationData = StringIO()
             locationData.write("""    location {location} {{
-        proxy_pass http://__var_{name};\n""".format(name=self._name, location=location))
+        proxy_pass http://{varname};\n""".format(varname=self._varname(), location=location))
             if 'max_connections_per_ip' in data:
                 locationData.write("        limit_conn {name}-{0}-byip {1};\n".format(zone_name, data['max_connections_per_ip'], name=self._name))
                 self._zones.append("limit_conn_zone $binary_remote_addr zone={name}-{0}-byip:10m;".format(zone_name, name=self._name))
