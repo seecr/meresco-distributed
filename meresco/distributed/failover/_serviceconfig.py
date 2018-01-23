@@ -2,7 +2,8 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2018 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2018 SURF https://surf.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -30,13 +31,13 @@ from hashlib import md5
 import re
 
 class ServiceConfig(object):
-    def __init__(self, type, minVersion, untilVersion, path='/', flag=READABLE, endpoint=None, port=None, name=None):
+    def __init__(self, type, minVersion, untilVersion, path=None, paths=None, flag=READABLE, endpoint=None, port=None, name=None):
         self._minVersion = minVersion
         self._untilVersion = untilVersion
         self._typeConfig = {}
         self._port = 80 if port is None else port
         self._type = type
-        self._path = path
+        self._path = _create_path(path, paths)
         self._flag = flag
         self._endpoint = endpoint
         self._matchingServices = []
@@ -127,3 +128,11 @@ NAME_RE = re.compile(r'^\w+$')
 def namecheck(name):
     if not NAME_RE.match(name):
         raise ValueError('Only alphanumeric characters allowed.')
+
+def _create_path(path, paths):
+    if path and paths:
+        raise TypeError("Use either path or paths")
+    if paths:
+        return '~ ^({})'.format('|'.join(paths))
+    return path or '/'
+
