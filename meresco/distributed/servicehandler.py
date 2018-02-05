@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2018 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
@@ -41,9 +41,10 @@ class ServiceHandler(Observable):
     versions = {'v2': 2}
     default_version = 2
 
-    def __init__(self, secret, name=None):
+    def __init__(self, secret, softwareVersion, name=None):
         Observable.__init__(self, name=name)
         self._secret = secret
+        self._softwareVersion = softwareVersion
         self._prefix = '/service/'
         self._actions = {
             'update': (self.handleUpdate, 'POST'),
@@ -124,7 +125,7 @@ class ServiceHandler(Observable):
             if this_service is not None:
                 result['this_service'] = this_service
                 result['this_service']['state'] = self.call.getPrivateStateFor(identifier=serviceIdentifier)
-        result = JsonDict(api_version=apiVersion, **result)
+        result = JsonDict(api_version=apiVersion, softwareVersion=self._softwareVersion, **result)
         yield okJson
         yield result.pretty_print() if prettyPrint else str(result)
 

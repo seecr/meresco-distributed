@@ -33,5 +33,6 @@ from ._sslconfig import SslConfig
 from ._staticpathconfig import StaticPathConfig, StaticLocations
 from ._unusedconfig import UnusedConfig
 from ._httptohttpsredirect import HttpToHttpsRedirect
+from ._matchesversion import MatchesVersion
 from .failover import Failover
 NginxConfig = Proxy
