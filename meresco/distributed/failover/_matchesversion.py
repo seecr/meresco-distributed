@@ -34,9 +34,8 @@ class MatchesVersion(Observable):
         self._actualVersion = None
 
     def updateConfig(self, config, **kwargs):
-        self._actualVersion = config.get('softwareVersion')
-        return
-        yield
+        yield self.all.updateConfig(config=config, **kwargs)
+        self._actualVersion = config.get('software_version')
 
     def all_unknown(self, message, *args, **kwargs):
         if self._matches():

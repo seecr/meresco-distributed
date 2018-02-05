@@ -125,7 +125,7 @@ class ServiceHandler(Observable):
             if this_service is not None:
                 result['this_service'] = this_service
                 result['this_service']['state'] = self.call.getPrivateStateFor(identifier=serviceIdentifier)
-        result = JsonDict(api_version=apiVersion, softwareVersion=self._softwareVersion, **result)
+        result = JsonDict(api_version=apiVersion, software_version=self._softwareVersion, **result)
         yield okJson
         yield result.pretty_print() if prettyPrint else str(result)
 
