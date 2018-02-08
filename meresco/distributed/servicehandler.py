@@ -41,7 +41,7 @@ class ServiceHandler(Observable):
     versions = {'v2': 2}
     default_version = 2
 
-    def __init__(self, secret, softwareVersion, name=None):
+    def __init__(self, secret, softwareVersion=None, name=None):
         Observable.__init__(self, name=name)
         self._secret = secret
         self._softwareVersion = softwareVersion
@@ -125,7 +125,9 @@ class ServiceHandler(Observable):
             if this_service is not None:
                 result['this_service'] = this_service
                 result['this_service']['state'] = self.call.getPrivateStateFor(identifier=serviceIdentifier)
-        result = JsonDict(api_version=apiVersion, software_version=self._softwareVersion, **result)
+        result = JsonDict(api_version=apiVersion, **result)
+        if self._softwareVersion is not None:
+            result['software_version'] = self._softwareVersion
         yield okJson
         yield result.pretty_print() if prettyPrint else str(result)
 
