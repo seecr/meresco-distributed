@@ -31,7 +31,8 @@ from weightless.core import be, asString, consume, NoneOfTheObserversRespond, re
 from meresco.core import Observable
 from meresco.distributed.constants import WRITABLE, READABLE
 from meresco.distributed.utils import usrSharePath
-from meresco.distributed.failover import MatchesVersion, Proxy, ServiceConfig
+from meresco.distributed.failover import MatchesVersion, Proxy, ServiceConfig 
+from meresco.distributed.failover._matchesversion import betweenVersionCondition
 
 
 class MatchesVersionTest(SeecrTestCase):
@@ -55,12 +56,12 @@ class MatchesVersionTest(SeecrTestCase):
         self.assertEqual(['updateConfig'], self.observer.calledMethodNames())
 
     def testDoesNotMatch(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '0.1'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '0.1', 'config':{'foo': 'bar'}}))
         self.assertEqual('', asString(self.top.all.somemessage()))
         self.assertEqual(['updateConfig'], self.observer.calledMethodNames())
 
     def testDoesMatch(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '2'}))
+        consume(self.matchesVersion.updateConfig(software_version='2'))
         self.assertEqual('result', asString(self.top.all.somemessage()))
         self.assertEqual(['updateConfig', 'somemessage'], self.observer.calledMethodNames())
 
@@ -79,7 +80,6 @@ class MatchesVersionTest(SeecrTestCase):
                 'fqdn': 'service2.front.example.org',
                 'ipAddress': '1.2.3.5',
             },
-            'software_version': '3.0'
         }
         configFile = join(self.tempdir, 'server.conf')
         top = be(
@@ -107,7 +107,7 @@ class MatchesVersionTest(SeecrTestCase):
             )
         )
 
-        mustUpdate, sleeptime = top.update(config=config, services=services, verbose=False)
+        mustUpdate, sleeptime = top.update(software_version='3.0', config=config, services=services, verbose=False)
         self.assertTrue(mustUpdate)
         self.assertEquals(30, sleeptime)
         self.assertTrue(isfile(configFile))
@@ -141,17 +141,17 @@ server {
     # MatchesVersion is expected to be invoked with 'all', but testing for 'do', 'call' and 'any' invocation just in case
 
     def testDoesNotMatchDo(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '0.1'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '0.1'}))
         self.top.do.somemessage()
         self.assertEqual(['updateConfig'], self.observer.calledMethodNames())
 
     def testDoesMatchDo(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '2'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '2'}))
         self.top.do.anothermessage()
         self.assertEqual(['updateConfig', 'anothermessage'], self.observer.calledMethodNames())
 
     def testDoesNotMatchCall(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '0.1'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '0.1'}))
         try:
             _ = self.top.call.somemessage()
             self.fail()
@@ -160,12 +160,12 @@ server {
         self.assertEqual(['updateConfig'], self.observer.calledMethodNames())
 
     def testDoesMatchCall(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '2'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '2'}))
         _ = self.top.call.somemessage()
         self.assertEqual(['updateConfig', 'somemessage'], self.observer.calledMethodNames())
 
     def testDoesNotMatchAny(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '0.1'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '0.1'}))
         try:
             _ = retval(self.top.any.somemessage())
             self.fail()
@@ -174,6 +174,16 @@ server {
         self.assertEqual(['updateConfig'], self.observer.calledMethodNames())
 
     def testDoesMatchAny(self):
-        consume(self.matchesVersion.updateConfig(config={'software_version': '2'}))
+        consume(self.matchesVersion.updateConfig(**{'software_version': '2'}))
         _ = retval(self.top.any.somemessage())
         self.assertEqual(['updateConfig', 'somemessage'], self.observer.calledMethodNames())
+
+    def testBetweenVersionCondition(self):
+        inbetween = betweenVersionCondition('1.3', '8')
+        self.assertTrue(inbetween('1.3'))
+        self.assertTrue(inbetween('1.3.x'))
+        self.assertTrue(inbetween('7.9'))
+        self.assertFalse(inbetween('8.0'))
+        self.assertFalse(inbetween('8'))
+        self.assertFalse(inbetween('77'))
+        self.assertFalse(inbetween('1.2.x'))

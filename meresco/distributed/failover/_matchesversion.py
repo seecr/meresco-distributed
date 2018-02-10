@@ -22,45 +22,18 @@
 #
 ## end license ##
 
-from weightless.core import NoneOfTheObserversRespond, DeclineMessage
-from meresco.core import Observable
+from ._conditionmet import ConditionMet
 
+from seecr.utils import Version
 
-class MatchesVersion(Observable):
+def betweenVersionCondition(minVersion, untilVersion):
+    minVersion, untilVersion = Version.create(minVersion), Version.create(untilVersion)
+    def _(software_version=None, **kwargs):
+        return not software_version is None and \
+            minVersion <= Version.create(software_version) < untilVersion
+    return _
+
+class MatchesVersion(ConditionMet):
     def __init__(self, minVersion, untilVersion, **kwargs):
-        Observable.__init__(self, **kwargs)
-        self._minVersion = minVersion
-        self._untilVersion = untilVersion
-        self._actualVersion = None
+        ConditionMet.__init__(self, condition=betweenVersionCondition(minVersion, untilVersion), **kwargs)
 
-    def updateConfig(self, config, **kwargs):
-        yield self.all.updateConfig(config=config, **kwargs)
-        self._actualVersion = config.get('software_version')
-
-    def all_unknown(self, message, *args, **kwargs):
-        if self._matches():
-            yield self.all.unknown(message, *args, **kwargs)
-
-    def any_unknown(self, message, *args, **kwargs):
-        if self._matches():
-            try:
-                response = yield self.any.unknown(message, *args, **kwargs)
-                raise StopIteration(response)
-            except NoneOfTheObserversRespond:
-                pass
-        raise DeclineMessage
-
-    def do_unknown(self, message, *args, **kwargs):
-        if self._matches():
-            self.do.unknown(message, *args, **kwargs)
-
-    def call_unknown(self, message, *args, **kwargs):
-        if self._matches():
-            try:
-                return self.call.unknown(message, *args, **kwargs)
-            except NoneOfTheObserversRespond:
-                pass
-        raise DeclineMessage
-
-    def _matches(self):
-        return self._minVersion <= self._actualVersion < self._untilVersion

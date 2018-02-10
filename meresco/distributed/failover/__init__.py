@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
@@ -34,5 +34,6 @@ from ._staticpathconfig import StaticPathConfig, StaticLocations
 from ._unusedconfig import UnusedConfig
 from ._httptohttpsredirect import HttpToHttpsRedirect
 from ._matchesversion import MatchesVersion
+from ._conditionmet import ConditionMet
 from .failover import Failover
 NginxConfig = Proxy
