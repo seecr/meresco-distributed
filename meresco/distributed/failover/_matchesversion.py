@@ -28,10 +28,10 @@ from seecr.utils import Version
 
 def betweenVersionCondition(minVersion, untilVersion):
     minVersion, untilVersion = Version.create(minVersion), Version.create(untilVersion)
-    def _(software_version=None, **kwargs):
+    def fn(software_version=None, **kwargs):
         return not software_version is None and \
             minVersion <= Version.create(software_version) < untilVersion
-    return _
+    return fn
 
 class MatchesVersion(ConditionMet):
     def __init__(self, minVersion, untilVersion, **kwargs):
