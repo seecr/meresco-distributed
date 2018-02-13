@@ -35,6 +35,7 @@ class ServiceConfig(object):
         self._minVersion = minVersion
         self._untilVersion = untilVersion
         self._typeConfig = {}
+        self._globalConfig = {}
         self._port = 80 if port is None else port
         self._type = type
         self._path = _create_path(path, paths)
@@ -49,6 +50,7 @@ class ServiceConfig(object):
 
     def updateConfig(self, config, services, **kwargs):
         self._typeConfig = config.get('{0}.frontend'.format(self._type), {})
+        self._globalConfig = config.get('global.frontend', {})
         if kwargs.get('verbose', False):
             self._log = log
         select = SelectService(self._minVersion, services=services, untilVersion=self._untilVersion)
@@ -76,7 +78,7 @@ class ServiceConfig(object):
             yield alias
 
     def listenLines(self):
-        listenIps = [ip for ip in ([self._typeConfig.get('ipAddress', self._typeConfig.get('ip'))] + self._typeConfig.get('ipAddresses',[])) if ip]
+        listenIps = _listenIps(self._typeConfig) or _listenIps(self._globalConfig)
         if not listenIps:
             listenIps.append('0.0.0.0')
         for listenIp in listenIps:
@@ -135,4 +137,7 @@ def _create_path(path, paths):
     if paths:
         return '~ ^({})'.format('|'.join(paths))
     return path or '/'
+
+def _listenIps(config):
+    return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]
 
