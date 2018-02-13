@@ -28,6 +28,7 @@ from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
 from ._utils import log, noLog, formatIp
 from hashlib import md5
+from itertools import chain
 import re
 
 class ServiceConfig(object):
@@ -72,10 +73,8 @@ class ServiceConfig(object):
         yield '\n'.join(self._locations)
 
     def servernames(self):
-        if 'fqdn' in self._typeConfig:
-            yield self._typeConfig['fqdn']
-        for alias in self._typeConfig.get('aliases', []):
-            yield alias
+        for n in _servernames(self._typeConfig) or _servernames(self._globalConfig):
+            yield n
 
     def listenLines(self):
         listenIps = _listenIps(self._typeConfig) or _listenIps(self._globalConfig)
@@ -140,4 +139,7 @@ def _create_path(path, paths):
 
 def _listenIps(config):
     return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]
+
+def _servernames(config):
+    return filter(None, chain([config.get('fqdn')], config.get('aliases', [])))
 
