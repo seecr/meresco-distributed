@@ -45,7 +45,7 @@ from meresco.html import DynamicHtml
 from meresco.oai import stamp2zulutime
 from meresco.oai.resumptiontoken import ResumptionToken
 
-from meresco.distributed.utils import ipsAndRanges
+from meresco.distributed.utils import ipsAndRanges, dynamicPath, staticPath
 from meresco.distributed.flagcheck import FlagCheck
 from _serviceflags import WRITABLE, READABLE
 from .selectservice import SelectService
@@ -87,8 +87,8 @@ class ServiceManagement(object):
             're': re,
             'datastreamStates': [],
         }
-        self.commonDynamicPaths = []
-        self.commonStaticPaths = [seecrWebLibPath]
+        self.commonDynamicPaths = [dynamicPath]
+        self.commonStaticPaths = [staticPath, seecrWebLibPath]
         self.createConfigUpdateTree()
 
     def updateConfig(self, config, **kwargs):
@@ -173,9 +173,11 @@ class ServiceManagement(object):
                     (PathFilter('/identifier'),
                         (StringServer(self.identifier, ContentTypePlainText),)
                     ),
+                    self.createStaticHelix(),
                     (PathFilter('/', excluding=[
                             '/version',
                             '/identifier',
+                            '/static',
                         ]),
                         (DynamicHtml(
                                 [dynamicPath] + self.commonDynamicPaths,
@@ -187,7 +189,7 @@ class ServiceManagement(object):
                             (self._serviceLog,),
                             (_observers,),
                         )
-                    )
+                    ),
                 ),
             )
 

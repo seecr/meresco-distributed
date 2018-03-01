@@ -1,0 +1,279 @@
+/* begin license *
+ *
+ * "Sharekit" is a repository service for higher education in The Netherlands.
+ * The service is developed by Seecr for SURFmarket.
+ *
+ * Copyright (C) 2016 SURFmarket https://surf.nl
+ * Copyright (C) 2016 Seecr (Seek You Too B.V.) https://seecr.nl
+ *
+ * This file is part of "Sharekit"
+ *
+ * "Sharekit" is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * "Sharekit" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with "Sharekit"; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * end license */
+
+.info {
+    background: white;
+    max-width: 1100px;
+    font-size: 100%;
+    border:         none;
+    width:          100%;
+    height:         100%;
+    line-height:    1.5;
+    font-family: "TitilliumText22LRegular";
+}
+
+a {
+    cursor: pointer;
+}
+
+h3 {
+    margin-top: 1em !important;
+}
+
+#main-content {
+    padding-bottom: 10px;
+}
+
+#content {
+    margin-top: 0;
+    width: 100%;
+    top: 120px;
+}
+
+#surf-logo{
+  margin: 19px 0 20px 0px;
+  width: 125px;
+  height: 64px;
+  background-size: 125px 64px;
+  background-image: url("/images/logo/surflogo.png");
+  display: block;
+  text-indent: -22000px;
+}
+
+td, th {
+    padding: 0.5em;
+    border-bottom: solid black 1px;
+}
+
+.warning {
+    color: #C16021;
+}
+.error {
+    color: red;
+}
+.ok {
+    color: green;
+}
+
+.success {
+    color: white;
+    background-color: green;
+    padding: 0 2px;
+}
+.serviceinfo p {
+    text-align: right;
+    font-size: 50%;
+}
+
+pre.loginfo {
+    overflow: scroll
+}
+pre {
+    word-wrap: break-word;
+}
+
+input[type="text"], input[type="password"], textarea {
+    width: 20em;
+}
+
+input[type="text"].large, textarea.large {
+    width: 100%;
+}
+
+dl {
+    margin: 0;
+}
+
+textarea.config {
+    width: 700px;
+}
+
+p.footer {
+  font-size: 50%;
+}
+
+dl.disabled {
+    background-color: #eeeeee;
+}
+
+h3.stats_toggle, h3.toggleable {
+    cursor: pointer;
+}
+h3.stats_toggle::after, h3.toggleable::after {
+    content: '\2228';
+    float: right;
+    margin-right: 20px;
+}
+h3.stats_toggle.show::after, h3.toggleable.show::after {
+    content: '\2227';
+}
+.stats_content,
+.toggleable_div {
+    max-height: 0;
+    transition: max-height .5s linear 0s;
+    overflow: hidden;
+}
+
+.toggleable_div.show {
+    transition: max-height .5s linear 0s;
+    max-height: 1000px;
+    margin-bottom: 1em;
+    overflow: scroll;
+}
+#config_default.show {
+    max-height: 5000px;
+}
+
+#menu > a {
+    margin-right: 1em;
+}
+
+.index_config_list form {
+    display: inline;
+}
+.hidden {
+    display: none;
+}
+
+
+.edit_div {
+    display: none;
+    border: 1px solid;
+    background-color: white;
+    margin: auto;
+    position: fixed;
+    top: 15%; left: 0; right: 0;
+    width: 500px;
+    padding: 3em 1em;
+    z-index: 1000;
+    margin-bottom: 1em;
+}
+.edit_div input[type='text'] {
+    width: 100%;
+}
+.edit_div textarea {
+    width: 100%;
+    height: 4em;
+}
+.edit_div .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    overflow: hidden;
+}
+.edit_div .close div {
+    position: relative;
+    top: -50px;
+    right: -50px;
+    background-color: black;
+    opacity: 0.5;
+    height: 100px;
+    width: 100px;
+    border-radius: 10em;
+    padding-top: 60px;
+    padding-left: 25px;
+    box-sizing: border-box;
+}
+
+.edit_div.show {
+    display: block;
+}
+.edit_div #save_text {
+    display: none;
+}
+
+input[type="submit"], button, input[type="button"] {
+    background-color: #4c4d4f;
+    color: white;
+    font-weight: bold;
+    border: 0;
+    height: 2em;
+    box-shadow: 1px 1px 5px #4c4d4f;
+    border-radius: 2px;
+    -webkit-appearance: none;
+    margin-right: 1em;
+}
+input[disabled="disabled"] {
+    opacity: 0.5;
+}
+
+/** LOGIN PAGE **/
+#loginpage h1::before, #loginpage h4::before, #login-form dd::before, #login-form p.error::before {
+    content: '';
+    width: 10%;
+    display: inline-block;
+    min-width: 110px;
+}
+
+#login-formpage h4 {
+    font-size: 0.8em;
+}
+#login-form dt {
+    min-width: 100px;
+}
+#login-form dd {
+    margin-left: 0;
+    margin-top: -3em;
+}
+#login-form dd.submit {
+    margin-top: .5em;
+}
+#login-form dt {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+}
+
+#login-form input {
+    position: relative;
+}
+#login-form input[type=text], #login-form input[type=password] {
+    border: 1px solid #4c4d4f;
+    border-radius: 2px;
+    height: 2em;
+    width: 16em;
+    padding-left: 0.5em;
+    font-size: 16px;
+}
+#login-form dd.submit input {
+    background-color: #4c4d4f;
+    color: white;
+    font-weight: bold;
+    border: 0;
+    width: 10em;
+    height: 3em;
+    box-shadow: 1px 1px 5px #4c4d4f;
+    border-radius: 2px;
+    -webkit-appearance: none;
+}
+/** / LOGIN PAGE **/
+
+@media print {
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}

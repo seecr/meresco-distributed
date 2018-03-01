@@ -29,16 +29,16 @@ def header(title, **kwargs):
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="author" content="Seecr" />
     <title>{title}</title>
-    <link rel="icon" href="/static/images/favicon.ico" type="image/gif"/>
-    <link rel="stylesheet" type="text/css" href="/static/info.css?version={version}"/>
-    <link rel="stylesheet" href="/static/css/seecr-view.css?version={version}"/>
-    <link rel="stylesheet" href="/static/css/seecr-banner.css?version={version}"/>
-    <link rel="stylesheet" href="/static/services.css?version={version}"/>
-    <script type="text/javascript" src="/static/admin.js?version={version}"></script>
-    <script type="text/javascript" src="/static/services.js?version={version}"></script>
-    <script type="text/javascript" src="/static/javascript/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="/static/javascript/jquery.autosize-1.18.13.min.js"></script>
-    <script type="text/javascript" src="/static/javascript/seecr-toggleable.js?version={version}"></script>
+    <link rel="icon" href="/info/static/images/favicon.ico" type="image/gif"/>
+    <link rel="stylesheet" type="text/css" href="/info/static/info.css?version={version}"/>
+    <link rel="stylesheet" href="/info/static/css/seecr-view.css?version={version}"/>
+    <link rel="stylesheet" href="/info/static/css/seecr-banner.css?version={version}"/>
+    <link rel="stylesheet" href="/info/static/services.css?version={version}"/>
+    <script type="text/javascript" src="/info/static/admin.js?version={version}"></script>
+    <script type="text/javascript" src="/info/static/services.js?version={version}"></script>
+    <script type="text/javascript" src="/info/static/javascript/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/info/static/javascript/jquery.autosize-1.18.13.min.js"></script>
+    <script type="text/javascript" src="/info/static/javascript/seecr-toggleable.js?version={version}"></script>
 </head>
 <body class="info">
    <!-- ~~~~~ SEECR BANNER ~~~~~ -->
