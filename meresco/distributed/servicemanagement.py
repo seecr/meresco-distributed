@@ -42,7 +42,7 @@ from meresco.components.http import PathFilter, PathRename, StringServer, FileSe
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.json import JsonDict
 from meresco.html import DynamicHtml
-from meresco.oaiutils import stamp2zulutime, ResumptionToken
+from meresco.oaicommon import stamp2zulutime, ResumptionToken
 
 from meresco.distributed.utils import ipsAndRanges, dynamicPath, staticPath
 from meresco.distributed.flagcheck import FlagCheck

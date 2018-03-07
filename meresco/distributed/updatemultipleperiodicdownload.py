@@ -26,7 +26,7 @@
 from meresco.components import PeriodicDownload
 from meresco.core import Observable
 from meresco.distributed import CompositeState
-from meresco.oaiutils import OaiDownloadProcessor
+from meresco.oaicommon import OaiDownloadProcessor
 from meresco.distributed.constants import READABLE
 from os.path import join
 
