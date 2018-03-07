@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015-2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2018 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 # Copyright (C) 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
 #
@@ -42,8 +42,7 @@ from meresco.components.http import PathFilter, PathRename, StringServer, FileSe
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.json import JsonDict
 from meresco.html import DynamicHtml
-from meresco.oai import stamp2zulutime
-from meresco.oai.resumptiontoken import ResumptionToken
+from meresco.oaiutils import stamp2zulutime, ResumptionToken
 
 from meresco.distributed.utils import ipsAndRanges, dynamicPath, staticPath
 from meresco.distributed.flagcheck import FlagCheck

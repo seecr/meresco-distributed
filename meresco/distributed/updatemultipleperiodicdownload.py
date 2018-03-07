@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -26,7 +26,7 @@
 from meresco.components import PeriodicDownload
 from meresco.core import Observable
 from meresco.distributed import CompositeState
-from meresco.oai import OaiDownloadProcessor
+from meresco.oaiutils import OaiDownloadProcessor
 from meresco.distributed.constants import READABLE
 from os.path import join
 
