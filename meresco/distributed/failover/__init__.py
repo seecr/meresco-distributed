@@ -30,7 +30,7 @@ from .__version__ import VERSION
 from ._proxy import Proxy
 from ._serviceconfig import ServiceConfig
 from ._sslconfig import SslConfig
-from ._staticpathconfig import StaticPathConfig, StaticLocations
+from ._staticpathconfig import StaticPathConfig, StaticLocations, StaticServiceConfig, StaticServerName, StaticListenLine
 from ._unusedconfig import UnusedConfig
 from ._httptohttpsredirect import HttpToHttpsRedirect
 from ._matchesversion import MatchesVersion

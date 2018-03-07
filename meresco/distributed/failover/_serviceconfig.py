@@ -26,7 +26,7 @@
 from StringIO import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
-from ._utils import log, noLog, formatIp
+from ._utils import log, noLog, formatIp, create_path
 from hashlib import md5
 from itertools import chain
 import re
@@ -39,7 +39,7 @@ class ServiceConfig(object):
         self._globalConfig = {}
         self._port = 80 if port is None else port
         self._type = type
-        self._path = _create_path(path, paths)
+        self._path = create_path(path, paths)
         self._flag = flag
         self._endpoint = endpoint
         self._matchingServices = []
@@ -129,13 +129,6 @@ NAME_RE = re.compile(r'^\w+$')
 def namecheck(name):
     if not NAME_RE.match(name):
         raise ValueError('Only alphanumeric characters allowed.')
-
-def _create_path(path, paths):
-    if path and paths:
-        raise TypeError("Use either path or paths")
-    if paths:
-        return '~ ^({})'.format('|'.join(paths))
-    return path or '/'
 
 def _listenIps(config):
     return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]

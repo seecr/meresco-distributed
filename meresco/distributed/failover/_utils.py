@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -37,3 +37,11 @@ def formatIp(ipAddress):
     if ip.version == 6:
         return '[%s]' % ip.format()
     return ip.format()
+
+def create_path(path, paths):
+    if path and paths:
+        raise TypeError("Use either path or paths")
+    if paths:
+        return '~ ^({})'.format('|'.join(paths))
+    return path or '/'
+

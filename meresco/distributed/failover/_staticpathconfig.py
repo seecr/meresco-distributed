@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -22,6 +22,7 @@
 #
 ## end license ##
 
+from ._utils import create_path
 
 class StaticPathConfig(object):
     def __init__(self, path, config):
@@ -37,3 +38,31 @@ class StaticLocations(object):
 
     def locations(self):
         yield self._config
+
+class StaticServiceConfig(object):
+    def __init__(self, remoteIp, remotePort=None, path=None, paths=None):
+        self._remotePort = 80 if remotePort is None else remotePort
+        self._remoteIp = remoteIp
+        self._path = create_path(path, paths)
+
+    def locations(self):
+        yield """    location {location} {{
+        proxy_pass http://{remoteIp}:{remotePort};
+    }}""".format(location=self._path, remoteIp=self._remoteIp, remotePort=self._remotePort)
+
+class StaticServerName(object):
+    def __init__(self, *names):
+        self._names = names
+
+    def servernames(self):
+        for n in self._names:
+            yield n
+
+class StaticListenLine(object):
+    def __init__(self, port=None, ip=None):
+        self._port = 80 if port is None else port
+        self._ip = '0.0.0.0' if ip is None else ip
+
+    def listenLines(self):
+        yield "    listen {0}:{1};\n".format(self._ip, self._port)
+
