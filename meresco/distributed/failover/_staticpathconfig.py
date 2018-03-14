@@ -40,15 +40,19 @@ class StaticLocations(object):
         yield self._config
 
 class StaticServiceConfig(object):
-    def __init__(self, remoteIp, remotePort=None, path=None, paths=None):
-        self._remotePort = 80 if remotePort is None else remotePort
+    def __init__(self, remoteIp, remotePort=None, remotePath=None, path=None, paths=None, proxyHeaders=None):
+        self._remotePort = remotePort or 80
         self._remoteIp = remoteIp
+        self._remotePath = remotePath or ''
         self._path = create_path(path, paths)
+        self._proxyHeaders = proxyHeaders or {}
 
     def locations(self):
         yield """    location {location} {{
-        proxy_pass http://{remoteIp}:{remotePort};
-    }}""".format(location=self._path, remoteIp=self._remoteIp, remotePort=self._remotePort)
+        proxy_pass http://{remoteIp}:{remotePort}{remotePath};""".format(location=self._path, remoteIp=self._remoteIp, remotePort=self._remotePort, remotePath=self._remotePath)
+        for key, value in self._proxyHeaders.items():
+            yield """        proxy_set_header    {key} {value};""".format(key=key, value=value)
+        yield """    }"""
 
 class StaticServerName(object):
     def __init__(self, *names):
