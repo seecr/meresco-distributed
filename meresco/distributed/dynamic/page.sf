@@ -30,7 +30,7 @@ def header(title, **kwargs):
     <meta name="author" content="Seecr" />
     <title>{title}</title>
     <link rel="icon" href="/info/static/images/favicon.ico" type="image/gif"/>
-    <link rel="stylesheet" type="text/css" href="/info/info.css?version={version}"/>
+    <link rel="stylesheet" type="text/css" href="/info/static/css/info.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/css/seecr-view.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/css/seecr-banner.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/services.css?version={version}"/>
@@ -60,5 +60,6 @@ def header(title, **kwargs):
 def footer(**kwargs):
     yield """
     </div>
+    <div class="serviceinfo"><p>{0} {1} ({2})</p></div>
     </body>
 </html>""".format(SERVICE_TYPE, identifier, VERSION)
