@@ -58,14 +58,11 @@ class SelectService(object):
         if remember and not identifier:
             identifier = self._getChosenService(type)
 
-        matchingServices = self.findServices(type=type, flag=flag, **kwargs)
+        matchingServices = self.findServices(type=type, flag=flag, identifier=identifier, **kwargs)
         if len(matchingServices) == 0:
+            if identifier is not None:
+                raise ValueError("No '%s' service found with identifier '%s'." % (type, identifier))
             raise ValueError("No '%s' service found" % type)
-        if not identifier is None:
-            for service in matchingServices:
-                if service.identifier == identifier:
-                    return service
-            raise ValueError("No '%s' service found with identifier '%s'." % (type, identifier))
         service = choice(matchingServices)
 
         if remember:
@@ -76,8 +73,8 @@ class SelectService(object):
         for service in self.findServices(type=type, flag=flag, **kwargs):
             yield service.selectHostAndPort(endpoint)
 
-    def findServices(self, type, flag, minVersion=None, untilVersion=None, **ignored):
-        key = (type, flag, minVersion, untilVersion)
+    def findServices(self, type, flag, minVersion=None, untilVersion=None, identifier=None, **ignored):
+        key = (type, flag, minVersion, untilVersion, identifier)
         matchingServices = self._cache.get(key, [])
         if matchingServices:
             return matchingServices
@@ -85,6 +82,8 @@ class SelectService(object):
         untilVersion = self._untilVersion.majorVersion() if untilVersion is None else Version.create(untilVersion)
         for service in self._serviceList.iterServices():
             if service.type == type and flag.isSet(service) and minVersion <= service.getVersion() < untilVersion:
+                if identifier is not None and service.identifier != identifier:
+                    continue
                 matchingServices.append(service)
         self._setCacheItem(key, matchingServices)
         return matchingServices
