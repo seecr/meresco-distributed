@@ -30,7 +30,7 @@ def header(title, **kwargs):
     <meta name="author" content="Seecr" />
     <title>{title}</title>
     <link rel="icon" href="/info/static/images/favicon.ico" type="image/gif"/>
-    <link rel="stylesheet" type="text/css" href="/info/static/css/info.css?version={version}"/>
+    <link rel="stylesheet" type="text/css" href="/info/static/info.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/css/seecr-view.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/css/seecr-banner.css?version={version}"/>
     <link rel="stylesheet" href="/info/static/services.css?version={version}"/>
@@ -78,10 +78,11 @@ def defaultInfo(oaiInfo=False, extralinks=None, **kwargs):
         extralinks.append(('/oai/info', 'Oai'))
     yield globalInfo(extralinks=extralinks, **kwargs)
 
-def globalInfo(extralinks=None, **kwargs):
+def globalInfo(extralinks=None, showLogInfo=True, **kwargs):
     extralinks = [] if extralinks is None else extralinks
     yield '<h3>Globale informatie</h3>\n<ul>\n'
-    yield '<li><a href="/info/loginfo">Service logs</a></li>\n'
+    if showLogInfo:
+        yield '<li><a href="/info/loginfo">Service logs</a></li>\n'
     for link, text in extralinks:
         yield '<li><a href="{0}">{1}</a></li>\n'.format(link, escapeHtml(text))
     yield '<li><a href="/info/config">Config</a></li>\n'

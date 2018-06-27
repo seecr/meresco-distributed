@@ -38,6 +38,7 @@ from weightless.core import be
 from weightless.http import httpget
 from meresco.core import Transparent
 from meresco.components import Schedule, PeriodicDownload
+from meresco.components import Bucket
 from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.json import JsonDict
@@ -69,6 +70,7 @@ class ServiceManagement(object):
         self._documentationPath = documentationPath
         self._serviceLog = ServiceLog(identifier=identifier)
         self.ipsAndRanges = ipsAndRanges
+        self._this_service = Bucket()
         self.allAdditionalGlobals={
             'VERSION': self._version,
             'SERVICE_TYPE': self._serviceType,
@@ -85,6 +87,7 @@ class ServiceManagement(object):
             'ZuluTime': ZuluTime,
             're': re,
             'datastreamStates': [],
+            'this_service': self.this_service,
         }
         self.commonDynamicPaths = [dynamicPath]
         self.commonStaticPaths = [staticPath, seecrWebLibPath]
@@ -95,6 +98,7 @@ class ServiceManagement(object):
         self._configPeriodicDownload.setSchedule(
             Schedule(period=float(config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL)))
         )
+        self._this_service = Bucket(**kwargs.get('this_service', {}))
         self._latestConfiguration = JsonDict(config=config, **kwargs)
         return
 
@@ -221,6 +225,9 @@ class ServiceManagement(object):
         check = FlagCheck(serviceIdentifier=self.identifier, flag=flag)
         self.addConfigObserver(check)
         return check
+
+    def this_service(self):
+        return self._this_service
 
 
 class SimpleServer(object):
