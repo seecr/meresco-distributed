@@ -24,6 +24,6 @@
 
 def main(**kwargs):
     yield 'HTTP/1.0 200 OK\r\n'
-    yield "Content-Type: text/plain\r\n"
+    yield "Content-Type: application/json\r\n"
     yield "\r\n"
     yield observable.call.getConfiguration().pretty_print()
