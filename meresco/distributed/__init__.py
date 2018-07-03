@@ -37,6 +37,7 @@ from .servicegroup import ServiceGroup
 from .selectservice import SelectService
 from .servicelog import ServiceLog
 from .service import Service
+from .servicestate import ServiceState
 from .listvpnservice import ListVpnService
 from .servicemanagement import ServiceManagement
 from .updateperiodicdownload import UpdatePeriodicDownload
