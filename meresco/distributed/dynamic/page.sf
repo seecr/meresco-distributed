@@ -63,13 +63,18 @@ def header(title, **kwargs):
     <div id="content">\n'''.format(title=escapeHtml(title), version=VERSION)
 
 
-def footer(**kwargs):
+def footer(additionalScript=None, **kwargs):
     yield """
     </div>
     </div>
-    <div class="serviceinfo"><p>{0} {1} ({2})</p></div>
-    </body>
-</html>""".format(SERVICE_TYPE, identifier, VERSION)
+    <div class="serviceinfo"><p>{0} {1} ({2})</p></div>""".format(SERVICE_TYPE, identifier, VERSION)
+    if additionalScript:
+        yield '<script type="text/javascript">\n'
+        yield additionalScript
+        yield '\n</script>'
+
+    yield """</body>
+</html>"""
 
 def defaultInfo(oaiInfo=False, extralinks=None, **kwargs):
     yield showProcessingStates(**kwargs)

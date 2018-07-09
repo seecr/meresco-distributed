@@ -118,7 +118,10 @@ function checkAll(servicesTableId, type, checked) {
         </p>""".format(config.get(ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL))
     yield "</form>"
 
-    yield "<script type='text/javascript'>reload_services();</script>"
     yield '<p class="footer">* Opmerkingen worden automatisch opgeslagen.</p>\n'
-    yield page.footer(**kwargs)
+    yield page.footer(additionalScript="""
+$(function(){
+    reload_services();
+});
+""", **kwargs)
 
