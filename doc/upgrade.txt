@@ -1,0 +1,4 @@
+0.5.4 -> 0.6
+============
+
+Your own page.sf should have a function 'footer(...)' which accepts and handles additionalScript.
