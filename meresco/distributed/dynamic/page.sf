@@ -22,6 +22,71 @@
 #
 ## end license ##
 
+def page(content, **kwargs):
+    title = kwargs.get("title", "")
+    additionalScript = kwargs.get("additionalScript", [])
+    tag = kwargs['tag']
+    yield """<!DOCTYPE html>"""
+    with tag("html"):
+        with tag("head"):
+            with tag("meta", **{'http-equiv': 'Content-Type', 'content': 'text/html; charset=utf-8'}): pass
+            with tag('meta', name="author", content="Seecr"): pass
+            with tag("title"): yield title
+            with tag("link", rel="icon", href="/info/static/images/favicon.ico", type_="image/gif"): pass
+            for name in [
+                'info.css',
+                'css/seecr-view.css',
+                'css/seecr-banner.css',
+                'services.css']:
+                href="/info/static/{}?{}".format(name, urlencode(dict(version=VERSION)))
+                with tag("link", rel="stylesheet", href=href, type_="text/css"): pass
+
+            for name in [
+                'admin.js',
+                'services.js',
+                'javascript/jquery-1.11.2.min.js',
+                'javascript/jquery.autosize-1.18.13.min.js',
+                'javascript/seecr-toggleable.js']:
+
+                href = "/info/static/{}".format(name)
+                if not 'jquery' in name:
+                    href = "{}?{}".format(href, urlencode(dict(version=VERSION)))
+                with tag("script", type_='text/javascript', src=href): pass
+        with tag("body", class_="info"):
+            # <!-- ~~~~~ SEECR BANNER ~~~~~ -->
+            with tag("div", id_="seecr-banner", class_=['vcard', 'no-print']):
+                with tag("div", class_=['wrap']):
+                    with tag("h2"):
+                        yield "By "
+                        with tag("span", class_=['org']): yield "Seecr"
+                    with tag("p", class_=['note']):
+                        yield "Software Craftsmanship"
+                    with tag("p"):
+                        with tag("a", class_=['url'], href="https://seecr.nl", rel="me", title="Visit the Seecr website"):
+                            yield "Seecr - Software Craftsmanship"
+                        yield "A service by "
+                        with tag("span", class_=['fn']):
+                            yield "Seecr"
+                        yield ", "
+                        with tag("a", href="mailto:info@seecr.nl", class_="email"):
+                            yield "info@seecr.nl"
+            with tag('div', id_=['main-content']):
+                with tag('div', class_=['header']):
+                    with tag('div', id_='title'):
+                        with tag('h1'):
+                            yield title
+                            yield ' - '
+                            yield VERSION
+                with tag("div", class_=["content"]):
+                    yield content(**kwargs)
+                with tag("div", class_=['serviceinfo']):
+                    with tag("p"):
+                        yield "{} {} ({})".format(SERVICE_TYPE, identifier, VERSION)
+    if additionalScript:
+        with tag("script", type_="text/javascript"):
+            yield tag.as_is(additionalScript)
+
+
 def header(tag, title, **kwargs):
     yield """<!DOCTYPE html>
 <html>
@@ -61,7 +126,7 @@ def header(tag, title, **kwargs):
                     yield title
                     yield ' - '
                     yield VERSION
-    yield '''<div id="content">\n'''
+        yield tag.as_is('''<div id="content">\n''')
 
 
 def footer(additionalScript=None, **kwargs):
@@ -85,62 +150,193 @@ def defaultInfo(oaiInfo=False, extralinks=None, **kwargs):
     yield globalInfo(extralinks=extralinks, **kwargs)
 
 def globalInfo(extralinks=None, showLogInfo=True, **kwargs):
+    tag = kwargs.get('tag')
     extralinks = [] if extralinks is None else extralinks
-    yield '<h3>Globale informatie</h3>\n<ul>\n'
-    if showLogInfo:
-        yield '<li><a href="/info/loginfo">Service logs</a></li>\n'
-    for link, text in extralinks:
-        yield '<li><a href="{0}">{1}</a></li>\n'.format(link, escapeHtml(text))
-    yield '<li><a href="/info/config">Config</a></li>\n'
-    yield '</ul>\n'
+
+    if not tag:
+        yield '<h3>Globale informatie</h3>\n<ul>\n'
+        if showLogInfo:
+            yield '<li><a href="/info/loginfo">Service logs</a></li>\n'
+        for link, text in extralinks:
+            yield '<li><a href="{0}">{1}</a></li>\n'.format(link, escapeHtml(text))
+        yield '<li><a href="/info/config">Config</a></li>\n'
+        yield '</ul>\n'
+        return
+
+    with tag("h3"):
+        yield "Globale informatie"
+    with tag("ul"):
+        if showLogInfo:
+            extralinks.insert(0, ('/info/loginfo', 'Service logs'))
+        for link, text in extralinks+[('/info/config', 'Config')]:
+            with tag("li"):
+                with tag("a", href=link): yield text
+
 
 def showProcessingStates(**kwargs):
     states = processingStates() if hasattr(processingStates, '__call__') else processingStates
-
     if not states:
         return
-    yield '<h3>Status overzicht</h3>\n<ul>\n'
+    tag = kwargs.get('tag')
+    if not tag:
+        yield '<h3>Status overzicht</h3>\n<ul>\n'
+        for state in states:
+            hasInfoPage = getattr(state, 'hasInfoPage', True)
+            yield '<li class="error">' if state.errorState else '<li>'
+            tokenInfoText = ""
+            if hasattr(state, 'host') and state.host and hasattr(state, 'resumptionToken'):
+                oaiPath = "http://%s:%s%s" % (vpnhost(state.host), state.port, state.path)
+                resumptionToken = state.resumptionToken
+                resumptionTokenLink = '<a href="%s/info/resumptiontoken?%s">status</a>' % (
+                        oaiPath,
+                        escapeHtml(urlencode(dict(resumptionToken=resumptionToken))),
+                    )
+                if resumptionToken:
+                    tokenInfoText = " (%s)" % escapeHtml(resumptionToken)
+                else:
+                    from_ = state.from_
+                    if from_:
+                        scheduledAt = ""
+                        if state.nextRequestTime:
+                            scheduledAt = ', scheduled at %s' % ZuluTime.parseEpoch(state.nextRequestTime).formatDutch(time=True)
+                        tokenInfoText = " (%s%s)" % (escapeHtml(from_), escapeHtml(scheduledAt))
+
+                if hasInfoPage:
+                    try:
+                        result = yield httpget(state.host, state.port, "%s/info/json/resumptiontoken?%s" % (state.path, urlencode(dict(resumptionToken=resumptionToken))))
+                        header, body = result.split('\r\n\r\n')
+                        info = loads(body)
+                        timestamp = stamp2zulutime(info['timestamp'])
+                        tokenInfoText = " (%s - %s records remaining - %s)" % (timestamp, formatInt(info['nrOfRemainingRecords']['total']), resumptionTokenLink)
+                    except Exception:
+                        pass
+            yield state.name
+            yield tokenInfoText
+            if hasattr(state, 'host') and state.host:
+                path = '/info' if hasInfoPage else state.path
+                port = '' if state.port == 80 else ':{0}'.format(state.port)
+                yield ' - connected to: <a href="http://{0}{1}{2}">{3}{1}</a>'.format(vpnhost(state.host), port, path, state.host)
+            yield ' - <em>PAUSED</em>' if getattr(state, 'paused', False) else ' - <em>active</em>'
+            if state.errorState:
+                yield '<br />%s' % escapeHtml(state.errorState)
+            yield '</li>\n'
+        yield '</ul>\n'
+        return
+
+    with tag("h3"):
+        yield "Status overzicht"
     for state in states:
         hasInfoPage = getattr(state, 'hasInfoPage', True)
-        yield '<li class="error">' if state.errorState else '<li>'
-        tokenInfoText = ""
-        if hasattr(state, 'host') and state.host and hasattr(state, 'resumptionToken'):
-            oaiPath = "http://%s:%s%s" % (vpnhost(state.host), state.port, state.path)
-            resumptionToken = state.resumptionToken
-            resumptionTokenLink = '<a href="%s/info/resumptiontoken?%s">status</a>' % (
-                    oaiPath,
-                    escapeHtml(urlencode(dict(resumptionToken=resumptionToken))),
-                )
-            if resumptionToken:
-                tokenInfoText = " (%s)" % escapeHtml(resumptionToken)
-            else:
-                from_ = state.from_
-                if from_:
-                    scheduledAt = ""
-                    if state.nextRequestTime:
-                        scheduledAt = ', scheduled at %s' % ZuluTime.parseEpoch(state.nextRequestTime).formatDutch(time=True)
-                    tokenInfoText = " (%s%s)" % (escapeHtml(from_), escapeHtml(scheduledAt))
+        with tag("li", class_=['error'] if state.errorState else None):
+            tokenInfoText = ""
+            tokenInfoLink = None
+            stateHasHost = hasattr(state, 'host') and state.host 
+            if stateHasHost and hasattr(state, 'resumptionToken'):
+                resumptionToken = state.resumptionToken
+                if resumptionToken:
+                    tokenInfoText = resumptionToken
+                else:
+                    if state.from_:
+                        tokenInfoText = "{}, scheduled at {}".format(
+                            state.from_,
+                            ZuluTime.parseEpoch(state.nextRequestTime).formatDutch(time=True)) \
+                               if state.nextRequestTime else state.from_
 
-            if hasInfoPage:
-                try:
-                    result = yield httpget(state.host, state.port, "%s/info/json/resumptiontoken?%s" % (state.path, urlencode(dict(resumptionToken=resumptionToken))))
-                    header, body = result.split('\r\n\r\n')
-                    info = loads(body)
-                    timestamp = stamp2zulutime(info['timestamp'])
-                    tokenInfoText = " (%s - %s records remaining - %s)" % (timestamp, formatInt(info['nrOfRemainingRecords']['total']), resumptionTokenLink)
-                except Exception:
-                    pass
-        yield state.name
-        yield tokenInfoText
-        if hasattr(state, 'host') and state.host:
-            path = '/info' if hasInfoPage else state.path
-            port = '' if state.port == 80 else ':{0}'.format(state.port)
-            yield ' - connected to: <a href="http://{0}{1}{2}">{3}{1}</a>'.format(vpnhost(state.host), port, path, state.host)
-        yield ' - <em>PAUSED</em>' if getattr(state, 'paused', False) else ' - <em>active</em>'
-        if state.errorState:
-            yield '<br />%s' % escapeHtml(state.errorState)
-        yield '</li>\n'
-    yield '</ul>\n'
+                if hasInfoPage:
+                    try:
+                        result = yield httpget(state.host, state.port, "{}/info/json/resumptiontoken?{}".format(
+                            state.path,
+                            urlencode(dict(
+                                resumptionToken=resumptionToken))))
+                        header, body = result.split('\r\n\r\n')
+                        info = loads(body)
+                        tokenInfoText = "{} - {} records remaining".format(
+                            stamp2zulutime(info['timestamp']),
+                            formatInt(info['nrOfRemainingRecords']['total']))
+
+                        oaiPath = "http://%s:%s%s" % (vpnhost(state.host), state.port, state.path)
+                        tokenInfoLink = dict(
+                            url='http://{}:{}{}/info/resumptiontoken?{}'.format(
+                                vpnhost(state.host),
+                                state.port,
+                                state.path,
+                                urlencode(dict(
+                                    resumptionToken=resumptionToken))),
+                            caption="status")
+                    except Exception, e:
+                        raise
+                        pass
+
+            yield state.name
+            if not tokenInfoLink:
+                yield " ({})".format(tokenInfoText) if tokenInfoText else ''
+            else:
+                yield " ({} - ".format(tokenInfoText)
+                with tag("a", href=tokenInfoLink['url']):
+                    yield tokenInfoLink['caption']
+                yield ")"
+
+            if stateHasHost:
+                path = '/info' if hasInfoPage else state.path
+                host = vpnhost(state.host)
+                if state.port != 80:
+                    host = "{}:{}".format(host, state.port)
+                yield " - connected to: "
+                with tag("a", href="http://{}{}".format(host, path)):
+                    yield  "{}:{}".format(state.host, state.port)
+            yield "  -"
+            with tag("em"):
+                yield "PAUSED" if getattr(state, 'paused', False) else 'active'
+            if state.errorState:
+                yield tag.as_is("<br>")
+                yield state.errorState
+
+
+
+           #         yield ' - connected to: <a href="http://{0}{1}{2}">{3}{1}</a>'.format(vpnhost(state.host), port, path, state.host)
+           #     yield ' - <em>PAUSED</em>' if getattr(state, 'paused', False) else ' - <em>active</em>'
+           #     if state.errorState:
+           #         yield '<br />%s' % escapeHtml(state.errorState)
+
+#           tokenInfoText = ""
+#           if hasattr(state, 'host') and state.host and hasattr(state, 'resumptionToken'):
+#               oaiPath = "http://%s:%s%s" % (vpnhost(state.host), state.port, state.path)
+#               resumptionToken = state.resumptionToken
+#               resumptionTokenLink = '<a href="%s/info/resumptiontoken?%s">status</a>' % (
+#                       oaiPath,
+#                       escapeHtml(urlencode(dict(resumptionToken=resumptionToken))),
+#                   )
+#               if resumptionToken:
+#                   tokenInfoText = " (%s)" % escapeHtml(resumptionToken)
+#               else:
+#                   from_ = state.from_
+#                   if from_:
+#                       scheduledAt = ""
+#                       if state.nextRequestTime:
+#                           scheduledAt = ', scheduled at %s' % ZuluTime.parseEpoch(state.nextRequestTime).formatDutch(time=True)
+#                       tokenInfoText = " (%s%s)" % (escapeHtml(from_), escapeHtml(scheduledAt))
+#
+#               if hasInfoPage:
+#                   try:
+#                       result = yield httpget(state.host, state.port, "%s/info/json/resumptiontoken?%s" % (state.path, urlencode(dict(resumptionToken=resumptionToken))))
+#                       header, body = result.split('\r\n\r\n')
+#                       info = loads(body)
+#                       timestamp = stamp2zulutime(info['timestamp'])
+#                       tokenInfoText = " (%s - %s records remaining - %s)" % (timestamp, formatInt(info['nrOfRemainingRecords']['total']), resumptionTokenLink)
+#                   except Exception:
+#                       pass
+#           yield state.name
+#           yield tokenInfoText
+#           if hasattr(state, 'host') and state.host:
+#               path = '/info' if hasInfoPage else state.path
+#               port = '' if state.port == 80 else ':{0}'.format(state.port)
+#               yield ' - connected to: <a href="http://{0}{1}{2}">{3}{1}</a>'.format(vpnhost(state.host), port, path, state.host)
+#           yield ' - <em>PAUSED</em>' if getattr(state, 'paused', False) else ' - <em>active</em>'
+#           if state.errorState:
+#               yield '<br />%s' % escapeHtml(state.errorState)
+#           yield '</li>\n'
+#       yield '</ul>\n'
+#       return
 
 def vpnhost(host):
     return observable.call.getConfiguration().get('config', {}).get('vpn', {}).get('convertIps', {}).get(host, host)
