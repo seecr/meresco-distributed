@@ -160,6 +160,7 @@ class ServiceManagement(object):
         return self._flagCheck(flag=READABLE)
 
     def createInfoHelix(self, dynamicPath, additionalGlobals=None, observers=None):
+        dynamicPaths = dynamicPath if isinstance(dynamicPath, list) else [dynamicPath]
         _observers = Transparent()
         allAdditionalGlobals = dict(self.allAdditionalGlobals)
         if additionalGlobals:
@@ -183,7 +184,7 @@ class ServiceManagement(object):
                             '/static',
                         ]),
                         (DynamicHtml(
-                                [dynamicPath] + self.commonDynamicPaths,
+                                dynamicPaths + self.commonDynamicPaths,
                                 reactor=self._reactor,
                                 indexPage='/info/index',
                                 additionalGlobals=allAdditionalGlobals,
