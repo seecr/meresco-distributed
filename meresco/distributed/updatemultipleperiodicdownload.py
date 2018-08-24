@@ -23,15 +23,16 @@
 #
 ## end license ##
 
-from meresco.components import PeriodicDownload
-from meresco.core import Observable
-from meresco.distributed import CompositeState
-from meresco.oaicommon import OaiDownloadProcessor
-from meresco.distributed.constants import READABLE
 from os.path import join
 
-class UpdateMultiplePeriodicDownload(Observable):
+from meresco.core import Observable
+from meresco.components import PeriodicDownload
+from meresco.oaicommon import OaiDownloadProcessor
+from meresco.distributed import CompositeState
+from meresco.distributed.constants import READABLE
 
+
+class UpdateMultiplePeriodicDownload(Observable):
     def __init__(self, reactor, serviceManagement, createDownloadObserver, downloadPath, metadataPrefix, statePath, serviceType, set=None, userAgentAddition=None, createOaiDownloadProcessor=None, **kwargs):
         Observable.__init__(self, **kwargs)
         self._reactor = reactor
@@ -45,7 +46,7 @@ class UpdateMultiplePeriodicDownload(Observable):
         self._userAgentAddition = userAgentAddition
         self._states = {}
         self._oaiDownloads = []
-        self._createOaiDownloadProcessor = firstNotNone(createOaiDownloadProcessor, OaiDownloadProcessor)
+        self._createOaiDownloadProcessor = createOaiDownloadProcessor or OaiDownloadProcessor
 
     def updateConfig(self, **kwargs):
         serviceSelector = self._serviceManagement.getServiceSelector()
@@ -57,22 +58,23 @@ class UpdateMultiplePeriodicDownload(Observable):
 
     def _createDownloader(self, serviceIdentifier):
         periodicDownload = PeriodicDownload(self._reactor, autoStart=False)
+        name = '{}-{}-{}-{}'.format(self._serviceType, serviceIdentifier, self.observable_name(), self._metadataPrefix)
+        print '_createDownloader name=', name
         oaiDownload = self._createOaiDownloadProcessor(
-                path=self._downloadPath,
-                metadataPrefix=self._metadataPrefix,
-                set=self._set,
-                workingDirectory=join(self._statePath, serviceIdentifier, self.observable_name()),
-                xWait=True,
-                name='{}-{}-{}-{}'.format(self._serviceType, serviceIdentifier, self.observable_name(), self._metadataPrefix),
-                autoCommit=False,
-                userAgentAddition=self._userAgentAddition,
-            )
-
+            path=self._downloadPath,
+            metadataPrefix=self._metadataPrefix,
+            set=self._set,
+            workingDirectory=join(self._statePath, serviceIdentifier, self.observable_name()),
+            xWait=True,
+            name=name,
+            autoCommit=False,
+            userAgentAddition=self._userAgentAddition,
+        )
         updatePeriodicDownload = self._serviceManagement.makeUpdatePeriodicDownload(
-                sourceServiceIdentifier=serviceIdentifier,
-                sourceServiceType=self._serviceType,
-                periodicDownload=periodicDownload,
-            )
+            sourceServiceIdentifier=serviceIdentifier,
+            sourceServiceType=self._serviceType,
+            periodicDownload=periodicDownload,
+        )
         self._serviceManagement.addConfigObserver(updatePeriodicDownload)
         self._createDownloadObserver(identifier=serviceIdentifier, name=self.observable_name(), periodicDownload=periodicDownload, oaiDownload=oaiDownload)
         self._states[serviceIdentifier] = CompositeState(periodicDownload.getState(), oaiDownload.getState())
@@ -84,9 +86,3 @@ class UpdateMultiplePeriodicDownload(Observable):
 
     def getState(self):
         return self._states.values()
-
-def firstNotNone(*args):
-    for a in args:
-        if a is not None:
-            return a
-    return None
