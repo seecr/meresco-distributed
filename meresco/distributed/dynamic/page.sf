@@ -250,9 +250,12 @@ def showProcessingStates(**kwargs):
                                 resumptionToken=resumptionToken))))
                         header, body = result.split('\r\n\r\n')
                         info = loads(body)
-                        tokenInfoText = "{} - {} records remaining".format(
-                            stamp2zulutime(info['timestamp']),
-                            formatInt(info['nrOfRemainingRecords']['total']))
+                        if 'timestamp' in info:
+                            tokenInfoText = "{} - {} records remaining".format(
+                                stamp2zulutime(info['timestamp']),
+                                formatInt(info['nrOfRemainingRecords']['total']))
+                        else:
+                            tokenInfoText = "?? - ??"
 
                         oaiPath = "http://%s:%s%s" % (vpnhost(state.host), state.port, state.path)
                         tokenInfoLink = dict(
