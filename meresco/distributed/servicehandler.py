@@ -6,7 +6,7 @@
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
+# Copyright (C) 2015, 2018 Stichting Kennisnet http://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -125,7 +125,7 @@ class ServiceHandler(Observable):
             if this_service is not None:
                 result['this_service'] = this_service
                 result['this_service']['state'] = self.call.getPrivateStateFor(identifier=serviceIdentifier)
-        result = JsonDict(api_version=apiVersion, **result)
+        result = JsonDict(api_version=apiVersion, domain=self.call.getDomain(), **result)
         if self._softwareVersion is not None:
             result['software_version'] = self._softwareVersion
         yield okJson
