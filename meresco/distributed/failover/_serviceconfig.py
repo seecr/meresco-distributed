@@ -2,8 +2,9 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016-2018 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2018 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2018 SURF https://surf.nl
+# Copyright (C) 2018 Stichting Kennisnet https://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -26,9 +27,8 @@
 from StringIO import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
-from ._utils import log, noLog, formatIp, create_path
+from ._utils import log, noLog, formatIp, create_path, listenIps, servernames
 from hashlib import md5
-from itertools import chain
 import re
 
 class ServiceConfig(object):
@@ -73,15 +73,15 @@ class ServiceConfig(object):
         yield '\n'.join(self._locations)
 
     def servernames(self):
-        for n in _servernames(self._typeConfig) or _servernames(self._globalConfig):
+        for n in servernames(self._typeConfig) or servernames(self._globalConfig):
             yield n
 
     def listenLines(self):
-        listenIps = _listenIps(self._typeConfig) or _listenIps(self._globalConfig)
-        if not listenIps:
-            listenIps.append('0.0.0.0')
-        for listenIp in listenIps:
-            yield "    listen {0}:{1};\n".format(formatIp(listenIp), self._port)
+        listen_ips = listenIps(self._typeConfig) or listenIps(self._globalConfig)
+        if not listen_ips:
+            listen_ips.append('0.0.0.0')
+        for listen_ip in listen_ips:
+            yield "    listen {0}:{1};\n".format(formatIp(listen_ip), self._port)
 
     def _varname(self):
         return '__var_{0}_{1}'.format(md5(''.join(self.servernames())).hexdigest(), self._name)
@@ -130,9 +130,4 @@ def namecheck(name):
     if not NAME_RE.match(name):
         raise ValueError('Only alphanumeric characters allowed.')
 
-def _listenIps(config):
-    return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]
-
-def _servernames(config):
-    return filter(None, chain([config.get('fqdn')], config.get('aliases', [])))
 

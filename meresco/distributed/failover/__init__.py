@@ -2,11 +2,12 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2016, 2018 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2016 SURFmarket https://surf.nl
+# Copyright (C) 2018 Stichting Kennisnet https://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -27,6 +28,7 @@
 ## end license ##
 
 from .__version__ import VERSION
+from ._utils import *
 from ._proxy import Proxy
 from ._serviceconfig import ServiceConfig
 from ._sslconfig import SslConfig

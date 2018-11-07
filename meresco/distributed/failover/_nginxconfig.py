@@ -3,7 +3,8 @@
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
 # Copyright (C) 2016 SURFmarket https://surf.nl
-# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2018 Seecr (Seek You Too B.V.) https://seecr.nl
+# Copyright (C) 2018 Stichting Kennisnet https://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -27,10 +28,8 @@ from weightless.core import asString
 from meresco.core import Observable
 from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
 from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
-from os import rename
 from os.path import join, isfile
-from collections import namedtuple
-from ._utils import log, noLog
+from ._utils import log, noLog, UpdateResult
 from escaping import escapeFilename
 from seecr.tools import atomic_write
 
@@ -54,6 +53,3 @@ class _NginxConfig(Observable):
 
     def generate(self, **kwargs):
         return asString(self._generate(**kwargs))
-
-
-UpdateResult = namedtuple('UpdateResult', ['mustUpdate', 'sleeptime'])

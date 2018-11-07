@@ -2,7 +2,8 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016, 2018 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016, 2018 Seecr (Seek You Too B.V.) https://seecr.nl
+# Copyright (C) 2018 Stichting Kennisnet https://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -24,6 +25,8 @@
 
 import sys
 from netaddr import IPAddress
+from collections import namedtuple
+from itertools import chain
 
 def log(msg):
     sys.stdout.write(msg)
@@ -45,3 +48,12 @@ def create_path(path, paths):
         return '~ ^({})'.format('|'.join(paths))
     return path or '/'
 
+def listenIps(config):
+    return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]
+
+def servernames(config):
+    return filter(None, chain([config.get('fqdn')], config.get('aliases', [])))
+
+UpdateResult = namedtuple('UpdateResult', ['mustUpdate', 'sleeptime'])
+
+__all__ = ['formatIp', 'UpdateResult', 'listenIps', 'servernames']
