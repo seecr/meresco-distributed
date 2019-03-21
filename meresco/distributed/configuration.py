@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2015, 2019 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -56,3 +56,23 @@ class Configuration(Observable):
 
     def observer_init(self):
         yield self.all.updateConfig(config=self.getConfig())
+
+class UpdatableConfig(Observable):
+    "Caches configuration, can be used to retrieve config."
+    def __init__(self, **kwargs):
+        Observable.__init__(self, **kwargs)
+        self._config = dict()
+
+    def updateConfig(self, config, **kwargs):
+        self._config = config
+        return
+        yield
+
+    def get(self, *args, **kwargs):
+        return self._config.get(*args, **kwargs)
+
+    def __getitem__(self, *args, **kwargs):
+        return self._config.__getitem__(*args, **kwargs)
+
+
+   

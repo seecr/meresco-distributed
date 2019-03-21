@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2013, 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2013, 2015, 2019 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2012-2013 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
@@ -30,7 +30,7 @@ from meresco.core import Observable
 
 from seecr.test import SeecrTestCase, CallTrace
 
-from meresco.distributed import Configuration
+from meresco.distributed import Configuration, UpdatableConfig
 from os.path import join, isdir
 from os import makedirs
 from meresco.components.json import JsonDict
@@ -91,6 +91,14 @@ class ConfigurationTest(SeecrTestCase):
         configuration = Configuration(stateDir=self.tempdir, defaultConfig={'a': 1})
         self.assertEquals(CONFIG, configuration.getConfig())
         self.assertFalse(isdir(join(self.tempdir, 'configuration')))
+
+    def testUpdatableConfig(self):
+        config = UpdatableConfig()
+        consume(config.updateConfig(services={'dont':'care'}, config=CONFIG))
+        self.assertEqual(8000, config.get('port'))
+        self.assertEqual(9000, config.get('otherPort', 9000))
+        self.assertEqual('localhost', config['hostname'])
+        self.assertRaises(KeyError, lambda: config['doesnotexist'])
 
 
 CONFIG = {"port": 8000, "hostname": "localhost"}

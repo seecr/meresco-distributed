@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2015 Drents Archief http://www.drentsarchief.nl
 # Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
-# Copyright (C) 2015-2016, 2018 Seecr (Seek You Too B.V.) https://seecr.nl
+# Copyright (C) 2015-2016, 2018-2019 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2015, 2018 Stichting Kennisnet https://www.kennisnet.nl
 #
 # This file is part of "Meresco Distributed"
@@ -28,7 +28,7 @@
 from .utils import dynamicPath, staticPath
 from .compositestate import CompositeState
 from .configdownloadprocessor import ConfigDownloadProcessor
-from .configuration import Configuration
+from .configuration import Configuration, UpdatableConfig
 from .confighandler import ConfigHandler
 from .utils import serviceUpdateHash, ipsAndRanges
 from .scheduledcommit import ScheduledCommit
