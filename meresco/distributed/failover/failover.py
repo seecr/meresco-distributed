@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016-2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016-2017, 2019 Seecr (Seek You Too B.V.) https://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -41,7 +41,7 @@ class Failover(object):
     def addConfiguration(self, config):
         self._nginxConfigurations.append(config)
 
-    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True, version=None, **ignored):
+    def main(self, sharedSecret, adminHostname, adminPort, name, nginxReload=defaultNginxReloadCmd, verbose=True, version=None, useVpn=False, **ignored):
         if nginxReload == defaultNginxReloadCmd and not isRootUser():
             raise ValueError('Run as rootuser for default nginx restart script.')
 
@@ -53,7 +53,8 @@ class Failover(object):
                 keys=[],
                 version=version or VERSION,
                 sharedSecret=sharedSecret,
-                updateInterval=SERVICE_POLL_INTERVAL
+                updateInterval=SERVICE_POLL_INTERVAL,
+                additionalArguments=dict(useVpn=useVpn),
             )
         try:
             configAndServices = configDownloadProcessor.downloadAndUpdate(adminHostname, adminPort)
