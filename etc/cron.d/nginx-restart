@@ -35,4 +35,4 @@
 # is done to hopefully improve the svc -h calls done when nginx
 # configuration is changed during the day. This appears to not
 # work correctly all the time.
-42 0 * * * root if [ -L /etc/service/nginx ]; then svc -t /etc/service/nginx; fi
+42 0 * * * root if [ -L /etc/service/nginx ]; then /usr/sbin/nginx -t && svc -t /etc/service/nginx; fi
