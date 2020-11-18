@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016, 2020 Seecr (Seek You Too B.V.) https://seecr.nl
 #
 # This file is part of "Meresco Distributed"
 #
@@ -22,10 +22,13 @@
 #
 ## end license ##
 
+import distro
+
 class SslConfig(object):
-    def __init__(self, certificate, key):
+    def __init__(self, certificate, key, sslprotocols=None):
         self._sslKey = key
         self._sslCertificate = certificate
+        self._sslProtocols = sslprotocols or default_sslprotocols
 
     def sslLines(self):
         yield """
@@ -33,8 +36,12 @@ class SslConfig(object):
 
     ssl_certificate         {crt};
     ssl_certificate_key     {pem};
-    ssl_protocols           TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols           {ssl_protocols};
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
-""".format(crt=self._sslCertificate, pem=self._sslKey)
+""".format(crt=self._sslCertificate, pem=self._sslKey, ssl_protocols=' '.join(self._sslProtocols))
+
+default_sslprotocols = ['TLSv1.2']
+if distro.id() == 'debian' and int(distro.version()) >= 10:
+    default_sslprotocols.append('TLSv1.3')

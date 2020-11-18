@@ -2,7 +2,7 @@
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
 #
-# Copyright (C) 2012-2018 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2018, 2020 Seecr (Seek You Too B.V.) https://seecr.nl
 # Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
 # Copyright (C) 2015-2016 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2016 Drents Archief http://www.drentsarchief.nl
@@ -35,7 +35,9 @@ from os.path import isfile, join
 from uuid import uuid4
 from meresco.distributed.utils import usrSharePath
 from weightless.core import asList, consume, asString
+from meresco.distributed.failover._sslconfig import default_sslprotocols
 
+sslProtocols = ' '.join(default_sslprotocols)
 
 newId = lambda: str(uuid4())
 
@@ -763,7 +765,7 @@ server {
 
     ssl_certificate         /path/to/server.crt;
     ssl_certificate_key     /path/to/server.pem;
-    ssl_protocols           TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols           %s;
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
@@ -778,7 +780,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, open(self.configFile).read())
+""" % (sslProtocols, usrSharePath), open(self.configFile).read())
 
     def testSsl(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -824,7 +826,7 @@ server {
 
     ssl_certificate         /path/to/server.crt;
     ssl_certificate_key     /path/to/server.pem;
-    ssl_protocols           TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols           %s;
     keepalive_timeout       60;
     ssl_session_cache       shared:SSL:10m;
 
@@ -837,7 +839,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, open(self.configFile).read())
+""" % (sslProtocols, usrSharePath), open(self.configFile).read())
 
     def testEndpointPortForListen(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -952,7 +954,7 @@ server {
         self.assertEqual('config2', open(join(self.tempdir, 'server.conf')).read())
 
     def testSslConfig(self):
-        c = SslConfig(certificate='/path/to/ssl.crt', key='/path/to/ssl.pem')
+        c = SslConfig(certificate='/path/to/ssl.crt', key='/path/to/ssl.pem', sslprotocols=['TLSv1', 'TLSv1.1', 'TLSv1.2'])
         self.assertEqual('''
     ssl on;
 
