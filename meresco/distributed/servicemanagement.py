@@ -39,7 +39,7 @@ from weightless.http import httpget
 from meresco.core import Transparent
 from meresco.components import Schedule, PeriodicDownload
 from meresco.components import Bucket
-from meresco.components.http import PathFilter, PathRename, StringServer, FileServer
+from meresco.components.http import PathFilter, PathRename, StringServer, FileServer, StaticFiles
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.json import JsonDict
 from meresco.html import DynamicHtml
@@ -168,6 +168,7 @@ class ServiceManagement(object):
         if observers:
             for observer in observers:
                 _observers.addObserver(observer)
+        staticElement, staticElementPaths = self.createNewStyleStaticElement()
         return \
             (PathFilter('/info'),
                 (PathRename(lambda path: path[len('/info'):] or '/'),
@@ -178,11 +179,12 @@ class ServiceManagement(object):
                         (StringServer(self.identifier, ContentTypePlainText),)
                     ),
                     self.createStaticHelix(),
+                    (staticElement,),
                     (PathFilter('/', excluding=[
                             '/version',
                             '/identifier',
                             '/static',
-                        ]),
+                        ] + staticElementPaths),
                         (DynamicHtml(
                                 dynamicPaths + self.commonDynamicPaths,
                                 reactor=self._reactor,
@@ -215,6 +217,18 @@ class ServiceManagement(object):
                     (FileServer(paths),)
                 )
             )
+
+    def createNewStyleStaticElement(self):
+        staticElementPaths = []
+        staticElement = Transparent()
+        js = lambda p: '/usr/share/javascript/' + p
+        for elem in [
+                    StaticFiles(libdir=js('jquery'), path='/jquery'),
+                    StaticFiles(libdir=js('autosize'), path='/autosize'),
+                ]:
+            staticElementPaths.append(elem.path)
+            staticElement.addObserver(elem)
+        return staticElement, staticElementPaths
 
     def configReadObject(self):
         class ConfigReadObject(object):

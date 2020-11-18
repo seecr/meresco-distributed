@@ -25,6 +25,7 @@
 def page(content, **kwargs):
     title = kwargs.get("title", "")
     additionalScript = kwargs.get("additionalScript", [])
+    extraJavascripts = kwargs.get("extraJavascripts", [])
     tag = kwargs['tag']
     yield """<!DOCTYPE html>"""
     with tag("html"):
@@ -32,7 +33,7 @@ def page(content, **kwargs):
             with tag("meta", **{'http-equiv': 'Content-Type', 'content': 'text/html; charset=utf-8'}): pass
             with tag('meta', name="author", content="Seecr"): pass
             with tag("title"): yield title
-            with tag("link", rel="icon", href="/info/static/images/favicon.ico", type_="image/gif"): pass
+            with tag("link", rel="icon", href="/info/static/favicon.ico", type_="image/gif"): pass
             for name in [
                 'info.css',
                 'css/seecr-view.css',
@@ -42,13 +43,13 @@ def page(content, **kwargs):
                 with tag("link", rel="stylesheet", href=href, type_="text/css"): pass
 
             for name in [
-                'admin.js',
-                'services.js',
-                'javascript/jquery-1.11.2.min.js',
-                'javascript/jquery.autosize-1.18.13.min.js',
-                'javascript/seecr-toggleable.js']:
+                'static/admin.js',
+                'static/services.js',
+                'jquery/jquery.min.js',
+                'autosize/autosize.min.js',
+                'static/javascript/seecr-toggleable.js']:
 
-                href = "/info/static/{}".format(name)
+                href = "/info/{}".format(name)
                 if not 'jquery' in name:
                     href = "{}?{}".format(href, urlencode(dict(version=VERSION)))
                 with tag("script", type_='text/javascript', src=href): pass
@@ -85,6 +86,8 @@ def page(content, **kwargs):
     if additionalScript:
         with tag("script", type_="text/javascript"):
             yield tag.as_is(additionalScript)
+    for each in extraJavascripts:
+        with tag("script", src=each): pass
 
 
 def header(tag, title, **kwargs):
@@ -230,7 +233,7 @@ def showProcessingStates(**kwargs):
         with tag("li", class_=['error'] if state.errorState else None):
             tokenInfoText = ""
             tokenInfoLink = None
-            stateHasHost = hasattr(state, 'host') and state.host 
+            stateHasHost = hasattr(state, 'host') and state.host
             if stateHasHost and hasattr(state, 'resumptionToken'):
                 resumptionToken = state.resumptionToken
                 if resumptionToken:
