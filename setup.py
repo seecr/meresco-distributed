@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ## begin license ##
 #
@@ -33,8 +33,6 @@ from os.path import join, relpath
 data_files = []
 for path, dirs, files in walk('usr-share'):
         data_files.append((path.replace('usr-share', '/usr/share/meresco-distributed', 1), [join(path, f) for f in files]))
-for path, dirs, files in walk('etc'):
-        data_files.append((path.replace('etc', '/etc', 1), [join(path, f) for f in files]))
 scripts = []
 for path, dirs, files in walk('bin'):
     for file in files:

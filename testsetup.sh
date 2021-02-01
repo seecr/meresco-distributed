@@ -30,21 +30,15 @@ rm -rf tmp build
 mydir=$(cd $(dirname $0); pwd)
 source /usr/share/seecr-tools/functions.d/test
 
-VERSION="x.y.z"
-
 definePythonVars
-python2.7 setup.py install --root tmp
+${PYTHON} setup.py install --root tmp
 
 cp -r test tmp/test
 removeDoNotDistribute tmp
 find tmp -name '*.py' -exec sed -r -e "
-    s/\\\$Version:[^\\\$]*\\\$/\\\$Version: ${VERSION}\\\$/;
     s,^usrSharePath = .*,usrSharePath = '$mydir/tmp/usr/share/meresco-distributed',;
     " -i '{}' \;
 
-if [ -z "$@" ]; then
-    runtests "alltests.sh integrationtest.sh"
-else
-    runtests "$@"
-fi
+runtests "$@"
+
 rm -rf tmp build
