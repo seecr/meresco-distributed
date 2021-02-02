@@ -564,7 +564,8 @@ class ServiceHandlerTest(SeecrTestCase):
         header, body = httpSplit(result)
         self.assertTrue("200 OK" in header, header)
         self.assertEqual({"listServices", "getConfig", 'getDomain'}, set(observer.calledMethodNames()))
-        self.assertEqual({'activeOnly': True, 'convertIpsToVpn': True, 'includeState': False}, observer.calledMethods[0].kwargs)
+        indexListServices = observer.calledMethodNames().index('listServices')
+        self.assertEqual({'activeOnly': True, 'convertIpsToVpn': True, 'includeState': False}, observer.calledMethods[indexListServices].kwargs)
 
 newId = lambda: str(uuid4())
 
