@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 ## begin license ##
 #
 # "Meresco Distributed" has components for group management based on "Meresco Components."
@@ -32,74 +31,74 @@ includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
 from meresco.distributed.constants import READABLE, WRITABLE, READWRITE
 from meresco.distributed.utils import usrSharePath
 from seecr.utils import isRootUser
-from meresco.components import ParseArguments
 from os.path import join
 from meresco.distributed.failover import Failover, Proxy, ServiceConfig, SslConfig, StaticLocations
 from warnings import warn
+from argparse import ArgumentParser
 
 
 if __name__ == '__main__':
     warn('This script will disappear, please write your own custom script.', DeprecationWarning)
-    parser = ParseArguments()
-    parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
-    parser.addOption('', '--adminPort', help='Admin port', default=10000, type='int')
-    parser.addOption('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
-    parser.addOption('-c', '--nginxConfigDir', type='str', help='Configuration directory with files included by default nginx configuration (defaults to /etc/nginx/sites-enabled)', default='/etc/nginx/sites-enabled')
-    parser.addOption('-t', '--type', type='str', help='Service type to write nginx configuration for (default: api)', default='api')
-    parser.addOption('-n', '--name', default=None, help='Service name, defaults to type')
+    parser = ArgumentParser()
+    parser.add_argument('--adminHostname', help='Admin hostname', required=True)
+    parser.add_argument('--adminPort', help='Admin port', default=10000, type=int)
+    parser.add_argument('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
+    parser.add_argument('-c', '--nginxConfigDir', help='Configuration directory with files included by default nginx configuration (defaults to /etc/nginx/sites-enabled)', default='/etc/nginx/sites-enabled')
+    parser.add_argument('-t', '--type', help='Service type to write nginx configuration for (default: api)', default='api')
+    parser.add_argument('-n', '--name', default=None, help='Service name, defaults to type')
     defaultNginxReloadCmd = 'svc -h /etc/service/nginx'
-    parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
-    parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
-    parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
-    parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
-    parser.addOption('', '--flag', type="choice", choices=['readable', 'writable'], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
-    parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
-    parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
-    parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
-    parser.addOption('', '--sslKey', help='Path to ssl key. Will generate https proxy.')
-    parser.addOption('', '--endpoint', help='Connect to other address than default ipAddress and infoport from the service.')
-    parser.addOption('', '--additionalLocation', help="AdditionalLocation, mention complet nginx 'location' config")
+    parser.add_argument('--nginxReload', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
+    parser.add_argument('--minVersion', help='Select services with specified minimial version.', required=True)
+    parser.add_argument('--untilVersion', help='Select services with specified with version below given version.', required=True)
+    parser.add_argument('--unused', action='store_true', default=False, dest='unused', help='Show unused page')
+    parser.add_argument('--flag', choices=['readable', 'writable'], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
+    parser.add_argument('--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
+    parser.add_argument('--sharedSecret', help='Shared secret for updating as a service in admin', required=True)
+    parser.add_argument('--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
+    parser.add_argument('--sslKey', help='Path to ssl key. Will generate https proxy.')
+    parser.add_argument('--endpoint', help='Connect to other address than default ipAddress and infoport from the service.')
+    parser.add_argument('--additionalLocation', help="AdditionalLocation, mention complet nginx 'location' config")
 
-    options, arguments = parser.parse()
-    if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
-        print 'Run as rootuser for default nginx restart script.'
+    args = parser.parse_args()
+    if args.nginxReload == defaultNginxReloadCmd and not isRootUser():
+        print('Run as rootuser for default nginx restart script.')
         exit(2)
 
 
-    name = options.name or options.type
+    name = args.name or args.type
     proxy = Proxy(
-            usrSharePath=options.usrSharePath,
-            nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
+            usrSharePath=args.usrSharePath,
+            nginxConfigFile=join(args.nginxConfigDir, '%s.frontend.conf' % name),
             name=name,
         )
-    flags = options.flags or []
+    flags = args.flags or []
     flag = READABLE
     if 'writable' in flags:
         flag = WRITABLE
         if 'readable' in flags:
             flag = READWRITE
     proxy.addObserver(ServiceConfig(
-            type=options.type,
-            minVersion=options.minVersion,
-            untilVersion=options.untilVersion,
+            type=args.type,
+            minVersion=args.minVersion,
+            untilVersion=args.untilVersion,
             flag=flag,
-            endpoint=options.endpoint,
-            port=80 if not options.sslCertificate else 443,
+            endpoint=args.endpoint,
+            port=80 if not args.sslCertificate else 443,
             name=name,
         ))
-    if options.sslKey and options.sslCertificate:
+    if args.sslKey and args.sslCertificate:
         proxy.addObserver(SslConfig(
-                certificate=options.sslCertificate,
-                key=options.sslKey,
+                certificate=args.sslCertificate,
+                key=args.sslKey,
             ))
-    if options.additionalLocation:
-        proxy.addObserver(StaticLocations(options.additionalLocation))
-    if options.unused:
+    if args.additionalLocation:
+        proxy.addObserver(StaticLocations(args.additionalLocation))
+    if args.unused:
         raise ValueError('No longer supported. Please create your own')
 
     f = Failover()
     f.addConfiguration(proxy)
 
-    f.main(**vars(options))
+    f.main(**vars(args))
 
 
