@@ -34,7 +34,7 @@ from time import time
 from meresco.distributed.servicestate import ERROR
 
 from seecr.zulutime import ZuluTime
-from seecr.utils import readFromFile, atomic_write
+from seecr.utils import read_from_file, atomic_write
 
 
 class CrashDetect(object):
@@ -60,7 +60,7 @@ class CrashDetect(object):
             remove(self._filePath)
 
     def lastSafePoint(self):
-        return float(readFromFile(self._filePath))
+        return float(read_from_file(self._filePath))
 
     def _markSafePoint(self):
         if not self.didCrash:

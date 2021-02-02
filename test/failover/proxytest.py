@@ -39,7 +39,7 @@ from uuid import uuid4
 from meresco.distributed.utils import usrSharePath
 from weightless.core import asList, consume, asString
 from meresco.distributed.failover._sslconfig import default_sslprotocols
-from seecr.utils import readFromFile
+from seecr.utils import read_from_file
 
 sslProtocols = ' '.join(default_sslprotocols)
 
@@ -132,7 +132,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testBaseOnBothWritableAndReadable(self):
         services={
@@ -181,7 +181,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testNameCheck(self):
         def name(name):
@@ -239,7 +239,7 @@ server {
     }
     client_max_body_size 0;
 }
-""", readFromFile(self.configFile))
+""", read_from_file(self.configFile))
 
     def testHttpToHttps(self):
         n1 = HttpToHttpsRedirect(nginxConfigFile=self.configFile, usrSharePath='/tmp/usr/share/failover')
@@ -275,7 +275,7 @@ server {
 
     rewrite  ^ https://api.front.example.org$request_uri? permanent;
 }
-""", readFromFile(self.configFile))
+""", read_from_file(self.configFile))
 
     def testShouldConfigureAnyGivenTypeOfServiceWithPort(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -325,7 +325,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testShouldConfigureGivenAliases(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -376,7 +376,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testShouldConfigureErrorPageIfServiceNotAvailable(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -421,7 +421,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testShouldConfigureErrorPageIfServicesNotReadable(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -466,7 +466,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testShouldConfigureServicesWithCorrectVersion(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -516,7 +516,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testShouldConfigureUnusedPage(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -555,7 +555,7 @@ server {
     }
     client_max_body_size 0;
 }
-''' % dict(path=usrSharePath), readFromFile(self.configFile))
+''' % dict(path=usrSharePath), read_from_file(self.configFile))
 
 
     def testShouldConfigureThrottling(self):
@@ -619,7 +619,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testUseAdminDownloadPeriod(self):
         config={
@@ -657,7 +657,7 @@ server {
         )
         self.assertEqual(True, mustUpdate)
         self.assertTrue(isfile(self.configFile))
-        lines = readFromFile(self.configFile).split('\n')
+        lines = read_from_file(self.configFile).split('\n')
         self.assertEqual(['listen 1.2.3.4:80;', 'listen 2.3.4.5:80;'], grep(lines, ' listen '))
         self.assertEqual(['server_name api.front.example.org;'], grep(lines, ' server_name '))
         mustUpdate, sleeptime = n1.update(
@@ -678,7 +678,7 @@ server {
         self.assertTrue(isfile(self.configFile))
         self.assertEqual(True, mustUpdate)
         self.assertTrue(isfile(self.configFile))
-        lines = readFromFile(self.configFile).split('\n')
+        lines = read_from_file(self.configFile).split('\n')
         self.assertEqual(['listen 3.4.5.6:80;'], grep(lines, ' listen '))
         self.assertEqual(['server_name global.front.example.org;'], grep(lines, ' server_name '))
 
@@ -728,7 +728,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testSslNoServices(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -784,7 +784,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % (sslProtocols, usrSharePath), readFromFile(self.configFile))
+""" % (sslProtocols, usrSharePath), read_from_file(self.configFile))
 
     def testSsl(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -843,7 +843,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % (sslProtocols, usrSharePath), readFromFile(self.configFile))
+""" % (sslProtocols, usrSharePath), read_from_file(self.configFile))
 
     def testEndpointPortForListen(self):
         n1 = Proxy(nginxConfigFile=self.configFile)
@@ -901,7 +901,7 @@ server {
     }
     client_max_body_size 0;
 }
-""" % usrSharePath, readFromFile(self.configFile))
+""" % usrSharePath, read_from_file(self.configFile))
 
     def testEmpty(self):
         observer = CallTrace(methods=dict(servernames=lambda:(f for f in ['example.org', 'example.org', 'example.org'])), emptyGeneratorMethods=['sslLines', 'matchingServices', 'zones', 'listenLines', 'locations', 'updateConfig'])
@@ -955,7 +955,7 @@ server {
         self.config.generate = lambda **kwargs: 'config2'
         result = self.config.update(config={}, services={}, verbose=False)
         self.assertEqual((True, 30), result)
-        self.assertEqual('config2', readFromFile(join(self.tempdir, 'server.conf')))
+        self.assertEqual('config2', read_from_file(join(self.tempdir, 'server.conf')))
 
     def testSslConfig(self):
         c = SslConfig(certificate='/path/to/ssl.crt', key='/path/to/ssl.pem', sslprotocols=['TLSv1', 'TLSv1.1', 'TLSv1.2'])

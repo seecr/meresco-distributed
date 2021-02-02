@@ -25,7 +25,8 @@
 #
 ## end license ##
 
-source _testoptions.sh
+export LANG=en_US.UTF-8
+export WEIGHTLESS_COMPOSE_TEST="PYTHON"
 export PYTHONPATH=.:$PYTHONPATH
-
-python _integrationtest.py "$@"
+export PYTHONWARNINGS=default
+python3 _integrationtest.py "$@"

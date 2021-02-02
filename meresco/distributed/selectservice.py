@@ -32,7 +32,7 @@ from os.path import join, isfile, isdir
 from random import choice
 
 from meresco.components.version import Version
-from seecr.utils import atomic_write, readFromFile
+from seecr.utils import atomic_write, read_from_file
 
 from .service import Service
 
@@ -98,7 +98,7 @@ class SelectService(object):
             return chosenService
         choicefile = join(self._statePath, 'service-%s.choice' % type)
         if isfile(choicefile):
-            chosenService = readFromFile(choicefile).strip()
+            chosenService = read_from_file(choicefile).strip()
             self._chosenService[type] = chosenService
             return chosenService
 

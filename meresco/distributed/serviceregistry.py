@@ -39,7 +39,7 @@ from time import time
 from meresco.core import Observable
 from meresco.components.json import JsonDict, JsonList
 from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
-from seecr.utils import readFromFile
+from seecr.utils import read_from_file
 from .constants import SERVICE_TIMEOUT, ULTIMATE_TIMEOUT, SERVICE_FLAGS, RETAIN_AFTER_STARTUP_TIMEOUT
 from .service import Service
 
@@ -197,7 +197,7 @@ class ServiceRegistry(Observable):
     def _load(self):
         if not isfile(self._jsonFilepath):
             return {}
-        data = readFromFile(self._jsonFilepath).strip()
+        data = read_from_file(self._jsonFilepath).strip()
         result = {}
         if '[' != data[0]:
             for identifier, serviceDict in JsonDict.loads(data).items():

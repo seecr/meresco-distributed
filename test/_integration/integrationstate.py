@@ -34,7 +34,7 @@ from os import chmod, makedirs
 from uuid import uuid4
 from time import sleep
 from seecr.test.integrationtestcase import IntegrationState as _IntegrationState
-from seecr.test.mockadminserver import MockAdminServer
+from meresco.testsupport.mockadminserver import MockAdminServer
 from seecr.test.portnumbergenerator import PortNumberGenerator
 
 newId = lambda: str(uuid4())
