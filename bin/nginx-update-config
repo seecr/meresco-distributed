@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+## begin license ##
+#
+# "Meresco Distributed" has components for group management based on "Meresco Components."
+#
+# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015 Stichting Kennisnet http://www.kennisnet.nl
+#
+# This file is part of "Meresco Distributed"
+#
+# "Meresco Distributed" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "Meresco Distributed" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "Meresco Distributed"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
+from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
+includeParentAndDeps(__file__)                   #DO_NOT_DISTRIBUTE
+
+from meresco.distributed.constants import READABLE, WRITABLE, READWRITE
+from meresco.distributed.utils import usrSharePath
+from seecr.utils import isRootUser
+from meresco.components import ParseArguments
+from os.path import join
+from meresco.distributed.failover import Failover, Proxy, ServiceConfig, SslConfig, StaticLocations
+from warnings import warn
+
+
+if __name__ == '__main__':
+    warn('This script will disappear, please write your own custom script.', DeprecationWarning)
+    parser = ParseArguments()
+    parser.addOption('', '--adminHostname', help='Admin hostname', mandatory=True)
+    parser.addOption('', '--adminPort', help='Admin port', default=10000, type='int')
+    parser.addOption('-q', '--quiet', help="Disable apache logging.", action="store_false", default=True, dest="verbose")
+    parser.addOption('-c', '--nginxConfigDir', type='str', help='Configuration directory with files included by default nginx configuration (defaults to /etc/nginx/sites-enabled)', default='/etc/nginx/sites-enabled')
+    parser.addOption('-t', '--type', type='str', help='Service type to write nginx configuration for (default: api)', default='api')
+    parser.addOption('-n', '--name', default=None, help='Service name, defaults to type')
+    defaultNginxReloadCmd = 'svc -h /etc/service/nginx'
+    parser.addOption('', '--nginxReload', type='str', help='The command to reload nginx (default: "{default}")', default=defaultNginxReloadCmd)
+    parser.addOption('', '--minVersion', type='str', help='Select services with specified minimial version.', mandatory=True)
+    parser.addOption('', '--untilVersion', type='str', help='Select services with specified with version below given version.', mandatory=True)
+    parser.addOption('', '--unused', action='store_true', default=False, dest='unused', help='Show unused page')
+    parser.addOption('', '--flag', type="choice", choices=['readable', 'writable'], dest='flags', action='append', help='Base active on flag readable or writable, multiple choices possible. Default readable')
+    parser.addOption('', '--usrSharePath', default=join(usrSharePath, 'failover'), help='Path containing unavailable.html and unused.html, defaults to "{default}"')
+    parser.addOption('', '--sharedSecret', help='Shared secret for updating as a service in admin', mandatory=True)
+    parser.addOption('', '--sslCertificate', help='Path to ssl certificate. Will generate https proxy.')
+    parser.addOption('', '--sslKey', help='Path to ssl key. Will generate https proxy.')
+    parser.addOption('', '--endpoint', help='Connect to other address than default ipAddress and infoport from the service.')
+    parser.addOption('', '--additionalLocation', help="AdditionalLocation, mention complet nginx 'location' config")
+
+    options, arguments = parser.parse()
+    if options.nginxReload == defaultNginxReloadCmd and not isRootUser():
+        print 'Run as rootuser for default nginx restart script.'
+        exit(2)
+
+
+    name = options.name or options.type
+    proxy = Proxy(
+            usrSharePath=options.usrSharePath,
+            nginxConfigFile=join(options.nginxConfigDir, '%s.frontend.conf' % name),
+            name=name,
+        )
+    flags = options.flags or []
+    flag = READABLE
+    if 'writable' in flags:
+        flag = WRITABLE
+        if 'readable' in flags:
+            flag = READWRITE
+    proxy.addObserver(ServiceConfig(
+            type=options.type,
+            minVersion=options.minVersion,
+            untilVersion=options.untilVersion,
+            flag=flag,
+            endpoint=options.endpoint,
+            port=80 if not options.sslCertificate else 443,
+            name=name,
+        ))
+    if options.sslKey and options.sslCertificate:
+        proxy.addObserver(SslConfig(
+                certificate=options.sslCertificate,
+                key=options.sslKey,
+            ))
+    if options.additionalLocation:
+        proxy.addObserver(StaticLocations(options.additionalLocation))
+    if options.unused:
+        raise ValueError('No longer supported. Please create your own')
+
+    f = Failover()
+    f.addConfiguration(proxy)
+
+    f.main(**vars(options))
+
+
