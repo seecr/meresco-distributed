@@ -24,7 +24,7 @@
 
 from ._conditionmet import ConditionMet
 
-from seecr.utils import Version
+from meresco.components.version import Version
 
 def betweenVersionCondition(minVersion, untilVersion):
     minVersion, untilVersion = Version.create(minVersion), Version.create(untilVersion)

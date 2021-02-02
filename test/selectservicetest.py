@@ -29,7 +29,7 @@ from seecr.test import SeecrTestCase, CallTrace
 from os.path import join, isdir
 from uuid import uuid4
 
-from seecr.utils import Version
+from meresco.components.version import Version
 from weightless.core import consume
 from meresco.distributed import Service, SelectService, ServiceRegistry
 from meresco.distributed.constants import READABLE, READWRITE
@@ -56,8 +56,8 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
-        self.assertEquals('1.2.3.4', host)
-        self.assertEquals(2000, port)
+        self.assertEqual('1.2.3.4', host)
+        self.assertEqual(2000, port)
 
     def testShouldSelectRequestedServiceTypeAndMatchingVersion(self):
         consume(self.selectService.updateConfig(
@@ -68,10 +68,10 @@ class SelectServiceTest(SeecrTestCase):
                 str(uuid4()): {'identifier': str(uuid4()), 'type': 'other', 'ipAddress': '4.3.2.1', 'infoport':2002, 'readable': True, 'data':{'VERSION': '0.10.42'}},
             },
         ))
-        for i in xrange(50):
+        for i in range(50):
             host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE, minVersion='0.10', untilVersion='0.11')
-            self.assertEquals('1.2.3.5', host)
-            self.assertEquals(2001, port)
+            self.assertEqual('1.2.3.5', host)
+            self.assertEqual(2001, port)
 
     def testHostsAndPortsforServiceWithVersion(self):
         consume(self.selectService.updateConfig(
@@ -83,7 +83,7 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         result = set(self.selectService.hostsAndPortsForService(type='index', flag=READABLE, minVersion='0.10', untilVersion='0.11'))
-        self.assertEquals(set([('1.2.3.5', 2001),('1.2.3.6', 2002)]), result)
+        self.assertEqual(set([('1.2.3.5', 2001),('1.2.3.6', 2002)]), result)
 
     def testShouldSelectDefaultMajorVersion(self):
         currentVersion = VERSION
@@ -99,16 +99,16 @@ class SelectServiceTest(SeecrTestCase):
                 str(uuid4()): {'identifier': str(uuid4()), 'type': 'plein', 'ipAddress': '1.2.3.6', 'infoport':2001, 'readable': True, 'data':{'VERSION': nextVersion}},
             },
         ))
-        for i in xrange(50):
+        for i in range(50):
             # Select default major version
             host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE, minVersion=None, untilVersion=None)
-            self.assertEquals('1.2.3.5', host)
-            self.assertEquals(2001, port)
+            self.assertEqual('1.2.3.5', host)
+            self.assertEqual(2001, port)
         # automatically untilVersion is minorVersion.nextMajorVersion()
-        for i in xrange(50):
+        for i in range(50):
             host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE, minVersion=currentLesserVersion, untilVersion=None)
-            self.assertEquals('1.2.3.5', host)
-            self.assertEquals(2001, port)
+            self.assertEqual('1.2.3.5', host)
+            self.assertEqual(2001, port)
         currentHigherVersion = str(currentMajor) + '.3'
         self.assertRaises(ValueError, lambda: self.selectService.selectHostPortForService(type='plein', flag=READABLE, minVersion=currentHigherVersion, untilVersion=None))
 
@@ -126,7 +126,7 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
-        self.assertEquals(2001, port)
+        self.assertEqual(2001, port)
 
     def testShouldRaiseValueErrorIfServiceNotAvailable(self):
         consume(self.selectService.updateConfig(
@@ -148,10 +148,10 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         selectedHostPort = set()
-        for i in xrange(20):
+        for i in range(20):
             result = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
             selectedHostPort.add(result)
-        self.assertEquals(set([('1.2.3.4', 4), ('1.2.3.5', 5)]), selectedHostPort)
+        self.assertEqual(set([('1.2.3.4', 4), ('1.2.3.5', 5)]), selectedHostPort)
 
     def testShouldSelectHostsAndPortsForService(self):
         consume(self.selectService.updateConfig(
@@ -164,7 +164,7 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         selectedHostPort = self.selectService.hostsAndPortsForService(type='plein', flag=READABLE)
-        self.assertEquals(set([('1.2.3.4', 4), ('1.2.3.5', 5)]), set(selectedHostPort))
+        self.assertEqual(set([('1.2.3.4', 4), ('1.2.3.5', 5)]), set(selectedHostPort))
 
     def testShouldSelectHostPortForSpecificEndpoint(self):
         consume(self.selectService.updateConfig(
@@ -175,10 +175,10 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         selectedHostPort = set()
-        for i in xrange(20):
+        for i in range(20):
             result = self.selectService.selectHostPortForService(type='kennisbank', flag=READABLE, endpoint='triplestore')
             selectedHostPort.add(result)
-        self.assertEquals(set([('1.3.5.7', 8000)]), selectedHostPort)
+        self.assertEqual(set([('1.3.5.7', 8000)]), selectedHostPort)
 
     def testShouldRaiseValueErrorIfRequestedEndpointNotAvailable(self):
         consume(self.selectService.updateConfig(
@@ -189,9 +189,9 @@ class SelectServiceTest(SeecrTestCase):
         ))
         try:
             result = self.selectService.selectHostPortForService(type='kennisbank', flag=READABLE, endpoint='triplestore')
-            print result
+            print(result)
             self.fail()
-        except ValueError, e:
+        except ValueError as e:
             self.assertTrue(str(e).startswith("No endpoint 'triplestore' found for service 'kennisbank' with identifier '"), str(e))
 
     def testShouldSelectRememberedService(self):
@@ -205,10 +205,10 @@ class SelectServiceTest(SeecrTestCase):
         ))
         host, port = self.selectService.selectHostPortForService(type='plein', flag=READABLE, remember=True)
         selectedHostPort = set()
-        for i in xrange(10):
+        for i in range(10):
             result = self.selectService.selectHostPortForService(type='plein', flag=READABLE, remember=True)
             selectedHostPort.add(result)
-        self.assertEquals(set([(host, port)]), selectedHostPort)
+        self.assertEqual(set([(host, port)]), selectedHostPort)
 
     def testShouldRaiseValueErrorIfRememberedServiceWrongVersion(self):
         serviceIdentifier = str(uuid4())
@@ -227,7 +227,7 @@ class SelectServiceTest(SeecrTestCase):
         ))
         self.assertRaises(ValueError, self.selectService.selectHostPortForService, type='plein', flag=READABLE, remember=True)
         result = self.selectService.selectHostPortForService(type='plein', flag=READABLE, remember=True, minVersion='0.9')
-        self.assertEquals(('1.2.3.5', 2000), result)
+        self.assertEqual(('1.2.3.5', 2000), result)
 
     def testSetChosenService(self):
         serviceIdentifier = str(uuid4())
@@ -240,10 +240,10 @@ class SelectServiceTest(SeecrTestCase):
         ))
         self.selectService.setRequestedServiceIdentifier(identifier=serviceIdentifier, type='plein')
         selectedHostPort = set()
-        for i in xrange(10):
+        for i in range(10):
             result = self.selectService.selectHostPortForService(type='plein', flag=READABLE, remember=True)
             selectedHostPort.add(result)
-        self.assertEquals(set([('1.2.3.5', 2000)]), selectedHostPort)
+        self.assertEqual(set([('1.2.3.5', 2000)]), selectedHostPort)
 
     def testShouldRaiseValueErrorIfRememberedServiceWithIdentifierNotAvailable(self):
         serviceIdentifier = str(uuid4())
@@ -284,7 +284,7 @@ class SelectServiceTest(SeecrTestCase):
         serviceRegistry.returnValues['iterServices'] = services
         selectService = SelectService.forAdmin(serviceRegistry, currentVersion=VERSION)
         hostsAndPorts = list(selectService.hostsAndPortsForService(type='type', flag=READABLE))
-        self.assertEquals([2], [port for h, port in hostsAndPorts])
+        self.assertEqual([2], [port for h, port in hostsAndPorts])
 
     def testSelectHostPortForGivenIdentifier(self):
         serviceIdentifier = str(uuid4())
@@ -296,10 +296,10 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         selectedHostPort = set()
-        for i in xrange(10):
+        for i in range(10):
             result = self.selectService.selectHostPortForService(identifier=serviceIdentifier, type='plein', flag=READABLE, remember=True)
             selectedHostPort.add(result)
-        self.assertEquals(set([('1.2.3.5', 2000)]), selectedHostPort)
+        self.assertEqual(set([('1.2.3.5', 2000)]), selectedHostPort)
 
     def testRequestTwiceFromCache(self):
         serviceIdentifier = str(uuid4())
@@ -312,12 +312,12 @@ class SelectServiceTest(SeecrTestCase):
         ))
         selectedHostPort = set()
         t0 = time()
-        for i in xrange(1000):
+        for i in range(1000):
             result = self.selectService.selectHostPortForService(type='plein', flag=READABLE)
             selectedHostPort.add(result)
         t1 = time()
         self.assertTrue(t1 - t0 < 0.011, t1 - t0)
-        self.assertEquals(set([('1.2.3.5', 2000), ('1.2.3.6', 2001)]), selectedHostPort)
+        self.assertEqual(set([('1.2.3.5', 2000), ('1.2.3.6', 2001)]), selectedHostPort)
 
     def testNoCacheForAdmin(self):
         serviceRegistry = ServiceRegistry(reactor=None, stateDir=self.tempdir, domainname='example.org')
@@ -326,11 +326,11 @@ class SelectServiceTest(SeecrTestCase):
         serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2000, data={'VERSION': VERSION})
         serviceRegistry.setFlag(identifier=serviceIdentifier, flag=READABLE, value=True, immediate=True)
         result = selectService.selectHostPortForService(type='plein', flag=READABLE)
-        self.assertEquals(('1.2.3.5', 2000), result)
+        self.assertEqual(('1.2.3.5', 2000), result)
 
         serviceRegistry.updateService(identifier=serviceIdentifier, type='plein', ipAddress='1.2.3.5', infoport=2001, data={'VERSION': VERSION})
         result = selectService.selectHostPortForService(type='plein', flag=READABLE)
-        self.assertEquals(('1.2.3.5', 2001), result)
+        self.assertEqual(('1.2.3.5', 2001), result)
 
     def testSelectWithBothReadableAndWritableFlag(self):
         self.selectService = SelectService(
@@ -346,4 +346,4 @@ class SelectServiceTest(SeecrTestCase):
             },
         ))
         host, port = self.selectService.selectHostPortForService(type='plein', flag=READWRITE)
-        self.assertEquals(2002, port)
+        self.assertEqual(2002, port)

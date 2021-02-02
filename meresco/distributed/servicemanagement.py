@@ -47,7 +47,7 @@ from meresco.oaicommon import stamp2zulutime, ResumptionToken
 
 from meresco.distributed.utils import ipsAndRanges, dynamicPath, staticPath
 from meresco.distributed.flagcheck import FlagCheck
-from _serviceflags import WRITABLE, READABLE
+from ._serviceflags import WRITABLE, READABLE
 from .selectservice import SelectService
 from .servicelog import ServiceLog
 from .constants import SERVICE_POLL_INTERVAL, ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY

@@ -31,7 +31,7 @@ from meresco.distributed.utils import usrSharePath as defaultUsrSharePath
 from os.path import join, isfile
 from ._utils import log, noLog, UpdateResult
 from escaping import escapeFilename
-from seecr.tools import atomic_write
+from seecr.utils import atomic_write, readFromFile
 
 class _NginxConfig(Observable):
     def __init__(self, nginxConfigFile, usrSharePath=None, name=None, **kwargs):
@@ -44,7 +44,7 @@ class _NginxConfig(Observable):
         newConfig = self.generate(config=config, verbose=verbose, **kwargs)
         _log = log if verbose else noLog
         mustUpdate = False
-        if not isfile(self._nginxConfigFile) or newConfig != open(self._nginxConfigFile).read():
+        if not isfile(self._nginxConfigFile) or newConfig != readFromFile(self._nginxConfigFile):
             with atomic_write(self._nginxConfigFile) as fd:
                 fd.write(newConfig)
             mustUpdate = True

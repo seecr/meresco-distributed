@@ -52,7 +52,7 @@ def listenIps(config):
     return [ip for ip in ([config.get('ipAddress', config.get('ip'))] + config.get('ipAddresses',[])) if ip]
 
 def servernames(config):
-    return filter(None, chain([config.get('fqdn')], config.get('aliases', [])))
+    return [f for f in chain([config.get('fqdn')], config.get('aliases', [])) if f]
 
 UpdateResult = namedtuple('UpdateResult', ['mustUpdate', 'sleeptime'])
 

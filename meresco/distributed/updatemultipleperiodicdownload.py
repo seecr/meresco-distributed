@@ -59,7 +59,7 @@ class UpdateMultiplePeriodicDownload(Observable):
     def _createDownloader(self, serviceIdentifier):
         periodicDownload = PeriodicDownload(self._reactor, autoStart=False)
         name = '{}-{}-{}-{}'.format(self._serviceType, serviceIdentifier, self.observable_name(), self._metadataPrefix)
-        print '_createDownloader name=', name
+        print('_createDownloader name=', name)
         oaiDownload = self._createOaiDownloadProcessor(
             path=self._downloadPath,
             metadataPrefix=self._metadataPrefix,
@@ -85,4 +85,4 @@ class UpdateMultiplePeriodicDownload(Observable):
             oaiDownloads.commit()
 
     def getState(self):
-        return self._states.values()
+        return list(self._states.values())

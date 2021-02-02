@@ -35,7 +35,7 @@ from os import listdir
 from os.path import join, isfile, isdir
 from socket import timeout
 from time import time
-from urllib2 import URLError
+from urllib.error import URLError
 
 from weightless.core import compose
 
@@ -46,14 +46,14 @@ from meresco.distributed.utils import IP_ADDRESS
 from meresco.distributed import serviceUpdateHash
 from simplejson import loads
 from meresco.components.http.utils import CRLF
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 SHARED_SECRET = 'a very secret secret'
 VERSION="41.2"
 
 @contextmanager
 def httpResponder(hangupConnectionTimeout=None):
-    serverPort = PortNumberGenerator.next()
+    serverPort = PortNumberGenerator.nextPort()
     ms = MockServer(port=serverPort, hangupConnectionTimeout=hangupConnectionTimeout)
     ms.start()
     try:
@@ -76,7 +76,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             try:
                 t0 = time()
                 cdp.download('localhost', 0)
-            except URLError, e:
+            except URLError as e:
                 t1 = time()
                 self.assertTrue('Connection refused' in str(e), str(e))
                 delta = t1 - t0
@@ -95,7 +95,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
                 try:
                     t0 = time()
                     cdp.download('localhost', serverPort)
-                except (URLError, timeout), e:
+                except (URLError, timeout) as e:
                     t1 = time()
                     self.assertTrue('timed out' in str(e), str(e))
                     delta = t1 - t0
@@ -116,7 +116,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
                     ms.response = 'HTTP/1.0 500 Internal Server Stuff\r\n\r\n'
                     t0 = time()
                     cdp.download('localhost', serverPort)
-                except URLError, e:
+                except URLError as e:
                     t1 = time()
                     self.assertTrue('HTTP Error 500: Internal Server Stuff' in str(e), str(e))
                     delta = t1 - t0
@@ -130,7 +130,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
     def testShouldSaveConfigOnSuccesfullDownload(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=0, statePath=self.tempdir, syncDownloadTimeout=1, sharedSecret=SHARED_SECRET, version=VERSION)
         cdp.addObserver(CallTrace(returnValues=dict(serviceData={'data': {'error': 0}})))
-        self.assertEquals(0, len(listdir(self.tempdir)))
+        self.assertEqual(0, len(listdir(self.tempdir)))
 
         mockConfig = {
             "config": {'key': 'value'},
@@ -140,11 +140,12 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             ms.response = 'HTTP/1.0 200 OK.\r\n\r\n%s' % JsonDict(mockConfig).dumps()
             configuration = cdp.download('localhost', serverPort)
 
-        self.assertEquals(mockConfig, configuration)
+        self.assertEqual(mockConfig, configuration)
         cdpConfigFile = join(self.tempdir, 'configuration_cache.json')
         self.assertTrue(isfile(cdpConfigFile))
-        self.assertEquals(['configuration_cache.json'], listdir(self.tempdir))
-        self.assertEquals(mockConfig, JsonDict().load(open(cdpConfigFile)))
+        self.assertEqual(['configuration_cache.json'], listdir(self.tempdir))
+        with open(cdpConfigFile) as fp:
+            self.assertEqual(mockConfig, JsonDict().load(fp))
 
         mockConfig = {
             "config": "Fig",
@@ -153,20 +154,22 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         with httpResponder() as (ms, serverPort):
             ms.response = 'HTTP/1.0 200 OK.\r\n\r\n%s' % JsonDict(mockConfig).dumps()
             configuration = cdp.download('localhost', serverPort)
-        self.assertEquals(['configuration_cache.json'], listdir(self.tempdir))
-        self.assertEquals(mockConfig, JsonDict().load(open(cdpConfigFile)))
+        self.assertEqual(['configuration_cache.json'], listdir(self.tempdir))
+        with open(cdpConfigFile) as fp:
+            self.assertEqual(mockConfig, JsonDict().load(fp))
 
         # Don't overwrite on unparsables
         with httpResponder() as (ms, serverPort):
             ms.response = 'HTTP/1.0 200 OK.\r\n\r\nunparsables'
             try:
                 configuration = cdp.download('localhost', serverPort)
-            except ValueError, e:
+            except ValueError as e:
 
                 self.assertTrue(str(e).startswith('No JSON object could be decoded') or str(e).startswith("Expecting value: line 1 column 1 (char 0)"), str(e))
             else:
                 self.fail('Should not happen')
-        self.assertEquals(mockConfig, JsonDict().load(open(cdpConfigFile)))
+        with open(cdpConfigFile) as fp:
+            self.assertEqual(mockConfig, JsonDict().load(fp))
 
     def testShouldSaveConfigOnSuccesfullHandle(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=0, statePath=self.tempdir, sharedSecret=SHARED_SECRET, version=VERSION)
@@ -177,23 +180,25 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         }
         observer = CallTrace('Observer', emptyGeneratorMethods=['updateConfig'])
         cdp.addObserver(observer)
-        self.assertEquals([], listdir(self.tempdir))
+        self.assertEqual([], listdir(self.tempdir))
 
         list(compose(cdp.handle(data=JsonDict(mockConfig).dumps())))
 
-        self.assertEquals(['configuration_cache.json'], listdir(self.tempdir))
+        self.assertEqual(['configuration_cache.json'], listdir(self.tempdir))
         cdpConfigFile = join(self.tempdir, 'configuration_cache.json')
-        self.assertEquals(mockConfig, JsonDict().load(open(cdpConfigFile)))
-        self.assertEquals(['updateConfig'], observer.calledMethodNames())
+        with open(cdpConfigFile) as fp:
+            self.assertEqual(mockConfig, JsonDict().load(fp))
+        self.assertEqual(['updateConfig'], observer.calledMethodNames())
 
         # Don't overwrite on unparsables
         try:
             list(compose(cdp.handle(data='unparsables')))
-        except ValueError, e:
+        except ValueError as e:
             self.assertTrue(str(e).startswith('No JSON object could be decoded') or str(e).startswith("Expecting value: line 1 column 1 (char 0)"), str(e))
         else:
             self.fail('Should not happen')
-        self.assertEquals(mockConfig, JsonDict().load(open(cdpConfigFile)))
+        with open(cdpConfigFile) as fp:
+            self.assertEqual(mockConfig, JsonDict().load(fp))
 
     def testShouldReUseSavedConfigOnFailedDownload(self):
         cdpConfigFile = join(self.tempdir, 'configuration_cache.json')
@@ -212,15 +217,15 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
 
             self.assertTrue('\nConfigDownloadProcessor: configuration cachefile "%s/configuration_cache.json" found.\n' % self.tempdir in err.getvalue(), err.getvalue())
 
-        self.assertEquals(mockConfig, configuration)
+        self.assertEqual(mockConfig, configuration)
 
     def testUpdateConfig(self):
         cdp = ConfigDownloadProcessor.forUpdate(identifier='id', type='type', infoport=0, statePath=self.tempdir, sharedSecret=SHARED_SECRET, version=VERSION)
         observer = CallTrace('observer', emptyGeneratorMethods=['updateConfig'])
         cdp.addObserver(observer)
         list(compose(cdp.updateConfig(config={'some': 'stuff'}, services={'xyz': {'abc': 'def'}})))
-        self.assertEquals(['updateConfig'], observer.calledMethodNames())
-        self.assertEquals({'config': {'some': 'stuff'}, 'services': {'xyz': {'abc': 'def'}}}, observer.calledMethods[0].kwargs)
+        self.assertEqual(['updateConfig'], observer.calledMethodNames())
+        self.assertEqual({'config': {'some': 'stuff'}, 'services': {'xyz': {'abc': 'def'}}}, observer.calledMethods[0].kwargs)
 
     def testBuildRequest(self):
         # Used by PeriodicDownload
@@ -230,26 +235,26 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             dataDict['error'] = 0
         downloadProcessor.addObserver(CallTrace(methods={'serviceData': serviceData}))
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('POST /api/service/v2/update?keys=apiKeys%%2Ccollections HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
+        self.assertEqual('POST /api/service/v2/update?keys=apiKeys%%2Ccollections HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
         arguments = parse_qs(request)
-        self.assertEquals([serviceUpdateHash(secret=SHARED_SECRET, **parameters)], arguments.pop('hash'))
+        self.assertEqual([serviceUpdateHash(secret=SHARED_SECRET, **parameters)], arguments.pop('hash'))
         data = loads(arguments.pop('data')[0])
-        self.assertEquals(dict((k,[str(v)]) for k,v in parameters.items()), arguments)
-        self.assertEquals(VERSION, data['VERSION'])
-        self.assertEquals(0, data['error'])
+        self.assertEqual(dict((k,[str(v)]) for k,v in parameters.items()), arguments)
+        self.assertEqual(VERSION, data['VERSION'])
+        self.assertEqual(0, data['error'])
         self.assertTrue(data['uptime'] >= 0)
 
     def testBuildRequestForDownload(self):
         # Used by PeriodicDownload
         downloadProcessor = ConfigDownloadProcessor.forDownload(statePath=self.tempdir, keys=['collections', 'apiKeys'], type="Loadbalancer", identifier='1234-1234', sharedSecret=SHARED_SECRET, version=VERSION)
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('GET /api/service/v2/list?identifier=1234-1234&keys=apiKeys%%2Ccollections HTTP/1.0\r\nUser-Agent: Loadbalancer 1234-1234 v%s' % VERSION, header)
+        self.assertEqual('GET /api/service/v2/list?identifier=1234-1234&keys=apiKeys%%2Ccollections HTTP/1.0\r\nUser-Agent: Loadbalancer 1234-1234 v%s' % VERSION, header)
 
     def testBuildRequestForDownloadWithIdentifier(self):
         # Used by PeriodicDownload
         downloadProcessor = ConfigDownloadProcessor.forDownload(statePath=self.tempdir, keys=['collections', 'apiKeys'], identifier='12345678-1234-1234-1234-1234567890ab', type='api', sharedSecret=SHARED_SECRET, version=VERSION)
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('GET /api/service/v2/list?identifier=12345678-1234-1234-1234-1234567890ab&keys=apiKeys%%2Ccollections HTTP/1.0\r\nUser-Agent: api 12345678-1234-1234-1234-1234567890ab v%s' % VERSION, header)
+        self.assertEqual('GET /api/service/v2/list?identifier=12345678-1234-1234-1234-1234567890ab&keys=apiKeys%%2Ccollections HTTP/1.0\r\nUser-Agent: api 12345678-1234-1234-1234-1234567890ab v%s' % VERSION, header)
 
     def testBuildRequestDownloadForUpdate(self):
         # Used by PeriodicDownload
@@ -270,7 +275,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
 
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
         arguments = parse_qs(request)
-        self.assertEquals(IP_ADDRESS, arguments['ipAddress'][0])
+        self.assertEqual(IP_ADDRESS, arguments['ipAddress'][0])
 
     def testHandle(self):
         observer = CallTrace(emptyGeneratorMethods=['updateConfig'])
@@ -278,9 +283,9 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         downloadProcessor.addObserver(observer)
 
         list(compose(downloadProcessor.handle(data='{"config": {"key1": "value1", "key2": "value2"}, "services": {"xyz": "abc"}}')))
-        self.assertEquals(['updateConfig'], observer.calledMethodNames())
-        self.assertEquals({"key1": "value1", "key2": "value2"}, observer.calledMethods[0].kwargs['config'])
-        self.assertEquals({"xyz": "abc"}, observer.calledMethods[0].kwargs['services'])
+        self.assertEqual(['updateConfig'], observer.calledMethodNames())
+        self.assertEqual({"key1": "value1", "key2": "value2"}, observer.calledMethods[0].kwargs['config'])
+        self.assertEqual({"xyz": "abc"}, observer.calledMethods[0].kwargs['services'])
 
     def testAdditionalData(self):
         parameters = dict(identifier='id1', type='api', ipAddress='127.0.0.1', infoport=12345)
@@ -289,10 +294,10 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             dataDict['error'] = 0
         downloadProcessor.addObserver(CallTrace(methods={'serviceData': serviceData}))
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('POST /api/service/v2/update?keys=apiKeys%%2Ccollections HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
+        self.assertEqual('POST /api/service/v2/update?keys=apiKeys%%2Ccollections HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
         arguments = parse_qs(request)
         data = loads(arguments.pop('data')[0])
-        self.assertEquals(dict(triplestore='http://example.org:876/sparql'), data['endpoints'])
+        self.assertEqual(dict(triplestore='http://example.org:876/sparql'), data['endpoints'])
 
     def testDownloadWithoutStatepath(self):
         cdp = ConfigDownloadProcessor.forDownload(statePath=None, version=VERSION)
@@ -304,7 +309,7 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
             ms.response = 'HTTP/1.0 200 OK.\r\n\r\n%s' % JsonDict(mockConfig).dumps()
             configuration = cdp.download('localhost', serverPort)
 
-        self.assertEquals(mockConfig, configuration)
+        self.assertEqual(mockConfig, configuration)
 
     def testDownloadFailsIfNoHttpResponse(self):
         cdp = ConfigDownloadProcessor.forDownload(statePath=None, version=VERSION)
@@ -316,4 +321,4 @@ class ConfigDownloadProcessorTest(SeecrTestCase):
         parameters = dict(identifier='id1', type='api', ipAddress='127.0.0.1', infoport=12345)
         downloadProcessor = ConfigDownloadProcessor.forUpdate(statePath=self.tempdir, additionalArguments=dict(useVpn=True, key='value'), sharedSecret=SHARED_SECRET, version=VERSION, **parameters)
         header, request = downloadProcessor.buildRequest().split(CRLF*2)
-        self.assertEquals('POST /api/service/v2/update?key=value&keys=&useVpn=True HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)
+        self.assertEqual('POST /api/service/v2/update?key=value&keys=&useVpn=True HTTP/1.0\r\nContent-Length: %s\r\nUser-Agent: api id1 v%s' % (len(request), VERSION), header)

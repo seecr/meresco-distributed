@@ -33,29 +33,29 @@ class CompositeStateTest(SeecrTestCase):
         state1 = State(errorState='WRONG')
         state2 = State(errorState='BAD')
         state = CompositeState(state1, state2)
-        self.assertEquals('WRONG', state.errorState)
+        self.assertEqual('WRONG', state.errorState)
 
     def testOneErrorState(self):
         state1 = State(errorState='WRONG')
         state2 = State(errorState=None)
         state = CompositeState(state1, state2)
-        self.assertEquals('WRONG', state.errorState)
+        self.assertEqual('WRONG', state.errorState)
         reversestate = CompositeState(state2, state1)
-        self.assertEquals('WRONG', reversestate.errorState)
+        self.assertEqual('WRONG', reversestate.errorState)
 
     def testOneOnlyWithErrorState(self):
         state1 = State(errorState='WRONG')
         state2 = State()
         state = CompositeState(state1, state2)
-        self.assertEquals('WRONG', state.errorState)
+        self.assertEqual('WRONG', state.errorState)
         reversestate = CompositeState(state2, state1)
-        self.assertEquals('WRONG', reversestate.errorState)
+        self.assertEqual('WRONG', reversestate.errorState)
 
     def testErrorStatesNone(self):
         state1 = State(errorState=None)
         state2 = State(errorState=None)
         state = CompositeState(state1, state2)
-        self.assertEquals(None, state.errorState)
+        self.assertEqual(None, state.errorState)
 
     def testNoErrorState(self):
         state1 = State()

@@ -44,7 +44,7 @@ class CrashDetectTest(SeecrTestCase):
         self.assertFalse(cd.didCrash)
         dataDict = {}
         cd.serviceData(dataDict)
-        self.assertEquals({}, dataDict)
+        self.assertEqual({}, dataDict)
 
     def testDidNotShutdownProperly(self):
         cd = CrashDetect(self.tempdir)
@@ -53,7 +53,7 @@ class CrashDetectTest(SeecrTestCase):
         self.assertTrue(cd.errorMessage().startswith('Data considered incomplete after crash [last safe point: '), cd.errorMessage())
         dataDict = {}
         cd.serviceData(dataDict)
-        self.assertEquals({'errors': 1}, dataDict)
+        self.assertEqual({'errors': 1}, dataDict)
         cd.handleShutdown()
         filePath = cd._filePath
         cd = None
@@ -62,7 +62,7 @@ class CrashDetectTest(SeecrTestCase):
         self.assertFalse(cd.didCrash)
         dataDict = {}
         cd.serviceData(dataDict)
-        self.assertEquals({}, dataDict)
+        self.assertEqual({}, dataDict)
 
     def testShutdownAfterRestartAfterCrashKeepsErrorState(self):
         cd = CrashDetect(self.tempdir)
@@ -73,29 +73,29 @@ class CrashDetectTest(SeecrTestCase):
         cd.handleShutdown()
         cd = CrashDetect(self.tempdir)
         self.assertTrue(cd.didCrash)
-        self.assertEquals(errorMessage, cd.errorMessage())
+        self.assertEqual(errorMessage, cd.errorMessage())
 
     def testKeepEarliestCrashTimestamp(self):
         cd = CrashDetect(self.tempdir)
         lsc = cd.lastSafePoint()
         cd = CrashDetect(self.tempdir)
         self.assertTrue(cd.didCrash)
-        self.assertEquals(lsc, cd.lastSafePoint())
+        self.assertEqual(lsc, cd.lastSafePoint())
         self.assertTrue(cd.errorMessage().startswith('Data considered incomplete after crash [last safe point: '), cd.errorMessage())
         cd = CrashDetect(self.tempdir)
         self.assertTrue(cd.didCrash)
-        self.assertEquals(lsc, cd.lastSafePoint())
+        self.assertEqual(lsc, cd.lastSafePoint())
 
     def testServiceDataIncrement(self):
         dataDict = {'errors': 1}
         cd = CrashDetect(self.tempdir)
         cd = CrashDetect(self.tempdir)
         cd.serviceData(dataDict)
-        self.assertEquals({'errors': 2}, dataDict)
+        self.assertEqual({'errors': 2}, dataDict)
 
     def testServiceDataWarningSeverity(self):
         dataDict = {'errors': 1}
         cd = CrashDetect(self.tempdir, severity=WARNING)
         cd = CrashDetect(self.tempdir, severity=WARNING)
         cd.serviceData(dataDict)
-        self.assertEquals({'errors': 1, 'warnings': 1}, dataDict)
+        self.assertEqual({'errors': 1, 'warnings': 1}, dataDict)

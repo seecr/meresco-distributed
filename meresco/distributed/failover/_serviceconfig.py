@@ -24,7 +24,7 @@
 #
 ## end license ##
 
-from StringIO import StringIO
+from io import StringIO
 from meresco.distributed import SelectService
 from meresco.distributed.constants import READABLE
 from ._utils import log, noLog, formatIp, create_path, listenIps, servernames
@@ -84,7 +84,7 @@ class ServiceConfig(object):
             yield "    listen {0}:{1};\n".format(formatIp(listen_ip), self._port)
 
     def _varname(self):
-        return '__var_{0}_{1}'.format(md5(''.join(self.servernames())).hexdigest(), self._name)
+        return '__var_{0}_{1}'.format(md5(''.join(self.servernames()).encode()).hexdigest(), self._name)
 
     def matchingServices(self):
         if self._matchingServices:

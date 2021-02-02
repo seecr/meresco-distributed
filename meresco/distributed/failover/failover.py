@@ -27,7 +27,7 @@ from time import sleep
 from meresco.components import ParseArguments
 from meresco.distributed import ConfigDownloadProcessor
 from meresco.distributed.constants import SERVICE_POLL_INTERVAL
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 from os import system
 from seecr.utils import isRootUser
 from ._utils import log

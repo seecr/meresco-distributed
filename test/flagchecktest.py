@@ -48,45 +48,45 @@ class FlagCheckTest(SeecrTestCase):
     def testAllowedWhenFlagSet(self):
         consume(self.flagCheck.updateConfig(this_service={'readable': False, 'state':{'readable': True}}))
         consume(self.server.all.someMessage(ignored='ignored'))
-        self.assertEquals(['someMessage'], self.observer.calledMethodNames())
+        self.assertEqual(['someMessage'], self.observer.calledMethodNames())
 
     def testNotAllowedServiceDoesntExists(self):
         consume(self.flagCheck.updateConfig(this_service=None))
         try:
             consume(self.server.all.someMessage(ignored='ignored'))
             self.fail()
-        except EnvironmentError, e:
-            self.assertEquals("'someMessage' is not allowed at the moment (readable=False).", str(e))
+        except EnvironmentError as e:
+            self.assertEqual("'someMessage' is not allowed at the moment (readable=False).", str(e))
 
     def testNotAllowedWhenFlagByDefault(self):
         try:
             consume(self.server.all.someMessage(ignored='ignored'))
             self.fail()
-        except EnvironmentError, e:
-            self.assertEquals("'someMessage' is not allowed at the moment (readable=False).", str(e))
+        except EnvironmentError as e:
+            self.assertEqual("'someMessage' is not allowed at the moment (readable=False).", str(e))
 
     def testHandleRequestNotAllowed(self):
         consume(self.flagCheck.updateConfig(this_service={'readable':True, 'state':{'readable':False}}))
         result = asString(self.server.all.handleRequest(ignored='ignored', arguments={}, Headers={}))
-        self.assertEquals('HTTP/1.0 503 Service Temporarily Unavailable\r\n\r\n', result)
+        self.assertEqual('HTTP/1.0 503 Service Temporarily Unavailable\r\n\r\n', result)
 
     def testHandleRequestDisableFlagWithDebugOption(self):
         consume(self.flagCheck.updateConfig(this_service={'readable': True, 'state':{'readable':False}}))
         header, body = asString(self.server.all.handleRequest(ignored='ignored', arguments=dict(debug=['True']), Headers={}, Client=('host', 1234))).split('\r\n\r\n')
-        self.assertEquals('RESULT', body)
-        self.assertEquals(['handleRequest'], self.observer.calledMethodNames())
+        self.assertEqual('RESULT', body)
+        self.assertEqual(['handleRequest'], self.observer.calledMethodNames())
         self.assertFalse('debug' in self.observer.calledMethods[0].kwargs['arguments'])
 
     def testDebugFlagIsRememberedWithCookie(self):
         consume(self.flagCheck.updateConfig(this_service={'readable': True, 'state':{'readable':False}}))
         header, body = asString(self.server.all.handleRequest(ignored='ignored', arguments=dict(debug=['True']), Headers={}, Client=('host', 1234))).split('\r\n\r\n')
-        self.assertEquals('RESULT', body)
+        self.assertEqual('RESULT', body)
         headers = parseHeaders(header)
         self.assertTrue('Set-Cookie' in headers,headers)
         self.assertTrue('Expires=' in headers['Set-Cookie'])
         header, body = asString(self.server.all.handleRequest(ignored='ignored', arguments={}, Headers={'Cookie': ';'.join([headers['Set-Cookie'], 'other=cookie'])}, Client=('host', 1234))).split('\r\n\r\n')
-        self.assertEquals('RESULT', body)
-        self.assertEquals(['handleRequest', 'handleRequest'], self.observer.calledMethodNames())
+        self.assertEqual('RESULT', body)
+        self.assertEqual(['handleRequest', 'handleRequest'], self.observer.calledMethodNames())
 
 def parseHeaders(header):
     return dict([i.strip() for i in line.split(':', 1)] for line in header.split('\r\n') if ':' in line)

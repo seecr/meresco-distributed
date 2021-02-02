@@ -36,7 +36,7 @@ class ServiceLogTest(SeecrTestCase):
         self.log = ServiceLog(identifier='identifier', serviceDir=self.tempdir)
 
     def testGetLogFilesNoneIfNotInitialized(self):
-        self.assertEquals([], self.log.getLogFiles())
+        self.assertEqual([], self.log.getLogFiles())
 
     def testGetLogFiles(self):
         logdir = join(self.tempdir, 'zp-serviceType-identifier', 'log', 'main')
@@ -44,7 +44,7 @@ class ServiceLogTest(SeecrTestCase):
         for f in ['@4000000052abf8200d2edecc.s', '@4000000052ad8cb729667ce4.u', 'current', 'lock', 'state']:
             with open(join(logdir, f), 'w'):
                 pass
-        self.assertEquals([
+        self.assertEqual([
             ('zp-serviceType-identifier', 'current'),
             ('zp-serviceType-identifier', '@4000000052ad8cb729667ce4.u'),
             ('zp-serviceType-identifier', '@4000000052abf8200d2edecc.s'),
@@ -59,7 +59,7 @@ class ServiceLogTest(SeecrTestCase):
             for l in [logdir, logdir2]:
                 with open(join(l, f), 'w'):
                     pass
-        self.assertEquals([
+        self.assertEqual([
             ('zp-gateway-identifier', 'current'),
             ('zp-gateway-identifier', '@4000000052ad8cb729667ce4.u'),
             ('zp-gateway-identifier', '@4000000052abf8200d2edecc.s'),
@@ -75,20 +75,20 @@ class ServiceLogTest(SeecrTestCase):
             f.write('@4000000052abf8100d2edecc line0\n')
             f.write('@4000000052abf8190d2edecc line1\n')
         r = self.log.getLogLines(dirname='zp-serviceType-identifier', filename='@4000000052abf8200d2edecc.s')
-        self.assertEquals([
+        self.assertEqual([
                 ('2013-12-14 07:17:42.221', 'line0\n'),
                 ('2013-12-14 07:17:51.221', 'line1\n'),
             ], list(r))
         r = self.log.getLogLines(dirname='zp-serviceType-identifier', filename='@4000000052abf8200d2edecc.s', filterValue='line0')
-        self.assertEquals([
+        self.assertEqual([
                 ('2013-12-14 07:17:42.221', 'line0\n'),
             ], list(r))
         r = self.log.getLogLines(dirname='zp-serviceType-identifier', filename='@4000000052abf8200d2edecc.s', filterStamp='17:51')
-        self.assertEquals([
+        self.assertEqual([
                 ('2013-12-14 07:17:51.221', 'line1\n'),
             ], list(r))
 
     def testFormatTimestamp(self):
-        self.assertEquals('2013-12-14 07:17:51.221', tai64ToTime('@4000000052abf8190d2edecc'))
+        self.assertEqual('2013-12-14 07:17:51.221', tai64ToTime('@4000000052abf8190d2edecc'))
 
 

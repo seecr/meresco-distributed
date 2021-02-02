@@ -26,13 +26,14 @@
 #
 ## end license ##
 
-from os import remove, rename
+from os import remove
 from os.path import isfile, join
 from time import time
 
 from meresco.distributed.servicestate import ERROR
 
 from seecr.zulutime import ZuluTime
+from seecr.utils import readFromFile, atomic_write
 
 
 class CrashDetect(object):
@@ -58,13 +59,12 @@ class CrashDetect(object):
             remove(self._filePath)
 
     def lastSafePoint(self):
-        return float(open(self._filePath).read())
+        return float(readFromFile(self._filePath))
 
     def _markSafePoint(self):
         if not self.didCrash:
-            with open(self._filePath + '~', 'w') as f:
+            with atomic_write(self._filePath) as f:
                 f.write("%f" % self._time())
-            rename(self._filePath + '~', self._filePath)
 
     def _time(self):
         return time()

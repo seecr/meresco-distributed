@@ -42,7 +42,7 @@ class ServiceGroup(Transparent):
         return [(groupName, sorted(s, key=lambda s:(s['type'], s['number']))) for (position, groupName), s in sorted(serviceGroups.items())]
 
     def listGroupings(self):
-        return sorted(((g.key, g.name) for g in self._groupingMethods.values()), key=lambda (key,name):(name,key))
+        return sorted(((g.key, g.name) for g in self._groupingMethods.values()), key=lambda key_name:(key_name[1],key_name[0]))
 
 
 class GroupingIp(object):

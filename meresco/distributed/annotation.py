@@ -36,23 +36,23 @@ def makeAnnotationEnvelope(uri, targetUri, motiveUri, annotatedByUri):
     annotationElement = SubElement(
         rdfElement,
         OA_ANNOTATION_TAG,
-        attrib={RDF_ABOUT_TAG: unicode(uri)},
+        attrib={RDF_ABOUT_TAG: str(uri)},
         nsmap=NSMAP_OA,
     )
     SubElement(
         annotationElement,
         OA_ANNOTATED_BY_TAG,
-        attrib={RDF_RESOURCE_TAG: unicode(annotatedByUri)}
+        attrib={RDF_RESOURCE_TAG: str(annotatedByUri)}
     )
     SubElement(
         annotationElement,
         OA_MOTIVATED_BY_TAG,
-        attrib={RDF_RESOURCE_TAG: unicode(motiveUri)}
+        attrib={RDF_RESOURCE_TAG: str(motiveUri)}
     )
     SubElement(
         annotationElement,
         OA_HAS_TARGET_TAG,
-        attrib={RDF_RESOURCE_TAG: unicode(targetUri)}
+        attrib={RDF_RESOURCE_TAG: str(targetUri)}
     )
     hasBodyElement = SubElement(
         annotationElement,

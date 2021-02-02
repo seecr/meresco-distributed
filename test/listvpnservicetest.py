@@ -36,7 +36,7 @@ class ListVpnServiceTest(SeecrTestCase):
         observer = CallTrace(methods=dict(listServices=services))
         lvs = ListVpnService()
         lvs.addObserver(observer)
-        self.assertEquals('1.2.3.4', lvs.listServices()['id0']['ipAddress'])
+        self.assertEqual('1.2.3.4', lvs.listServices()['id0']['ipAddress'])
         consume(lvs.updateConfig(config={
                 "vpn":{
                     "convert-ips": {
@@ -45,13 +45,13 @@ class ListVpnServiceTest(SeecrTestCase):
                     }
                 }
             }))
-        self.assertEquals('1.2.3.4', lvs.listServices()['id0']['ipAddress'])
-        self.assertEquals('10.20.30.40', lvs.listServices(convertIpsToVpn=True)['id0']['ipAddress'])
-        self.assertEquals('1.2.3.4', lvs.listServices(convertIpsToVpn=True)['id0']['data']['originalIpAddress'])
-        self.assertEquals('http://10.20.30.40:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['endpoints']['triplestore'])
-        self.assertEquals('http://1.2.3.4:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['originalEndpoints']['triplestore'])
-        self.assertEquals('1.2.3.5', lvs.listServices(convertIpsToVpn=True)['id1']['ipAddress'])
-        self.assertEquals('http://1.2.3.5:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id1']['data']['endpoints']['triplestore'])
+        self.assertEqual('1.2.3.4', lvs.listServices()['id0']['ipAddress'])
+        self.assertEqual('10.20.30.40', lvs.listServices(convertIpsToVpn=True)['id0']['ipAddress'])
+        self.assertEqual('1.2.3.4', lvs.listServices(convertIpsToVpn=True)['id0']['data']['originalIpAddress'])
+        self.assertEqual('http://10.20.30.40:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['endpoints']['triplestore'])
+        self.assertEqual('http://1.2.3.4:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id0']['data']['originalEndpoints']['triplestore'])
+        self.assertEqual('1.2.3.5', lvs.listServices(convertIpsToVpn=True)['id1']['ipAddress'])
+        self.assertEqual('http://1.2.3.5:8975/sparql', lvs.listServices(convertIpsToVpn=True)['id1']['data']['endpoints']['triplestore'])
         self.assertFalse("originalEndpoints" in lvs.listServices(convertIpsToVpn=True)['id1']['data'])
 
 

@@ -45,19 +45,19 @@ class ServiceGroupTest(SeecrTestCase):
             self.addService('id{0}'.format(i), number=i, type='a')
 
     def testTransparent(self):
-        self.assertEquals(set(['id1', 'id2', 'id3', 'id4', 'id5']), set(self.top.call.listServices().keys()))
+        self.assertEqual(set(['id1', 'id2', 'id3', 'id4', 'id5']), set(self.top.call.listServices().keys()))
 
     def testIpGrouping(self):
         result = self.top.call.groupAndServices(groupingKey='ip', key='value')
-        self.assertEquals(1, len(result))
+        self.assertEqual(1, len(result))
         group, services = result[0]
-        self.assertEquals('IP: 1.2.3.4', group)
-        self.assertEquals(['id4', 'id5', 'id1', 'id2', 'id3'], [s.identifier for s in services])
-        self.assertEquals(['listServices'], self.observer.calledMethodNames())
-        self.assertEquals({'key': 'value'}, self.observer.calledMethods[0].kwargs)
+        self.assertEqual('IP: 1.2.3.4', group)
+        self.assertEqual(['id4', 'id5', 'id1', 'id2', 'id3'], [s.identifier for s in services])
+        self.assertEqual(['listServices'], self.observer.calledMethodNames())
+        self.assertEqual({'key': 'value'}, self.observer.calledMethods[0].kwargs)
 
     def testListGroupings(self):
-        self.assertEquals([
+        self.assertEqual([
             ('default', 'Default'),
             ('error', 'Error'),
             ('ip', 'IP-Address'),

@@ -34,8 +34,8 @@ class UtilsTest(SeecrTestCase):
         hash1 = serviceUpdateHash(secret='1234', identifier='x', type='y', ipAddress='1.2.3.4', port=99)
         hash2 = serviceUpdateHash(secret='3411', identifier='xx', type='yy', ipAddress='2.2.3.4', port=98)
         self.assertNotEqual(hash1, hash2)
-        self.assertEquals(40, len(hash1))
-        self.assertEquals(40, len(hash2))
+        self.assertEqual(40, len(hash1))
+        self.assertEqual(40, len(hash2))
 
     def testArgumentsNotAllowed(self):
         self.assertRaises(TypeError, serviceUpdateHash, '1234', 'x', 'y', '1.2.3.4', 99)
@@ -43,8 +43,8 @@ class UtilsTest(SeecrTestCase):
     def testHashBasedOnKwargs(self):
         hash = serviceUpdateHash(secret='1234', a='a', b='b', c=3)
         hash2 = serviceUpdateHash(secret='1234', b='b', c=3, a='a')
-        self.assertEquals(hash, hash2)
-        self.assertEquals(40, len(hash))
+        self.assertEqual(hash, hash2)
+        self.assertEqual(40, len(hash))
 
 
 

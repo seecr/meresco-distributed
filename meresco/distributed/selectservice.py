@@ -28,7 +28,8 @@ from os import makedirs
 from os.path import join, isfile, isdir
 from random import choice
 
-from seecr.utils import Version
+from meresco.components.version import Version
+from seecr.utils import atomic_write, readFromFile
 
 from .service import Service
 
@@ -94,7 +95,7 @@ class SelectService(object):
             return chosenService
         choicefile = join(self._statePath, 'service-%s.choice' % type)
         if isfile(choicefile):
-            chosenService = open(choicefile).read().strip()
+            chosenService = readFromFile(choicefile).strip()
             self._chosenService[type] = chosenService
             return chosenService
 
@@ -105,7 +106,7 @@ class SelectService(object):
         chosenService = self._chosenService.get(type)
         if chosenService == identifier:
             return
-        with open(join(self._statePath, 'service-%s.choice' % type), 'w') as f:
+        with atomic_write(join(self._statePath, 'service-%s.choice' % type)) as f:
             f.write(identifier)
         self._chosenService[type] = identifier
 

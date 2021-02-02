@@ -37,7 +37,7 @@ staticPath = join(usrSharePath, 'static')
 
 def serviceUpdateHash(secret, **kwargs):
     hashString = secret + ''.join(str(value) for key, value in sorted(kwargs.items()))
-    return sha1(hashString).hexdigest()
+    return sha1(hashString.encode()).hexdigest()
 
 IP_ADDRESS = gethostbyname(gethostname())
 

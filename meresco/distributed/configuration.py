@@ -44,15 +44,14 @@ class Configuration(Observable):
             self._save(defaultConfig or {})
 
     def getConfig(self):
-        return JsonDict.load(open(self._configFile))
+        return JsonDict.load(self._configFile)
 
     def saveConfig(self, config):
         self._save(config)
         yield self.all.updateConfig(config=config)
 
     def _save(self, config):
-        JsonDict(config).dump(open(self._configFile + '.tmp', 'w'))
-        rename(self._configFile + '.tmp', self._configFile)
+        JsonDict(config).dump(self._configFile)
 
     def observer_init(self):
         yield self.all.updateConfig(config=self.getConfig())
@@ -75,4 +74,4 @@ class UpdatableConfig(Observable):
         return self._config.__getitem__(*args, **kwargs)
 
 
-   
+

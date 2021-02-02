@@ -42,8 +42,8 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={'akey': {'period': 1}}, services={}))
-        self.assertEquals(['getState', 'setSchedule', 'resume'], observer.calledMethodNames())
-        self.assertEquals(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
+        self.assertEqual(['getState', 'setSchedule', 'resume'], observer.calledMethodNames())
+        self.assertEqual(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
 
     def testUpdateScheduleAlreadyRunning(self):
         class MockState():
@@ -53,8 +53,8 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={'akey': {'period': 1}}, services={}))
-        self.assertEquals(['getState', 'setSchedule'], observer.calledMethodNames())
-        self.assertEquals(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
+        self.assertEqual(['getState', 'setSchedule'], observer.calledMethodNames())
+        self.assertEqual(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
 
     def testKeyNotInConfigSetsDefault(self):
         class MockState():
@@ -64,8 +64,8 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey', default=dict(period=3))
         upc.addObserver(observer)
         consume(upc.updateConfig(config={}, services={}))
-        self.assertEquals(['getState', 'setSchedule'], observer.calledMethodNames())
-        self.assertEquals(Schedule(period=3), observer.calledMethods[1].kwargs['schedule'])
+        self.assertEqual(['getState', 'setSchedule'], observer.calledMethodNames())
+        self.assertEqual(Schedule(period=3), observer.calledMethods[1].kwargs['schedule'])
 
     def testKeyNotInConfigWillPauseIfNoDefault(self):
         class MockState():
@@ -75,7 +75,7 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={}, services={}))
-        self.assertEquals(['getState', 'pause'], observer.calledMethodNames())
+        self.assertEqual(['getState', 'pause'], observer.calledMethodNames())
 
     def testKeyNotInConfigDoesNothingIfAlreadyPaused(self):
         class MockState():
@@ -85,7 +85,7 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={}, services={}))
-        self.assertEquals(['getState'], observer.calledMethodNames())
+        self.assertEqual(['getState'], observer.calledMethodNames())
 
     def testDontUpdateScheduleIfNotChanged(self):
         class MockState():
@@ -95,7 +95,7 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(scheduleConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={'akey': {'period': 2}}, services={}))
-        self.assertEquals(['getState'], observer.calledMethodNames())
+        self.assertEqual(['getState'], observer.calledMethodNames())
 
     def testPeriodConfigKey(self):
         class MockState():
@@ -105,8 +105,8 @@ class UpdatePeriodicCallTest(SeecrTestCase):
         upc = UpdatePeriodicCall(periodConfigKey='akey')
         upc.addObserver(observer)
         consume(upc.updateConfig(config={'akey': 1}, services={}))
-        self.assertEquals(['getState', 'setSchedule', 'resume'], observer.calledMethodNames())
-        self.assertEquals(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
+        self.assertEqual(['getState', 'setSchedule', 'resume'], observer.calledMethodNames())
+        self.assertEqual(Schedule(period=1), observer.calledMethods[1].kwargs['schedule'])
 
     def testBothScheduleAndPeriodNotAllowed(self):
         self.assertRaises(ValueError, lambda: UpdatePeriodicCall(periodConfigKey='akey', scheduleConfigKey='otherkey'))

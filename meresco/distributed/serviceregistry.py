@@ -30,7 +30,7 @@
 #
 ## end license ##
 
-from os import rename, stat
+from os import stat
 from os.path import join, isfile
 
 import re
@@ -40,6 +40,7 @@ from time import time
 from meresco.core import Observable
 from meresco.components.json import JsonDict, JsonList
 from meresco.distributed.constants import ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY, SERVICE_POLL_INTERVAL
+from seecr.utils import readFromFile
 from .constants import SERVICE_TIMEOUT, ULTIMATE_TIMEOUT, SERVICE_FLAGS, RETAIN_AFTER_STARTUP_TIMEOUT
 from .service import Service
 
@@ -105,7 +106,7 @@ class ServiceRegistry(Observable):
         return servicesDict
 
     def iterServices(self):
-        return self.listServices().values()
+        return iter(self.listServices().values())
 
     def getService(self, identifier):
         self._disableLongGoneService()
@@ -114,7 +115,7 @@ class ServiceRegistry(Observable):
         return self._services[identifier].enrichAndClone()
 
     def setFlag(self, identifier, flag, value, immediate=False):
-        if not flag in SERVICE_FLAGS.values():
+        if not flag in set(SERVICE_FLAGS.values()):
             raise ValueError("flag '%s' not known." % flag)
         service = self._services.get(identifier)
         if service is None:
@@ -197,7 +198,7 @@ class ServiceRegistry(Observable):
     def _load(self):
         if not isfile(self._jsonFilepath):
             return {}
-        data = open(self._jsonFilepath).read().strip()
+        data = readFromFile(self._jsonFilepath).strip()
         result = {}
         if '[' != data[0]:
             for identifier, serviceDict in JsonDict.loads(data).items():
@@ -211,10 +212,7 @@ class ServiceRegistry(Observable):
         return result
 
     def _save(self):
-        tmpFile = self._jsonFilepath + '.tmp'
-        with open(tmpFile, 'w') as f:
-            JsonList([service for service in self._services.values()]).dump(f)
-        rename(tmpFile, self._jsonFilepath)
+        JsonList([service for service in self._services.values()]).dump(self._jsonFilepath)
 
     def _now(self):
         return time()

@@ -25,7 +25,7 @@
 #
 ## end license ##
 
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 from meresco.components.json import JsonDict
 
 from meresco.core import Observable

@@ -27,7 +27,6 @@
 
 from os import listdir, stat
 from os.path import join, basename, isfile
-from string import atol
 from time import strftime, localtime
 
 from meresco.core import Observable
@@ -54,12 +53,13 @@ class ServiceLog(Observable):
         if not isfile(filepath):
             yield 'Log not found'
             return
-        for line in open(filepath):
-            if filterValue and filterValue not in line:
-                continue
-            time, value = stampedLine(line)
-            if not filterStamp or filterStamp in time:
-                yield time, value
+        with open(filepath) as fp:
+            for line in fp:
+                if filterValue and filterValue not in line:
+                    continue
+                time, value = stampedLine(line)
+                if not filterStamp or filterStamp in time:
+                    yield time, value
 
 
 def formatStamp(stamp):
@@ -71,8 +71,8 @@ def stampedLine(line):
     return time, value
 
 def tai64ToTime(stamp):
-    secs = long(atol(stamp[1:17], 16))
-    nsec = long(atol(stamp[17:25], 16))
+    secs = int(stamp[1:17], 16)
+    nsec = int(stamp[17:25], 16)
     return "%s.%03d" % (strftime("%Y-%m-%d %H:%M:%S", localtime(int(secs - EPOCH))), nsec/10**6)
 
-EPOCH = 4611686018427387914L
+EPOCH = 4611686018427387914

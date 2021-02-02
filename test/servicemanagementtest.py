@@ -36,10 +36,10 @@ class ServiceManagementTest(SeecrTestCase):
                 { 'ip': '1.1.1.1' },
                 { 'start': '2.2.2.1', 'end': '2.2.2.3'},
             ]}))
-        self.assertEquals(["updateIps"], component.calledMethodNames())
+        self.assertEqual(["updateIps"], component.calledMethodNames())
         updateIpsKwargs = component.calledMethods[0].kwargs
-        self.assertEquals(set(['ipAddresses', 'ipRanges']), set(updateIpsKwargs))
-        self.assertEquals(set([('2.2.2.1', '2.2.2.3')]), updateIpsKwargs['ipRanges'])
+        self.assertEqual(set(['ipAddresses', 'ipRanges']), set(updateIpsKwargs))
+        self.assertEqual(set([('2.2.2.1', '2.2.2.3')]), updateIpsKwargs['ipRanges'])
         ipAddresses = updateIpsKwargs['ipAddresses']
         self.assertTrue('127.0.0.1' in ipAddresses)
         self.assertTrue('1.1.1.1' in ipAddresses)

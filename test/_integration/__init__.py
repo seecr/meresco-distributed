@@ -24,4 +24,4 @@
 #
 ## end license ##
 
-from integrationstate import IntegrationState
+from .integrationstate import IntegrationState

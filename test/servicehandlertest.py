@@ -29,7 +29,7 @@
 from seecr.test import SeecrTestCase, CallTrace
 
 from simplejson import loads, dumps
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from weightless.core import compose, be, asString
 
@@ -101,7 +101,7 @@ class ServiceHandlerTest(SeecrTestCase):
         )))
         header, body = httpSplit(result)
         self.assertTrue('HTTP/1.0 400', header)
-        self.assertEquals('Hash does not match expected hash.', body)
+        self.assertEqual('Hash does not match expected hash.', body)
 
     def testShouldUpdateServicesOnHttpPostRequest(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
@@ -125,8 +125,8 @@ class ServiceHandlerTest(SeecrTestCase):
         lastseen = dictBody['services']['cc635329-c089-41a8-91be-2a4554851515']['lastseen']
         body = dictBody.pretty_print()
 
-        self.assertEquals('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
-        self.assertEquals(
+        self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
+        self.assertEqual(
 {
     "services": {
         "cc635329-c089-41a8-91be-2a4554851515": {
@@ -173,7 +173,7 @@ class ServiceHandlerTest(SeecrTestCase):
 
         result = self.serviceRegistry.listServices()
         result['cc635329-c089-41a8-91be-2a4554851515']['lastseen'] = 666.6
-        self.assertEquals({
+        self.assertEqual({
             'cc635329-c089-41a8-91be-2a4554851515': {
                 'type': 'srv',
                 'fqdn': 'srv0.seecr.nl',
@@ -189,9 +189,9 @@ class ServiceHandlerTest(SeecrTestCase):
                 'data': {'error': 1, 'VERSION': '2.718281828'}}
             }, result)
 
-        self.assertEquals(['getConfig'], self.configuration.calledMethodNames())
-        self.assertEquals(["updateZone"], self.dns.calledMethodNames())
-        self.assertEquals([((), {'ipAddress': '127.0.0.1', 'fqdn': 'srv0.seecr.nl'})], [(m.args, m.kwargs) for m in self.dns.calledMethods])
+        self.assertEqual(['getConfig'], self.configuration.calledMethodNames())
+        self.assertEqual(["updateZone"], self.dns.calledMethodNames())
+        self.assertEqual([((), {'ipAddress': '127.0.0.1', 'fqdn': 'srv0.seecr.nl'})], [(m.args, m.kwargs) for m in self.dns.calledMethods])
 
     def testShouldBeAbleToUpdateMultipleServices(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
@@ -232,7 +232,7 @@ class ServiceHandlerTest(SeecrTestCase):
         lastseen11 = dictBody['services']['11111111-aaaa-3333-eeee-444444444444']['lastseen']
         body = dictBody.pretty_print()
 
-        self.assertEquals('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
+        self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
         self.assertDictEquals(
 {
     "services": {
@@ -336,7 +336,7 @@ class ServiceHandlerTest(SeecrTestCase):
         lastseen11 = dictBody['services']['11111111-aaaa-3333-eeee-444444444444']['lastseen']
         body = dictBody.pretty_print()
 
-        self.assertEquals('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
+        self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: application/json; charset=utf-8', header)
         self.assertDictEquals(
 {
     "services": {
@@ -412,8 +412,8 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['host', 'port'], sorted(dictBodyV2['config'].keys()))
-        self.assertEquals(['api_version', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['host', 'port'], sorted(dictBodyV2['config'].keys()))
+        self.assertEqual(['api_version', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testShouldListOnlyRequestedKeys(self):
         result = asString(self.dna.all.handleRequest(
@@ -423,7 +423,7 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'collections', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testAllKeys(self):
         result = asString(self.dna.all.handleRequest(
@@ -433,11 +433,11 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
-        self.assertEquals({'collection': {'provenanceSource': 'collection_source', 'enabled': True, 'name': 'collection'}}, dictBodyV2['collections'])
-        self.assertEquals(['other'], dictBodyV2['other'])
-        self.assertEquals({'host': 'localhost', 'port': 8000}, dictBodyV2['config'])
-        self.assertEquals({}, dictBodyV2['services'])
+        self.assertEqual(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual({'collection': {'provenanceSource': 'collection_source', 'enabled': True, 'name': 'collection'}}, dictBodyV2['collections'])
+        self.assertEqual(['other'], dictBodyV2['other'])
+        self.assertEqual({'host': 'localhost', 'port': 8000}, dictBodyV2['config'])
+        self.assertEqual({}, dictBodyV2['services'])
 
     def testNonexistingKeys(self):
         result = asString(self.dna.all.handleRequest(
@@ -447,8 +447,8 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'config', 'domain', 'errors', 'services', 'software_version'], sorted(dictBodyV2.keys()))
-        self.assertEquals(["Key 'no' not found."], dictBodyV2['errors'])
+        self.assertEqual(['api_version', 'config', 'domain', 'errors', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(["Key 'no' not found."], dictBodyV2['errors'])
 
     def testRemovingNotListedKeys(self):
         result = asString(self.dna.all.handleRequest(
@@ -458,7 +458,7 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'config', 'domain', 'services', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testAllKeysMultipleArguments(self):
         result = asString(self.dna.all.handleRequest(
@@ -468,7 +468,7 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testIgnoreDefaultKeys(self):
         result = asString(self.dna.all.handleRequest(
@@ -478,7 +478,7 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'domain', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'collections', 'domain', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testShouldReturnOnlyRequestedKeysWithUpdate(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
@@ -498,7 +498,7 @@ class ServiceHandlerTest(SeecrTestCase):
         )))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'config', 'domain', 'services', 'software_version', 'this_service'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'collections', 'config', 'domain', 'services', 'software_version', 'this_service'], sorted(dictBodyV2.keys()))
 
     def testKeysAll(self):
         result = asString(self.dna.all.handleRequest(
@@ -508,31 +508,31 @@ class ServiceHandlerTest(SeecrTestCase):
         ))
         header, body = httpSplit(result)
         dictBodyV2 = JsonDict.loads(body)
-        self.assertEquals(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
+        self.assertEqual(['api_version', 'collections', 'config', 'domain', 'other', 'services', 'software_version'], sorted(dictBodyV2.keys()))
 
     def testShouldNotAllowWrongPath(self):
         result = ''.join(compose(self.dna.all.handleRequest(path='/service/fluffy', arguments={'type': ['srv']}, Method='POST')))
 
         header, body = httpSplit(result)
-        self.assertEquals(header, 'HTTP/1.0 400 Bad Request')
-        self.assertEquals(body, '')
+        self.assertEqual(header, 'HTTP/1.0 400 Bad Request')
+        self.assertEqual(body, '')
 
     def testShouldAllowPostsOnly(self):
         result = ''.join(compose(self.dna.all.handleRequest(path='/service/v2/update', arguments={}, Method='GET')))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 405 Method Not Allowed', header)
-        self.assertEquals('', body)
+        self.assertEqual('HTTP/1.0 405 Method Not Allowed', header)
+        self.assertEqual('', body)
 
         result = ''.join(compose(self.dna.all.handleRequest(path='/service/v2/update', arguments={}, Method='HEAD')))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 405 Method Not Allowed', header)
-        self.assertEquals('', body)
+        self.assertEqual('HTTP/1.0 405 Method Not Allowed', header)
+        self.assertEqual('', body)
 
     def testShouldFailOnBadVersion(self):
         result = asString(self.dna.all.handleRequest(path='/service/v42/list', arguments={}, Method='GET'))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 400 Bad Request', header)
-        self.assertEquals('', body)
+        self.assertEqual('HTTP/1.0 400 Bad Request', header)
+        self.assertEqual('', body)
 
     def testShouldFailOnMissingParameters(self):
         postBody = urlencode({
@@ -545,8 +545,8 @@ class ServiceHandlerTest(SeecrTestCase):
             Body=postBody,
         )))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 400 Bad Request', header)
-        self.assertEquals("Missing parameter: 'type'", body)
+        self.assertEqual('HTTP/1.0 400 Bad Request', header)
+        self.assertEqual("Missing parameter: 'type'", body)
 
     def testUseVpn(self):
         observer = CallTrace()
@@ -560,7 +560,7 @@ class ServiceHandlerTest(SeecrTestCase):
         result = asString(self.dna.all.handleRequest(path='/service/v2/list', arguments={'useVpn': ['True']}, Method='GET'))
         header, body = httpSplit(result)
         self.assertTrue("200 OK" in header, header)
-        self.assertEqual(["listServices", "getConfig", 'getDomain'], observer.calledMethodNames())
+        self.assertEqual({"listServices", "getConfig", 'getDomain'}, set(observer.calledMethodNames()))
         self.assertEqual({'activeOnly': True, 'convertIpsToVpn': True, 'includeState': False}, observer.calledMethods[0].kwargs)
 
 newId = lambda: str(uuid4())

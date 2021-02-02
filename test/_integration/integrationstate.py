@@ -43,7 +43,7 @@ class IntegrationState(_IntegrationState):
         _IntegrationState.__init__(self, "failover-" + stateName, tests=tests, fastMode=fastMode)
 
         self.testdataDir = join(dirname(mydir), 'data/integration')
-        self.adminPort = PortNumberGenerator.next()
+        self.adminPort = PortNumberGenerator.nextPort()
         self.nginxConfigDir = join(self.integrationTempdir, 'nginx-conf.d')
         isdir(self.nginxConfigDir) or makedirs(self.nginxConfigDir)
         nginxScript = join(self.integrationTempdir, 'etc-init.d-nginx')
@@ -56,7 +56,7 @@ class IntegrationState(_IntegrationState):
                 "fqdn": "example.org"
             }
         }
-        chmod(nginxScript, 0770)
+        chmod(nginxScript, 0o770)
 
     def binDir(self):
         return join(projectDir, 'bin')

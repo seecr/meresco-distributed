@@ -88,7 +88,7 @@ class FlagCheck(Observable):
     def _registerDebugId(self, debugId, Client, **ignored):
         if debugId is None:
             clientaddress, ignoredPort = Client
-            debugId = sha1('%s%s%s%s' % (time(), randomWord(10), clientaddress, self._seed)).hexdigest()
+            debugId = sha1(('%s%s%s%s' % (time(), randomWord(10), clientaddress, self._seed)).encode()).hexdigest()
             self._debugIds[debugId] = debugId
         else:
             self._debugIds.touch(debugId)
@@ -104,4 +104,4 @@ class FlagCheck(Observable):
 
 
 def randomWord(length):
-    return ''.join(choice(ascii_letters+digits) for i in xrange(length))
+    return ''.join(choice(ascii_letters+digits) for i in range(length))

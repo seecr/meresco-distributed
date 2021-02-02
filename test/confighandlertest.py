@@ -25,7 +25,7 @@
 #
 ## end license ##
 
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from seecr.test import SeecrTestCase, CallTrace
 
@@ -65,11 +65,11 @@ class ConfigHandlerTest(SeecrTestCase):
             Method='POST')))
 
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 302 Found\r\nLocation: /config', header)
-        self.assertEquals("", body)
-        self.assertEquals(['saveConfig'], [m.name for m in self.observer.calledMethods])
-        self.assertEquals({'aconfig': 'avalue'}, self.observer.calledMethods[0].kwargs['config'])
-        self.assertEquals({'message': {'class': 'success', 'text': 'Configuratie opgeslagen.'}}, session)
+        self.assertEqual('HTTP/1.0 302 Found\r\nLocation: /config', header)
+        self.assertEqual("", body)
+        self.assertEqual(['saveConfig'], [m.name for m in self.observer.calledMethods])
+        self.assertEqual({'aconfig': 'avalue'}, self.observer.calledMethods[0].kwargs['config'])
+        self.assertEqual({'message': {'class': 'success', 'text': 'Configuratie opgeslagen.'}}, session)
 
     def testShouldHandleSplitUpConfig(self):
         session = {}
@@ -84,11 +84,11 @@ class ConfigHandlerTest(SeecrTestCase):
             Method='POST')))
 
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 302 Found\r\nLocation: /config', header)
-        self.assertEquals("", body)
-        self.assertEquals(['saveConfig'], [m.name for m in self.observer.calledMethods])
-        self.assertEquals({'aconfig': 'avalue', 'api.frontend':{'ipAddress': '1.2.3.4'}}, self.observer.calledMethods[0].kwargs['config'])
-        self.assertEquals({'message': {'class': 'success', 'text': 'Configuratie opgeslagen.'}}, session)
+        self.assertEqual('HTTP/1.0 302 Found\r\nLocation: /config', header)
+        self.assertEqual("", body)
+        self.assertEqual(['saveConfig'], [m.name for m in self.observer.calledMethods])
+        self.assertEqual({'aconfig': 'avalue', 'api.frontend':{'ipAddress': '1.2.3.4'}}, self.observer.calledMethods[0].kwargs['config'])
+        self.assertEqual({'message': {'class': 'success', 'text': 'Configuratie opgeslagen.'}}, session)
 
     def testShouldHandleInvalidUpdateAndShowError(self):
         session = {}
@@ -99,25 +99,25 @@ class ConfigHandlerTest(SeecrTestCase):
             Method='POST')))
 
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 302 Found\r\nLocation: /config', header)
-        self.assertEquals("", body)
-        self.assertEquals({'message': {'class': 'error', 'text': 'Ongeldige JSON'}}, session)
+        self.assertEqual('HTTP/1.0 302 Found\r\nLocation: /config', header)
+        self.assertEqual("", body)
+        self.assertEqual({'message': {'class': 'error', 'text': 'Ongeldige JSON'}}, session)
 
     def testShouldDisallowWrongPaths(self):
         result = ''.join(compose(self.dna.all.handleRequest(path='/config/add', arguments={'type': ['srv']}, Method='POST')))
 
         header, body = httpSplit(result)
-        self.assertEquals(header, 'HTTP/1.0 400 Bad Request')
-        self.assertEquals(body, '')
+        self.assertEqual(header, 'HTTP/1.0 400 Bad Request')
+        self.assertEqual(body, '')
 
     def testShouldOnlyHandlePost(self):
         result = ''.join(compose(self.dna.all.handleRequest(path='/config/update', arguments={}, Method='GET')))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 405 Method Not Allowed', header)
-        self.assertEquals('', body)
+        self.assertEqual('HTTP/1.0 405 Method Not Allowed', header)
+        self.assertEqual('', body)
 
         result = ''.join(compose(self.dna.all.handleRequest(path='/config/update', arguments={}, Method='HEAD')))
         header, body = httpSplit(result)
-        self.assertEquals('HTTP/1.0 405 Method Not Allowed', header)
-        self.assertEquals('', body)
+        self.assertEqual('HTTP/1.0 405 Method Not Allowed', header)
+        self.assertEqual('', body)
 

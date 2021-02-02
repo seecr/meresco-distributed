@@ -103,11 +103,11 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'setSchedule', 'setRetryAfterErrorTime', 'setDownloadAddress', 'pause'], self.periodicDownloadMock.calledMethodNames())
-        self.assertEquals(2, self.periodicDownloadMock.calledMethods[1].kwargs['schedule'].period)
-        self.assertEquals({'seconds': 1}, self.periodicDownloadMock.calledMethods[2].kwargs)
-        self.assertEquals(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
-        self.assertEquals(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
+        self.assertEqual(['getState', 'setSchedule', 'setRetryAfterErrorTime', 'setDownloadAddress', 'pause'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(2, self.periodicDownloadMock.calledMethods[1].kwargs['schedule'].period)
+        self.assertEqual({'seconds': 1}, self.periodicDownloadMock.calledMethods[2].kwargs)
+        self.assertEqual(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
+        self.assertEqual(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
 
         self.periodicDownloadMock.calledMethods.reset()
         self.serviceManagementMock.calledMethods.reset()
@@ -129,9 +129,9 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'resume'], self.periodicDownloadMock.calledMethodNames())
-        self.assertEquals(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
-        self.assertEquals(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
+        self.assertEqual(['getState', 'resume'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
+        self.assertEqual(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
 
         self.periodicDownloadMock.calledMethods.reset()
         self.serviceManagementMock.calledMethods.reset()
@@ -156,7 +156,7 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'pause'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(['getState', 'pause'], self.periodicDownloadMock.calledMethodNames())
 
         self.periodicDownloadMock.calledMethods.reset()
         self.serviceManagementMock.calledMethods.reset()
@@ -178,9 +178,9 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'setSchedule', 'resume'], self.periodicDownloadMock.calledMethodNames())
-        self.assertEquals(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
-        self.assertEquals(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
+        self.assertEqual(['getState', 'setSchedule', 'resume'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(['selectHostPortForService'], self.serviceManagementMock.calledMethodNames())
+        self.assertEqual(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
 
     def testGetPollIntervalFromConfigSelectorOnUpdateConfig(self):
         observers = self.updatePeriodicDownload.observers()
@@ -206,9 +206,9 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
             services={}
         )))
 
-        self.assertEquals(['getState', 'setSchedule', 'pause'], self.periodicDownloadMock.calledMethodNames())
-        self.assertEquals(7, self.periodicDownloadMock.calledMethods[1].kwargs['schedule'].period)
-        self.assertEquals(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
+        self.assertEqual(['getState', 'setSchedule', 'pause'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(7, self.periodicDownloadMock.calledMethods[1].kwargs['schedule'].period)
+        self.assertEqual(True, self.serviceManagementMock.calledMethods[0].kwargs['remember'])
 
         self.periodicDownloadMock.calledMethods.reset()
         self.serviceManagementMock.calledMethods.reset()
@@ -231,7 +231,7 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'setSchedule', 'pause'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(['getState', 'setSchedule', 'pause'], self.periodicDownloadMock.calledMethodNames())
 
         self.periodicDownloadMock.calledMethods.reset()
         self.serviceManagementMock.returnValues['selectHostPortForService'] = ('hostname', 1234)
@@ -251,7 +251,7 @@ class UpdatePeriodicDownloadTest(SeecrTestCase):
                 }
             }
         )))
-        self.assertEquals(['getState', 'setDownloadAddress', 'resume'], self.periodicDownloadMock.calledMethodNames())
+        self.assertEqual(['getState', 'setDownloadAddress', 'resume'], self.periodicDownloadMock.calledMethodNames())
 
     def testCreateUpdatePeriodicDownloadForSpecificService(self):
         self.updatePeriodicDownload = UpdatePeriodicDownload(

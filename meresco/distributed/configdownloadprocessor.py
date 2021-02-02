@@ -28,8 +28,9 @@
 import sys
 from os import makedirs
 from os.path import join, abspath, isfile, isdir
-from urllib import urlencode
-from urllib2 import urlopen, HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
 from socket import timeout
 from time import time
 from copy import copy
@@ -144,9 +145,11 @@ class ConfigDownloadProcessor(Observable):
 
     def _download(self, url, **kwargs):
         try:
+            if 'data' in kwargs:
+                kwargs['data'] = kwargs['data'].encode()
             configuration = JsonDict.load(urlopen(url, **kwargs))
             self._cache.update(configuration)
-        except (HTTPError, URLError, timeout), e:
+        except (HTTPError, URLError, timeout) as e:
             sys.stderr.write("""%s (%s).
 Tried: %s
 -----

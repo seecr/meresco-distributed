@@ -44,7 +44,7 @@ class ConditionMet(Observable):
         if self._conditionMet:
             try:
                 response = yield self.any.unknown(message, *args, **kwargs)
-                raise StopIteration(response)
+                return response
             except NoneOfTheObserversRespond:
                 pass
         raise DeclineMessage

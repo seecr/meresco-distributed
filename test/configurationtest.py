@@ -51,23 +51,23 @@ class ConfigurationTest(SeecrTestCase):
             ))
 
     def testShouldReturnEmpty(self):
-        self.assertEquals({}, self.configuration.getConfig())
+        self.assertEqual({}, self.configuration.getConfig())
 
     def testShouldStoreAddedConfiguration(self):
         consume(self.observable.all.saveConfig(CONFIG))
-        self.assertEquals(CONFIG, self.configuration.getConfig())
+        self.assertEqual(CONFIG, self.configuration.getConfig())
 
         consume(self.observable.all.saveConfig(config={"anotherPort": 8001}))
-        self.assertEquals({'anotherPort': 8001}, self.configuration.getConfig())
-        self.assertEquals(['updateConfig', 'updateConfig'], [m.name for m in self.observer.calledMethods])
-        self.assertEquals({'anotherPort': 8001}, self.observer.calledMethods[-1].kwargs['config'])
+        self.assertEqual({'anotherPort': 8001}, self.configuration.getConfig())
+        self.assertEqual(['updateConfig', 'updateConfig'], [m.name for m in self.observer.calledMethods])
+        self.assertEqual({'anotherPort': 8001}, self.observer.calledMethods[-1].kwargs['config'])
 
     def testShouldUpdateConfigurationOnObserverInit(self):
         consume(self.observable.all.saveConfig(CONFIG))
         list(compose(self.observable.once.observer_init()))
-        self.assertEquals(CONFIG, self.configuration.getConfig())
-        self.assertEquals(['updateConfig', 'updateConfig'], [m.name for m in self.observer.calledMethods])
-        self.assertEquals(CONFIG, self.observer.calledMethods[-1].kwargs['config'])
+        self.assertEqual(CONFIG, self.configuration.getConfig())
+        self.assertEqual(['updateConfig', 'updateConfig'], [m.name for m in self.observer.calledMethods])
+        self.assertEqual(CONFIG, self.observer.calledMethods[-1].kwargs['config'])
 
     def testShouldUseDefaultConfigurationIfNotPresent(self):
         configuration = Configuration(stateDir=join(self.tempdir, 'sub'), defaultConfig={'a': 1})
@@ -78,18 +78,18 @@ class ConfigurationTest(SeecrTestCase):
                 )
             ))
         list(compose(self.observable.once.observer_init()))
-        self.assertEquals({'a': 1}, configuration.getConfig())
+        self.assertEqual({'a': 1}, configuration.getConfig())
 
         makedirs(join(self.tempdir, 'yes'))
-        JsonDict(CONFIG).dump(open(join(self.tempdir, 'yes', 'config.json'), 'w'))
+        JsonDict(CONFIG).dump(join(self.tempdir, 'yes', 'config.json'))
         configuration = Configuration(stateDir=join(self.tempdir, 'yes'), defaultConfig={'a': 1})
-        self.assertEquals(CONFIG, configuration.getConfig())
+        self.assertEqual(CONFIG, configuration.getConfig())
 
     def testConversion(self):
         makedirs(join(self.tempdir, 'configuration', 'config.json'))
-        JsonDict(CONFIG).dump(open(join(self.tempdir, 'configuration', 'config.json', 'config'), 'w'))
+        JsonDict(CONFIG).dump(join(self.tempdir, 'configuration', 'config.json', 'config'))
         configuration = Configuration(stateDir=self.tempdir, defaultConfig={'a': 1})
-        self.assertEquals(CONFIG, configuration.getConfig())
+        self.assertEqual(CONFIG, configuration.getConfig())
         self.assertFalse(isdir(join(self.tempdir, 'configuration')))
 
     def testUpdatableConfig(self):

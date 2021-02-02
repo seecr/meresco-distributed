@@ -46,38 +46,38 @@ class ServiceRegistryTest(SeecrTestCase):
         identifier = str(uuid4())
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
         services = registry.listServices()
-        self.assertEquals(0, services[identifier]['number'])
-        self.assertEquals('127.0.0.1', services[identifier]['ipAddress'])
-        self.assertEquals(1234, services[identifier]['infoport'])
-        self.assertEquals('plein', services[identifier]['type'])
-        self.assertEquals(True, services[identifier].isActive())
-        self.assertEquals('plein0.zp.example.org', services[identifier].fqdn())
+        self.assertEqual(0, services[identifier]['number'])
+        self.assertEqual('127.0.0.1', services[identifier]['ipAddress'])
+        self.assertEqual(1234, services[identifier]['infoport'])
+        self.assertEqual('plein', services[identifier]['type'])
+        self.assertEqual(True, services[identifier].isActive())
+        self.assertEqual('plein0.zp.example.org', services[identifier].fqdn())
         t0 = services[identifier]['lastseen']
 
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=2345, data={})
         services = registry.listServices()
-        self.assertEquals(0, services[identifier]['number'])
-        self.assertEquals(2345, services[identifier]['infoport'])
+        self.assertEqual(0, services[identifier]['number'])
+        self.assertEqual(2345, services[identifier]['infoport'])
         t1 = services[identifier]['lastseen']
         self.assertTrue(t0 < t1)
 
         identifier2 = str(uuid4())
         registry.updateService(identifier=identifier2, type='plein', ipAddress='127.0.0.2', infoport=1234, data={})
-        self.assertEquals('plein1.zp.example.org', registry.getService(identifier2).fqdn())
+        self.assertEqual('plein1.zp.example.org', registry.getService(identifier2).fqdn())
 
         services = registry.listServices()
-        self.assertEquals(2, len(services))
+        self.assertEqual(2, len(services))
 
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname="zp.example.org")
         observer = CallTrace('observer')
         registry.addObserver(observer)
 
         services = registry.listServices()
-        self.assertEquals(0, services[identifier]['number'])
-        self.assertEquals('127.0.0.1', services[identifier]['ipAddress'])
-        self.assertEquals(2345, services[identifier]['infoport'])
-        self.assertEquals('plein', services[identifier]['type'])
-        self.assertEquals(2, len(services))
+        self.assertEqual(0, services[identifier]['number'])
+        self.assertEqual('127.0.0.1', services[identifier]['ipAddress'])
+        self.assertEqual(2345, services[identifier]['infoport'])
+        self.assertEqual('plein', services[identifier]['type'])
+        self.assertEqual(2, len(services))
 
     def testShouldNotAllowTypesWithNumbers(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
@@ -87,8 +87,8 @@ class ServiceRegistryTest(SeecrTestCase):
         try:
             registry.updateService(identifier=str(uuid4()), type='aType1', ipAddress='127.0.0.1', infoport=1234, data={})
             self.fail('Should not happen')
-        except ValueError, e:
-            self.assertEquals('Service type "aType1" must not end with a number.', str(e))
+        except ValueError as e:
+            self.assertEqual('Service type "aType1" must not end with a number.', str(e))
 
         self.assertRaises(ValueError, lambda: registry.updateService(identifier=str(uuid4()), type='aType5', ipAddress='127.0.0.1', infoport=1234, data={}))
         registry.updateService(identifier=str(uuid4()), type='1234a', ipAddress='127.0.0.1', infoport=1234, data={})
@@ -98,8 +98,8 @@ class ServiceRegistryTest(SeecrTestCase):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
         observer = CallTrace('observer')
         registry.addObserver(observer)
-        self.assertEquals(60, registry._timeout)
-        self.assertEquals(24*60*60, registry._ultimateTimeout)
+        self.assertEqual(60, registry._timeout)
+        self.assertEqual(24*60*60, registry._ultimateTimeout)
         def sleep(seconds):
             times[0] += seconds
         registry._now = lambda: times[0]
@@ -111,7 +111,7 @@ class ServiceRegistryTest(SeecrTestCase):
         registry.setFlag(identifier, WRITABLE, True)
         service = registry.listServices()[identifier]
         number = service['number']
-        self.assertEquals(times[0], service['lastseen'])
+        self.assertEqual(times[0], service['lastseen'])
         self.assertTrue(service.isActive())
         sleep(30)
         service = registry.listServices()[identifier]
@@ -123,7 +123,7 @@ class ServiceRegistryTest(SeecrTestCase):
         self.assertTrue(identifier not in registry.listServices())
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
         service = registry.listServices()[identifier]
-        self.assertEquals(number, service['number'])
+        self.assertEqual(number, service['number'])
         self.assertTrue(service.isActive())
         sleep(80)
         service = registry.listServices(activeOnly=False)[identifier]
@@ -156,7 +156,7 @@ class ServiceRegistryTest(SeecrTestCase):
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={})
         registry._services[identifier]._now = lambda: times[0]
         service = registry.listServices()[identifier]
-        self.assertEquals(times[0], service['lastseen'])
+        self.assertEqual(times[0], service['lastseen'])
         self.assertTrue(service.isActive())
         sleep(80)
         service = registry.listServices(activeOnly=False)[identifier]
@@ -174,7 +174,7 @@ class ServiceRegistryTest(SeecrTestCase):
         service = registry.listServices()[identifier]
         self.assertFalse('state' in service, service)
         service = registry.listServices(includeState=True)[identifier]
-        self.assertEquals({'readable': False, 'writable': False}, service['state'])
+        self.assertEqual({'readable': False, 'writable': False}, service['state'])
 
     def testShouldUpdateDns(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
@@ -183,10 +183,10 @@ class ServiceRegistryTest(SeecrTestCase):
         identifier = str(uuid4())
         registry.updateService(identifier=identifier, type='api', ipAddress='127.0.0.1', infoport=1234, data={})
 
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         method = observer.calledMethods[0]
-        self.assertEquals(registry.getService(identifier).fqdn(), method.kwargs['fqdn'])
-        self.assertEquals('127.0.0.1', method.kwargs['ipAddress'])
+        self.assertEqual(registry.getService(identifier).fqdn(), method.kwargs['fqdn'])
+        self.assertEqual('127.0.0.1', method.kwargs['ipAddress'])
 
     def testShouldUpdateDnsOnDelete(self):
         times = [12345678.0]
@@ -199,12 +199,12 @@ class ServiceRegistryTest(SeecrTestCase):
 
         identifier = str(uuid4())
         registry.updateService(identifier=identifier, type='api', ipAddress='127.0.0.1', infoport=1234, data={})
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         registry.listServices()
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         sleep(2*24*60*60)
         services = registry.listServices()
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         self.assertTrue(identifier not in services, services)
 
     def testShouldAllowOldRegistryFileFormat(self):
@@ -212,7 +212,7 @@ class ServiceRegistryTest(SeecrTestCase):
         with open(join(self.tempdir, 'serviceregistry.json'), 'w') as f:
             f.write("""{"%s": {"type": "kennisbank", "ipAddress": "89.16.161.123", "number": 0, "infoport": 6002, "lastseen": 1}}""" % identifier)
         reqistry = ServiceRegistry(stateDir=self.tempdir, domainname='zp.example.org', reactor=CallTrace())
-        self.assertEquals(1, len(reqistry.listServices(activeOnly=False)))
+        self.assertEqual(1, len(reqistry.listServices(activeOnly=False)))
 
     def testShouldUpdateFlags(self):
         reactor = CallTrace('reactor')
@@ -249,9 +249,9 @@ class ServiceRegistryTest(SeecrTestCase):
             state = registry.getPrivateStateFor(identifier)
             self.assertFalse(service[flagName], service)
             self.assertTrue(state[flagName], service)
-            self.assertEquals(['addTimer'], reactor.calledMethodNames())
+            self.assertEqual(['addTimer'], reactor.calledMethodNames())
             addTimer = reactor.calledMethods[0]
-            self.assertEquals(30, addTimer.args[0])
+            self.assertEqual(30, addTimer.args[0])
             addTimer.args[1]()
             registry = ServiceRegistry(reactor, self.tempdir, domainname="zp.example.org")
             service = registry.listServices().get(identifier)
@@ -335,11 +335,11 @@ class ServiceRegistryTest(SeecrTestCase):
         identifier = str(uuid4())
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={'VERSION': '0.1.2.3'})
         service = registry.listServices().get(identifier)
-        self.assertEquals({'VERSION': '0.1.2.3'}, service['data'])
+        self.assertEqual({'VERSION': '0.1.2.3'}, service['data'])
 
         registry.updateService(identifier=identifier, type='plein', ipAddress='127.0.0.1', infoport=1234, data={'error': 1, 'VERSION': '0.1.2.3'})
         service = registry.listServices().get(identifier)
-        self.assertEquals({'error': 1, 'VERSION': '0.1.2.3'}, service['data'])
+        self.assertEqual({'error': 1, 'VERSION': '0.1.2.3'}, service['data'])
 
     def testShouldDeleteService(self):
         times = [12345678.0]
@@ -353,13 +353,13 @@ class ServiceRegistryTest(SeecrTestCase):
         identifier = str(uuid4())
         registry.updateService(identifier=identifier, type='api', ipAddress='127.0.0.1', infoport=1234, data={})
         fqdn = registry.getService(identifier).fqdn()
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         sleep(2*24*60*60)
         registry.listServices()
-        self.assertEquals(['updateZone'], observer.calledMethodNames())
+        self.assertEqual(['updateZone'], observer.calledMethodNames())
         registry.deleteService(identifier)
-        self.assertEquals(['updateZone', 'deleteFromZone'], observer.calledMethodNames())
-        self.assertEquals({'fqdn': fqdn}, observer.calledMethods[-1].kwargs)
+        self.assertEqual(['updateZone', 'deleteFromZone'], observer.calledMethodNames())
+        self.assertEqual({'fqdn': fqdn}, observer.calledMethods[-1].kwargs)
         self.assertFalse(identifier in registry.listServices(activeOnly=False))
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
         self.assertFalse(identifier in registry.listServices(activeOnly=False))
@@ -405,7 +405,7 @@ class ServiceRegistryTest(SeecrTestCase):
 
     def testGetStateForNoneExistingService(self):
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
-        self.assertEquals(None, registry.getPrivateStateFor(identifier='ehh'))
+        self.assertEqual(None, registry.getPrivateStateFor(identifier='ehh'))
 
     def testKeepDownServicesForAWhile(self):
         added_time = [0]
@@ -427,7 +427,7 @@ class ServiceRegistryTest(SeecrTestCase):
             return r
         # T = 0
         registry = createRegistry()
-        id1, id2, id3 = (str(uuid4()) for i in xrange(3))
+        id1, id2, id3 = (str(uuid4()) for i in range(3))
         registry.updateService(identifier=id1, type='type_one', ipAddress='127.0.0.1', infoport=1234, data={})
         registry._services[id1]._now = currentTime
 
@@ -437,7 +437,7 @@ class ServiceRegistryTest(SeecrTestCase):
         registry._services[id2]._now = currentTime
         registry.updateService(identifier=id3, type='type_three', ipAddress='127.0.0.1', infoport=1234, data={})
         registry._services[id3]._now = currentTime
-        self.assertEquals(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
+        self.assertEqual(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
         # T = 40 for registry file
         filetimes = stat(join(self.tempdir, SERVICEREGISTRY_FILE))
         utime(join(self.tempdir, SERVICEREGISTRY_FILE), (filetimes.st_atime + 40, filetimes.st_mtime + 40))
@@ -447,14 +447,14 @@ class ServiceRegistryTest(SeecrTestCase):
         registry = createRegistry()
         for s in registry._services.values():
             s._now = currentTime
-        self.assertEquals(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
+        self.assertEqual(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
         # T = 130
         added_time[0] += 50
         registry.updateService(identifier=id3, type='type_three', ipAddress='127.0.0.1', infoport=1234, data={})
-        self.assertEquals(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
+        self.assertEqual(set(['type_two', 'type_three']), set(d['type'] for d in registry.listServices().values()))
         # T = 155
         added_time[0] += 25
-        self.assertEquals(set(['type_three']), set(d['type'] for d in registry.listServices().values()))
+        self.assertEqual(set(['type_three']), set(d['type'] for d in registry.listServices().values()))
 
     def testServiceRegistryOldFormat(self):
         uuid1 = str(uuid4())
@@ -494,14 +494,14 @@ class ServiceRegistryTest(SeecrTestCase):
             domainname='zp.example.org',
             reactor=CallTrace(),
         )
-        self.assertEquals(set([uuid1, uuid2]), set(registry.listServices(activeOnly=False).keys()))
+        self.assertEqual(set([uuid1, uuid2]), set(registry.listServices(activeOnly=False).keys()))
 
     def testUpdateScriptAsService(self):
         times = [12345678.0]
         registry = ServiceRegistry(stateDir=self.tempdir, reactor=CallTrace(), domainname='zp.example.org')
         observer = CallTrace('observer')
         registry.addObserver(observer)
-        self.assertEquals(60, registry._timeout)
+        self.assertEqual(60, registry._timeout)
         def sleep(seconds):
             times[0] += seconds
         registry._now = lambda: times[0]

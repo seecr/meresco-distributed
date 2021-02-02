@@ -33,17 +33,17 @@ class RemarksTest(SeecrTestCase):
     def testStore(self):
         r = Remarks(self.tempdir)
         consume(r.handleRequest(Method="POST", path="/some/path/save", Body="key=key&contents=Contents"))
-        self.assertEquals('Contents', r.getRemarks(key='key'))
+        self.assertEqual('Contents', r.getRemarks(key='key'))
 
     def testIsStored(self):
         r = Remarks(self.tempdir)
         consume(r.handleRequest(Method="POST", path="/some/path/save", Body="key=key&contents=The+contents"))
-        self.assertEquals('The contents', Remarks(self.tempdir).getRemarks('key'))
+        self.assertEqual('The contents', Remarks(self.tempdir).getRemarks('key'))
 
     def testEmptyForNonExistingKey(self):
-        self.assertEquals('', Remarks(self.tempdir).getRemarks(key='does_not_exist'))
+        self.assertEqual('', Remarks(self.tempdir).getRemarks(key='does_not_exist'))
 
     def testSaveEmptyKey(self):
         r = Remarks(self.tempdir)
         consume(r.handleRequest(Method="POST", path="/some/path/save", Body="key=key&contents="))
-        self.assertEquals('', r.getRemarks(key='key'))
+        self.assertEqual('', r.getRemarks(key='key'))

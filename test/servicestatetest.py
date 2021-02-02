@@ -33,19 +33,19 @@ class ServiceStateTest(SeecrTestCase):
         state = ServiceState(lambda: [downloadState(error=False)])
         dataDict = {}
         state.serviceData(dataDict)
-        self.assertEquals({}, dataDict)
+        self.assertEqual({}, dataDict)
 
     def testOneError(self):
         state = ServiceState([downloadState(error=True)])
         dataDict = {}
         state.serviceData(dataDict)
-        self.assertEquals({'errors': 1}, dataDict)
+        self.assertEqual({'errors': 1}, dataDict)
 
     def testTwoErrors(self):
         state = ServiceState([downloadState(True), downloadState(False), downloadState(True)])
         dataDict = {}
         state.serviceData(dataDict)
-        self.assertEquals({'errors': 2}, dataDict)
+        self.assertEqual({'errors': 2}, dataDict)
 
     def testWarnings(self):
         state = ServiceState.asWarning([downloadState(True)])

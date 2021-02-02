@@ -47,13 +47,13 @@ class UpdateIpsTest(SeecrTestCase):
         self.createTree(configSelector=cs)
 
         consume(self.top.all.updateConfig(config=CONFIG_EXAMPLE, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(tuple(), updateIps.args)
+        self.assertEqual(tuple(), updateIps.args)
 
         # return-type is a set i.s.o. a list, but works equally well with IpFilter / Deproxy.
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set(['1.2.3.5', '1.2.3.4', '127.0.0.1']),
                 ipRanges=set([('0.0.0.0', '10.10.10.10'), ('20.20.20.20', '40.40.40.40'), '10.10.10.0/24']),
             ), updateIps.kwargs)
@@ -63,13 +63,13 @@ class UpdateIpsTest(SeecrTestCase):
         self.createTree(configSelector=emptyCs, staticIpAddresses=['0.9.1.1'], includeLocalhost=False)
 
         consume(self.top.all.updateConfig(config=CONFIG_EXAMPLE, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(tuple(), updateIps.args)
+        self.assertEqual(tuple(), updateIps.args)
 
         # return-type is a set i.s.o. a list, but works equally well with IpFilter / Deproxy.
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set(['0.9.1.1']),
                 ipRanges=set([]),
             ), updateIps.kwargs)
@@ -79,10 +79,10 @@ class UpdateIpsTest(SeecrTestCase):
         emptyCs = lambda c: []
         self.createTree(configSelector=emptyCs, includeLocalhost=False)
         consume(self.top.all.updateConfig(config={}, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set([]),
                 ipRanges=set([]),
             ), updateIps.kwargs)
@@ -91,10 +91,10 @@ class UpdateIpsTest(SeecrTestCase):
         emptyCs = lambda c: []
         self.createTree(configSelector=emptyCs, includeLocalhost=True)
         consume(self.top.all.updateConfig(config={}, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set(['127.0.0.1']),
                 ipRanges=set([]),
             ), updateIps.kwargs)
@@ -104,13 +104,13 @@ class UpdateIpsTest(SeecrTestCase):
         self.createTree(configSelector=emptyCs, staticIpAddresses=['0.9.1.1'], includeLocalhost=True)
 
         consume(self.top.all.updateConfig(config={}, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(tuple(), updateIps.args)
+        self.assertEqual(tuple(), updateIps.args)
 
         # return-type is a set i.s.o. a list, but works equally well with IpFilter / Deproxy.
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set(['0.9.1.1', '127.0.0.1']),
                 ipRanges=set([]),
             ), updateIps.kwargs)
@@ -120,13 +120,13 @@ class UpdateIpsTest(SeecrTestCase):
         self.createTree(configSelector=cs, staticIpAddresses=['0.9.1.1'])
 
         consume(self.top.all.updateConfig(config=CONFIG_EXAMPLE, services={}))
-        self.assertEquals(1, len(self.observer.calledMethods))
+        self.assertEqual(1, len(self.observer.calledMethods))
 
         updateIps, = self.observer.calledMethods
-        self.assertEquals(tuple(), updateIps.args)
+        self.assertEqual(tuple(), updateIps.args)
 
         # return-type is a set i.s.o. a list, but works equally well with IpFilter / Deproxy.
-        self.assertEquals(dict(
+        self.assertEqual(dict(
                 ipAddresses=set(['0.9.1.1', '1.2.3.5', '1.2.3.4', '127.0.0.1']),
                 ipRanges=set([('0.0.0.0', '10.10.10.10'), ('20.20.20.20', '40.40.40.40'), '10.10.10.0/24']),
             ), updateIps.kwargs)

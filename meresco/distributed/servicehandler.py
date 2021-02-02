@@ -26,7 +26,7 @@
 #
 ## end license ##
 
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 from simplejson import loads
 
 from weightless.core import NoneOfTheObserversRespond
@@ -65,7 +65,7 @@ class ServiceHandler(Observable):
             handleFunction, methodForAction = self._actions[action]
             if Method != methodForAction:
                 raise Exception('METHOD_NOT_ALLOWED')
-        except Exception, e:
+        except Exception as e:
             if str(e) == 'METHOD_NOT_ALLOWED':
                 yield 'HTTP/1.0 405 Method Not Allowed' + CRLF*2
             else:
@@ -84,11 +84,11 @@ class ServiceHandler(Observable):
             data = loads(bodyArgs.get('data', ["{}"])[0])
             self._verifyHash(hash=hash, identifier=identifier, type=type, ipAddress=ipAddress, infoport=infoport)
             self.call.updateService(identifier=identifier, type=type, ipAddress=ipAddress, infoport=infoport, data=data)
-        except KeyError, e:
+        except KeyError as e:
             yield badRequest
             yield "Missing parameter: %s" % str(e)
             return
-        except ValueError, e:
+        except ValueError as e:
             yield badRequest
             yield str(e)
             return

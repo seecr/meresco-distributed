@@ -30,7 +30,7 @@ from os import makedirs
 from os.path import join, isfile, isdir
 from meresco.components.json import JsonDict
 from meresco.html import PostActions
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 from meresco.components.http.utils import Ok, CRLF
 
 class Remarks(PostActions):
