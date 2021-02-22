@@ -52,7 +52,7 @@ class ConfigHandler(Observable):
         yield self._actions[action](**kwargs)
 
     def handleUpdate(self, Body, session, **kwargs):
-        formValues = parse_qs(Body, keep_blank_values=True)
+        formValues = parse_qs(Body.decode(), keep_blank_values=True)
         redirectUrl = formValues.get('redirectUrl')[0]
         try:
             config = JsonDict.loads(formValues.get('config')[0])

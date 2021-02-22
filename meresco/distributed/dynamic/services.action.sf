@@ -32,13 +32,13 @@ def main(session, user, Method, Body, arguments, **kwargs):
         yield http.redirect('/services')
         return
     immediateFlagChange = arguments.get('immediate', ['False'])[0] == 'True'
-    bodyArgs = parse_qs(Body)
+    bodyArgs = parse_qs(Body.decode())
 
     if "settings" in bodyArgs:
         session['useVpn'] = 'useVpn' in bodyArgs
         session['groupingKey'] = bodyArgs.get('groupingKey', [None])[0]
         config = observable.call.getConfig()
-        config[ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY] = int(bodyArgs["admin_download_period"][0])
+        config[ADMIN_DOWNLOAD_PERIOD_CONFIG_KEY] = int(float(bodyArgs["admin_download_period"][0]))
         yield observable.all.saveConfig(config)
     else:
         for identifier, service in observable.call.listServices(activeOnly=False).items():
@@ -46,7 +46,7 @@ def main(session, user, Method, Body, arguments, **kwargs):
                 value = (('%s_%s' % (identifier, flag)) in bodyArgs)
                 immediate = immediateFlagChange or (('%s_%s_immediate' % (identifier, flag)) in bodyArgs)
                 if immediate or value != service[flag.name]:
-                    print 'setFlag', identifier, flag, value, 'immediate=%s' % immediate
+                    print('setFlag', identifier, flag, value, 'immediate=%s' % immediate)
                     observable.call.setFlag(identifier, flag, value, immediate=immediate)
         if 'reEnableService' in bodyArgs:
             observable.call.reEnableService(bodyArgs['reEnableService'][0])
