@@ -77,7 +77,7 @@ class ServiceHandler(Observable):
         yield handleFunction(apiVersion=version, **kwargs)
 
     def handleUpdate(self, Body, **kwargs):
-        bodyArgs = parse_qs(Body)
+        bodyArgs = parse_qs(str(Body, encoding='utf-8'))
         try:
             identifier = bodyArgs['identifier'][0]
             type = bodyArgs['type'][0]

@@ -84,7 +84,7 @@ class ServiceHandlerTest(SeecrTestCase):
             'hash': hash,
             'data': dumps({'VERSION': '2.718281828'}),
         }
-        postBody = urlencode(bodyArgs)
+        postBody = bytes(urlencode(bodyArgs), encoding='utf-8')
         result = ''.join(compose(self.dna.all.handleRequest(
             path=updatePath,
             Method='POST',
@@ -95,7 +95,7 @@ class ServiceHandlerTest(SeecrTestCase):
         self.assertTrue('HTTP/1.0 200', header)
 
         bodyArgs['hash'] = 'wrong'
-        postBody = urlencode(bodyArgs)
+        postBody = bytes(urlencode(bodyArgs), encoding='utf-8')
         result = ''.join(compose(self.dna.all.handleRequest(
             path=updatePath,
             Method='POST',
@@ -108,14 +108,14 @@ class ServiceHandlerTest(SeecrTestCase):
 
     def testShouldUpdateServicesOnHttpPostRequest(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': 'cc635329-c089-41a8-91be-2a4554851515',
             'type': 'srv',
             'ipAddress': '127.0.0.1',
             'infoport': '1234',
             'hash': hash,
             'data': dumps({'error': 1, 'VERSION': '2.718281828'}),
-        })
+        }), encoding='utf-8')
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -198,14 +198,14 @@ class ServiceHandlerTest(SeecrTestCase):
 
     def testShouldBeAbleToUpdateMultipleServices(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': 'cc635329-c089-41a8-91be-2a4554851515',
             'type': 'srv',
             'ipAddress': '127.0.0.1',
             'infoport': '1234',
             'hash': hash,
             'data': dumps({'VERSION': '2.718281828'}),
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -214,14 +214,14 @@ class ServiceHandlerTest(SeecrTestCase):
         )))
 
         hash = serviceUpdateHash(secret='guessme!', identifier='11111111-aaaa-3333-eeee-444444444444', type='nice', ipAddress='128.0.0.8', infoport=6666)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': '11111111-aaaa-3333-eeee-444444444444',
             'type': 'nice',
             'ipAddress': '128.0.0.8',
             'infoport': '6666',
             'hash': hash,
             'data': dumps({'VERSION': '2.718281828'}),
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -297,14 +297,14 @@ class ServiceHandlerTest(SeecrTestCase):
 
     def testShouldListMultipleServices(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': 'cc635329-c089-41a8-91be-2a4554851515',
             'type': 'srv',
             'ipAddress': '127.0.0.1',
             'infoport': '1234',
             'data': dumps({'VERSION': '2.718281828'}),
             'hash': hash,
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -313,14 +313,14 @@ class ServiceHandlerTest(SeecrTestCase):
         )))
 
         hash = serviceUpdateHash(secret='guessme!', identifier='11111111-aaaa-3333-eeee-444444444444', type='nice', ipAddress='128.0.0.8', infoport=6666)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': '11111111-aaaa-3333-eeee-444444444444',
             'type': 'nice',
             'ipAddress': '128.0.0.8',
             'infoport': '6666',
             'data': dumps({'VERSION': '2.718281828'}),
             'hash': hash,
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -485,14 +485,14 @@ class ServiceHandlerTest(SeecrTestCase):
 
     def testShouldReturnOnlyRequestedKeysWithUpdate(self):
         hash = serviceUpdateHash(secret='guessme!', identifier='cc635329-c089-41a8-91be-2a4554851515', type='srv', ipAddress='127.0.0.1', infoport=1234)
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': 'cc635329-c089-41a8-91be-2a4554851515',
             'type': 'srv',
             'ipAddress': '127.0.0.1',
             'infoport': '1234',
             'data': dumps({'VERSION': '2.718281828'}),
             'hash': hash,
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',
@@ -538,9 +538,9 @@ class ServiceHandlerTest(SeecrTestCase):
         self.assertEqual('', body)
 
     def testShouldFailOnMissingParameters(self):
-        postBody = urlencode({
+        postBody = bytes(urlencode({
             'identifier': newId(),
-        })
+        }), encoding="utf-8")
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/service/v2/update',
             Method='POST',

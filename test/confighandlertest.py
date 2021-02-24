@@ -64,7 +64,7 @@ class ConfigHandlerTest(SeecrTestCase):
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/config/update',
             session=session,
-            Body=urlencode({"config": '{"aconfig": "avalue"}', "redirectUrl": "/config"}),
+            Body=bytes(urlencode({"config": '{"aconfig": "avalue"}', "redirectUrl": "/config"}), encoding='utf-8'),
             Method='POST')))
 
         header, body = httpSplit(result)
@@ -79,11 +79,11 @@ class ConfigHandlerTest(SeecrTestCase):
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/config/update',
             session=session,
-            Body=urlencode({
+            Body=bytes(urlencode({
                 "config": '{"aconfig": "avalue"}',
                 "config_somename": '{"api.frontend": {"ipAddress": "1.2.3.4"}}',
                 "redirectUrl": "/config"
-            }),
+            }), encoding="utf-8"),
             Method='POST')))
 
         header, body = httpSplit(result)
@@ -98,7 +98,7 @@ class ConfigHandlerTest(SeecrTestCase):
         result = ''.join(compose(self.dna.all.handleRequest(
             path='/config/update',
             session=session,
-            Body=urlencode({"config": 'NO JSON', "redirectUrl": "/config"}),
+            Body=bytes(urlencode({"config": 'NO JSON', "redirectUrl": "/config"}), encoding="utf-8"),
             Method='POST')))
 
         header, body = httpSplit(result)
