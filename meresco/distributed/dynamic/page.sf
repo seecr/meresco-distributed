@@ -207,7 +207,7 @@ def showProcessingStates(**kwargs):
                 if hasInfoPage:
                     try:
                         result = yield httpget(state.host, state.port, "%s/info/json/resumptiontoken?%s" % (state.path, urlencode(dict(resumptionToken=resumptionToken))))
-                        header, body = result.split('\r\n\r\n')
+                        header, body = result.split(b'\r\n\r\n')
                         info = loads(body)
                         timestamp = stamp2zulutime(info['timestamp'])
                         tokenInfoText = " (%s - %s records remaining - %s)" % (timestamp, formatInt(info['nrOfRemainingRecords']['total']), resumptionTokenLink)
@@ -251,7 +251,7 @@ def showProcessingStates(**kwargs):
                             state.path,
                             urlencode(dict(
                                 resumptionToken=resumptionToken))))
-                        header, body = result.split('\r\n\r\n')
+                        header, body = result.split(b'\r\n\r\n')
                         info = loads(body)
                         if 'timestamp' in info:
                             tokenInfoText = "{} - {} records remaining".format(
@@ -269,7 +269,7 @@ def showProcessingStates(**kwargs):
                                 urlencode(dict(
                                     resumptionToken=resumptionToken))),
                             caption="status")
-                    except Exception, e:
+                    except Exception as e:
                         raise
                         pass
 
