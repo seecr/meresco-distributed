@@ -21,7 +21,6 @@ python-weightless-core (>= 0.10.13.5)
 python-weightless-core (<< 0.11)
 python-escaping (>= 0.1.3)
 python-escaping (<< 0.2)
-seecr-tools (>= 0.9.44)
-seecr-tools (<< 0.10)
+seecr-tools
 python-distro (>= 1.3.0)
 python-distro (<< 1.4)
