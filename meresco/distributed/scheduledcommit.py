@@ -49,7 +49,8 @@ class InsideOutObservable(object):
         yield self.once.handleShutdown()
 
 class ScheduledCommit(InsideOutObservable):
-    def __init__(self, reactor, name=None, **kwargs):
+    def __init__(self, reactor, name=None, initialPeriod=60, **kwargs):
+        self._initialPeriod = initialPeriod
         InsideOutObservable.__init__(self, name=name or 'scheduledCommit', **kwargs)
         self._scheduledCommit = be(
             (PeriodicCall(reactor, message='commit', autoStart=False, name='Scheduled commit', errorSchedule=Schedule(period=1)),
@@ -62,7 +63,7 @@ class ScheduledCommit(InsideOutObservable):
 
     def configObserver(self):
         return be(
-            (UpdatePeriodicCall(scheduleConfigKey='global.scheduledCommitSchedule', default=dict(period=3600)),
+            (UpdatePeriodicCall(scheduleConfigKey='global.scheduledCommitSchedule', default=dict(period=self._initialPeriod)),
                 (self._scheduledCommit,)
             )
         )
